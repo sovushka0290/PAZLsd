@@ -55,8 +55,36 @@
           </UButton>
         </form>
         
-        <div class="mt-6 pt-6 border-t border-slate-100 text-center text-xs text-slate-400">
-          Доступ только для сотрудников
+        <div class="mt-8 pt-6 border-t border-slate-100 text-center">
+          <div class="inline-flex items-center justify-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 text-amber-800 text-xs font-black uppercase tracking-widest mb-4">
+            🔥 Демо-доступ без пароля
+          </div>
+          <p class="text-sm text-slate-500 mb-4 font-medium">Свободный вход для фаундера и инвесторов</p>
+          <div class="flex flex-col gap-3">
+            <button
+              type="button"
+              class="w-full py-3 bg-slate-50 hover:bg-blue-50 text-slate-700 hover:text-blue-700 font-bold text-sm rounded-xl border-2 border-slate-200 hover:border-blue-300 transition-all"
+              @click="quickDemoLogin('admin')"
+            >
+              Войти как Администратор
+            </button>
+            <button
+              type="button"
+              class="w-full py-3 bg-slate-50 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 font-bold text-sm rounded-xl border-2 border-slate-200 hover:border-indigo-300 transition-all"
+              @click="quickDemoLogin('operator')"
+            >
+              Войти как Оператор
+            </button>
+          </div>
+          
+          <div class="mt-6">
+            <NuxtLink
+              :to="localePath('/docs')"
+              class="inline-flex items-center justify-center w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm rounded-xl shadow-md transition-all gap-2"
+            >
+              <span>📄</span> Читать полную тех. документацию
+            </NuxtLink>
+          </div>
         </div>
       </UCard>
     </div>
@@ -89,6 +117,12 @@ onMounted(() => {
     }
   }
 })
+
+async function quickDemoLogin(role: 'admin' | 'operator') {
+  username.value = role === 'admin' ? 'admin' : 'operator'
+  password.value = '123456'
+  await handleLogin()
+}
 
 async function handleLogin() {
   if (!username.value || !password.value) {

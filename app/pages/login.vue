@@ -85,23 +85,36 @@
         </form>
 
         <!-- Divider -->
-        <div class="mt-6 pt-6 border-t border-slate-100 text-center">
-          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Быстрый вход для презентации</p>
-          <div class="grid grid-cols-2 gap-2 mb-4">
+        <div class="mt-8 pt-6 border-t border-slate-100 text-center">
+          <div class="inline-flex items-center justify-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 text-amber-800 text-xs font-black uppercase tracking-widest mb-4">
+            🔥 Демо-доступ без регистрации
+          </div>
+          <p class="text-sm text-slate-500 mb-4 font-medium">Свободный вход для фаундера и инвесторов</p>
+          
+          <div class="flex flex-col gap-3 mb-6">
             <button
               type="button"
-              class="px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs rounded-xl border border-blue-200 transition-all flex items-center justify-center gap-1"
+              class="w-full py-3.5 bg-slate-50 hover:bg-blue-50 text-slate-700 hover:text-blue-700 font-extrabold text-sm rounded-xl border-2 border-slate-200 hover:border-blue-300 transition-all flex items-center justify-center gap-2"
               @click="quickDemoLogin('buyer')"
             >
-              <span>🛒</span> Клиника
+              <span class="text-xl">🛒</span> Войти как Клиент (Покупатель)
             </button>
             <button
               type="button"
-              class="px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl border border-indigo-200 transition-all flex items-center justify-center gap-1"
+              class="w-full py-3.5 bg-slate-50 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 font-extrabold text-sm rounded-xl border-2 border-slate-200 hover:border-indigo-300 transition-all flex items-center justify-center gap-2"
               @click="quickDemoLogin('supplier')"
             >
-              <span>🏭</span> Поставщик
+              <span class="text-xl">🏭</span> Войти как Поставщик (Продавец)
             </button>
+          </div>
+
+          <div class="mb-6">
+            <NuxtLink
+              :to="localePath('/docs')"
+              class="inline-flex items-center justify-center w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm rounded-xl shadow-md transition-all gap-2"
+            >
+              <span>📄</span> Читать полную тех. документацию
+            </NuxtLink>
           </div>
 
           <p class="text-sm text-slate-500">
