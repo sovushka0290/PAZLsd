@@ -27,6 +27,7 @@ export default defineEventHandler(async (event) => {
   return {
     success: true,
     order_id: newOrder.id,
-    message: 'Заказ успешно сохранен'
+    message: 'Заказ успешно сохранен',
+    order: newOrder
   }
 })

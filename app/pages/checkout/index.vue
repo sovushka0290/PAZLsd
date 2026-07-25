@@ -196,7 +196,7 @@ async function onSubmit() {
         }))
       : [{ modification_id: 999, name: 'Стоматологический набор (Демо)', quantity: 1, price: 15000, currencyCode: 'KZT' }]
 
-    await $fetch('/api/web-order', {
+    const res = await $fetch<any>('/api/web-order', {
       method: 'POST',
       body: {
         name: name || 'Стоматологическая клиника',
@@ -204,6 +204,16 @@ async function onSubmit() {
         items: orderItems
       }
     })
+    
+    // Save to localStorage for mock operator panel persistence on Vercel
+    try {
+      if (res && res.order) {
+        const existing = JSON.parse(localStorage.getItem('mock_orders') || '[]')
+        existing.unshift(res.order)
+        localStorage.setItem('mock_orders', JSON.stringify(existing))
+      }
+    } catch(e) {}
+
     cart.clear()
     await navigateTo('/checkout/success')
   } catch {
