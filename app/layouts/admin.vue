@@ -39,7 +39,7 @@
           variant="ghost"
           color="red"
           class="w-full justify-start text-red-600 hover:bg-red-50 hover:text-red-700 rounded-xl"
-          @click="authStore.logout()"
+          @click="handleLogout"
         >
           Выйти
         </UButton>
@@ -84,7 +84,7 @@
               variant="ghost"
               color="red"
               class="w-full justify-start rounded-xl"
-              @click="authStore.logout()"
+              @click="handleLogout"
             >
               Выйти
             </UButton>
@@ -164,4 +164,9 @@ const breadcrumbItems = computed(() => {
   
   return items
 })
+
+function handleLogout() {
+  authStore.logout()
+  window.location.href = localePath('/admin/login')
+}
 </script>
