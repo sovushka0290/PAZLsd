@@ -1,5 +1,4 @@
-import { readFileSync } from 'fs'
-import { resolve } from 'path'
+import dbProducts from '../../data/scraped_products.json'
 
 const fallbackProducts = [
   {
@@ -46,9 +45,8 @@ const fallbackProducts = [
 
 export default defineEventHandler((event) => {
   try {
-    const filePath = resolve(process.cwd(), 'data/scraped_products.json')
-    const fileContent = readFileSync(filePath, 'utf-8')
-    const data = JSON.parse(fileContent)
+    const data = dbProducts as any[]
+
 
     const source = Array.isArray(data) && data.length ? data : fallbackProducts
 

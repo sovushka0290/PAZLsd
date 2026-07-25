@@ -7,6 +7,7 @@ import {
   setResponseStatus
 } from 'h3'
 import { getStoredOrders } from '../../../utils/orderStore'
+import dbData from '../../../../data/scraped_products_500.json'
 
 interface Category {
   id: number
@@ -33,20 +34,18 @@ export default defineEventHandler(async (event) => {
   console.log('[Mock API v2] Request pathname:', pathname)
   
   // Load mock DB
-  let dataRaw = ""
+  let categories: Category[] = []
+  let products: Product[] = []
+  
   try {
-    const dataPath = join(process.cwd(), 'data', 'scraped_products_500.json')
-    dataRaw = await readFile(dataPath, 'utf-8')
+    categories = dbData.categories as Category[]
+    products = dbData.products as Product[]
   } catch (err) {
-    console.error('[Mock API v2] Failed to read scraped_products_500.json:', err)
+    console.error('[Mock API v2] Failed to parse scraped_products_500.json:', err)
     setResponseStatus(event, 500)
-    return { error: 'Mock database not found. Please run prepare_500_mock.py script first.' }
+    return { error: 'Mock database error.' }
   }
 
-  const { categories, products } = JSON.parse(dataRaw) as {
-    categories: Category[]
-    products: Product[]
-  }
   console.log('[Mock API v2] DB loaded. categories:', categories?.length, 'products:', products?.length)
 
   // Helper to paginate array
