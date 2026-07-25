@@ -1,0 +1,132 @@
+[
+  {
+    "id": 1,
+    "name": "Стоматологический микроскоп Flexion",
+    "category_detail": {
+      "id": 1,
+      "name": "Микроскопы"
+    },
+    "images": [
+      {
+        "image": "https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&w=900&q=80"
+      }
+    ],
+    "description": "Премиальный микроскоп для стоматологической клиники. Подходит для точной диагностики и комфортной работы врача.",
+    "modifications": [
+      {
+        "id": 1,
+        "name": "Стандарт",
+        "prices": [
+          {
+            "currency_price": 1250000,
+            "currency": "KZT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Коффердам Easy Dam",
+    "category_detail": {
+      "id": 2,
+      "name": "Изоляция"
+    },
+    "images": [
+      {
+        "image": "https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=900&q=80"
+      }
+    ],
+    "description": "Надёжный коффердам для качественной изоляции рабочего поля. Удобный в установке и безопасный для пациента.",
+    "modifications": [
+      {
+        "id": 2,
+        "name": "Стандарт",
+        "prices": [
+          {
+            "currency_price": 18500,
+            "currency": "KZT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Светодиодная лампа для стоматологии",
+    "category_detail": {
+      "id": 3,
+      "name": "Осветительные установки"
+    },
+    "images": [
+      {
+        "image": "https://images.unsplash.com/photo-1580281657527-2e6be6f5bc0d?auto=format&fit=crop&w=900&q=80"
+      }
+    ],
+    "description": "Яркое и стабильное освещение для стоматологического кабинета. Подходит для лечения и диагностики.",
+    "modifications": [
+      {
+        "id": 3,
+        "name": "Стандарт",
+        "prices": [
+          {
+            "currency_price": 980000,
+            "currency": "KZT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "name": "Композитный материал Esthet-X",
+    "category_detail": {
+      "id": 4,
+      "name": "Материалы"
+    },
+    "images": [
+      {
+        "image": "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=900&q=80"
+      }
+    ],
+    "description": "Высококачественный композит для эстетичного восстановления зубов. Подходит для работы в клинике.",
+    "modifications": [
+      {
+        "id": 4,
+        "name": "Стандарт",
+        "prices": [
+          {
+            "currency_price": 42000,
+            "currency": "KZT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "name": "Ультразвуковая чистка наконечников",
+    "category_detail": {
+      "id": 5,
+      "name": "Инструменты"
+    },
+    "images": [
+      {
+        "image": "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=900&q=80"
+      }
+    ],
+    "description": "Надёжный инструмент для стерилизации и подготовки рабочего инструмента. Упрощает процесс в клинике.",
+    "modifications": [
+      {
+        "id": 5,
+        "name": "Стандарт",
+        "prices": [
+          {
+            "currency_price": 760000,
+            "currency": "KZT"
+          }
+        ]
+      }
+    ]
+  }
+]

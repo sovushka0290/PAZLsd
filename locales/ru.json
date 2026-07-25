@@ -1,0 +1,149 @@
+{
+  "meta": {
+    "homeTitle": "PAZL — маркетплейс для стоматологии",
+    "checkoutTitle": "Оформление заказа — PAZL"
+  },
+  "brand": {
+    "name": "PAZL",
+    "tagline": "Платформа автоматизации закупа и логистики"
+  },
+  "language": {
+    "label": "Язык",
+    "kk": "Қазақша",
+    "ru": "Русский",
+    "en": "English"
+  },
+  "header": {
+    "phone": "87077120190",
+    "email": "info{'@'}pazl-ai.com",
+    "phoneAria": "Позвонить",
+    "emailAria": "Написать на почту"
+  },
+  "hero": {
+    "title": "Всё для стоматологии в одном месте",
+    "subtitle": "Оборудование, инструменты и материалы для профессионалов",
+    "searchPlaceholder": "Поиск товаров..."
+  },
+  "catalog": {
+    "categoriesTitle": "Категории",
+    "productsFound": "Найдено товаров: {count}",
+    "productsFoundBefore": "Найдено товаров: ",
+    "noProducts": "Товары не найдены",
+    "allCategories": "Все",
+    "addToCart": "В корзину",
+    "loading": "Загрузка каталога…",
+    "loadError": "Не удалось загрузить каталог. Проверьте API и настройки.",
+    "loadMore": "Показать ещё",
+    "changeCategory": "Выбрать категорию"
+  },
+  "price": {
+    "onRequest": "По запросу"
+  },
+  "categories": {
+    "equipment": "Оборудование",
+    "implantology": "Имплантология",
+    "orthodontics": "Ортодонтия",
+    "tools": "Инструменты",
+    "diagnostics": "Диагностика",
+    "hygiene": "Гигиена",
+    "cosmetics": "Косметология",
+    "prosthetics": "Протезирование"
+  },
+  "cart": {
+    "title": "Корзина ({count})",
+    "empty": "Ваша корзина пуста",
+    "checkout": "Оформить заказ",
+    "total": "Итого:",
+    "remove": "Удалить позицию",
+    "decrease": "Уменьшить количество",
+    "increase": "Увеличить количество",
+    "open": "Открыть корзину"
+  },
+  "productCard": {
+    "imageAlt": "Изображение: {name}"
+  },
+  "checkout": {
+    "pageTitle": "Оформление заказа",
+    "back": "Назад",
+    "contactTitle": "Контактная информация",
+    "fields": {
+      "name": "Имя *",
+      "namePlaceholder": "Введите ваше имя",
+      "company": "Название компании *",
+      "companyPlaceholder": "Название вашей клиники",
+      "address": "Адрес доставки *",
+      "addressPlaceholder": "Город, улица, дом",
+      "phone": "Телефон / WhatsApp / Telegram *",
+      "phonePlaceholder": "+7 ... или {'@'}username"
+    },
+    "submit": "Подтвердить заказ",
+    "submitting": "Отправка...",
+    "validationError": "Заполните имя и контактные данные",
+    "submitError": "Не удалось отправить заказ. Попробуйте ещё раз.",
+    "orderTitle": "Ваш заказ",
+    "cartEmpty": "Корзина пуста",
+    "lineSummary": "{qty} × {price}",
+    "goodsCount": "Товары ({count})",
+    "shipping": "Доставка",
+    "freeShipping": "Бесплатно",
+    "grandTotal": "Итого:",
+    "successTitle": "Ваш заказ успешно принят.",
+    "successBody": "Ожидайте ответа от оператора.",
+    "backHome": "Вернуться на главную"
+  },
+  "auth": {
+    "loginTitle": "Вход в систему",
+    "loginSubtitle": "Войдите, чтобы получить доступ к своему кабинету",
+    "phone": "Номер телефона",
+    "phonePlaceholder": "+7 (___) ___-__-__",
+    "password": "Пароль",
+    "passwordPlaceholder": "Введите пароль",
+    "loginButton": "Войти",
+    "loggingIn": "Вход...",
+    "fillAllFields": "Пожалуйста, заполните все поля",
+    "loginError": "Ошибка входа. Проверьте данные.",
+    "noAccount": "Нет аккаунта?",
+    "registerLink": "Зарегистрироваться",
+    "backToStore": "Вернуться в магазин",
+    "registerTitle": "Регистрация",
+    "registerSubtitle": "Создайте аккаунт для оформления заказов",
+    "firstName": "Ваше имя",
+    "firstNamePlaceholder": "Иван",
+    "createPasswordPlaceholder": "Придумайте пароль",
+    "minPassword": "Минимум 6 символов",
+    "registerButton": "Зарегистрироваться",
+    "registering": "Регистрация...",
+    "registerError": "Ошибка при регистрации",
+    "hasAccount": "Уже есть аккаунт?",
+    "loginLink": "Войти",
+    "smsTitle": "Подтверждение номера",
+    "smsSentTo": "Код отправлен на номер",
+    "smsPlaceholder": "0000",
+    "verifyButton": "Подтвердить",
+    "verifying": "Проверка...",
+    "resendCode": "Отправить код повторно",
+    "resendIn": "Отправить код повторно через {seconds} сек",
+    "backToForm": "Вернуться к регистрации",
+    "enterCode": "Введите код",
+    "wrongCode": "Неверный код",
+    "smsError": "Ошибка отправки SMS",
+    "cabinet": "Личный кабинет",
+    "logout": "Выйти",
+    "profile": "Профиль",
+    "orders": "Заказы",
+    "login": "Войти"
+  },
+  "footer": {
+    "aboutTitle": "PAZL",
+    "aboutText": "Профессиональное оборудование и материалы для стоматологических клиник",
+    "contactsTitle": "Контакты",
+    "phoneLabel": "Телефон:",
+    "emailLabel": "Email:",
+    "hours": "Пн-Пт: 9:00 - 18:00",
+    "infoTitle": "Информация",
+    "aboutCompany": "О компании",
+    "delivery": "Доставка и оплата",
+    "warranty": "Гарантия",
+    "copyright": "© {year} PAZL. Все права защищены."
+  }
+}

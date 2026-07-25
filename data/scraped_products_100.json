@@ -1,0 +1,354 @@
+[
+  {
+    "id": 1,
+    "name": "Визиограф Н2",
+    "category_detail": {
+      "id": 1,
+      "name": "rengenovskoe_oborudovanie_i_aksessuary"
+    },
+    "images": [],
+    "description": "",
+    "modifications": [
+      {
+        "id": 1,
+        "name": "Стандарт",
+        "prices": [
+          {
+            "currency_price": 608177,
+            "currency": "KZT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Игла инжекторная для обтурационного аппарата Fi-G, размер 25G, 24 мм (уп-4шт)",
+    "category_detail": {
+      "id": 1,
+      "name": "instrumenty"
+    },
+    "images": [],
+    "description": "",
+    "modifications": [
+      {
+        "id": 1,
+        "name": "Стандарт",
+        "prices": [
+          {
+            "currency_price": 15886,
+            "currency": "KZT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Наконечник сменный на скалер HW-3H",
+    "category_detail": {
+      "id": 1,
+      "name": "stomatologicheskoe_oborudovanie"
+    },
+    "images": [],
+    "description": "",
+    "modifications": [
+      {
+        "id": 1,
+        "name": "Стандарт",
+        "prices": [
+          {
+            "currency_price": 40205,
+            "currency": "KZT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "name": "Наконечник сменный на скалер HW-5L",
+    "category_detail": {
+      "id": 1,
+      "name": "stomatologicheskoe_oborudovanie"
+    },
+    "images": [],
+    "description": "",
+    "modifications": [
+      {
+        "id": 1,
+        "name": "Стандарт",
+        "prices": [
+          {
+            "currency_price": 48798,
+            "currency": "KZT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "name": "Насадка на лазер DT30",
+    "category_detail": {
+      "id": 1,
+      "name": "materialy_i_instrumenty"
+    },
+    "images": [],
+    "description": "",
+    "modifications": [
+      {
+        "id": 1,
+        "name": "Стандарт",
+        "prices": [
+          {
+            "currency_price": 8153,
+            "currency": "KZT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "name": "Скалер UDS-A",
+    "category_detail": {
+      "id": 1,
+      "name": "stomatologicheskoe_oborudovanie"
+    },
+    "images": [],
+    "description": "",
+    "modifications": [
+      {
+        "id": 1,
+        "name": "Стандарт",
+        "prices": [
+          {
+            "currency_price": 90319,
+            "currency": "KZT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "name": "Скалер UDS-A LED",
+    "category_detail": {
+      "id": 1,
+      "name": "stomatologicheskoe_oborudovanie"
+    },
+    "images": [],
+    "description": "",
+    "modifications": [
+      {
+        "id": 1,
+        "name": "Стандарт",
+        "prices": [
+          {
+            "currency_price": 100455,
+            "currency": "KZT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "name": "Скалер UDS-B",
+    "category_detail": {
+      "id": 1,
+      "name": "stomatologicheskoe_oborudovanie"
+    },
+    "images": [],
+    "description": "",
+    "modifications": [
+      {
+        "id": 1,
+        "name": "Стандарт",
+        "prices": [
+          {
+            "currency_price": 59911,
+            "currency": "KZT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "name": "Скалер UDS-E",
+    "category_detail": {
+      "id": 1,
+      "name": "stomatologicheskoe_oborudovanie"
+    },
+    "images": [],
+    "description": "",
+    "modifications": [
+      {
+        "id": 1,
+        "name": "Стандарт",
+        "prices": [
+          {
+            "currency_price": 157214,
+            "currency": "KZT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "name": "Скалер UDS-E LED",
+    "category_detail": {
+      "id": 1,
+      "name": "stomatologicheskoe_oborudovanie"
+    },
+    "images": [],
+    "description": "",
+    "modifications": [
+      {
+        "id": 1,
+        "name": "Стандарт",
+        "prices": [
+          {
+            "currency_price": 96400,
+            "currency": "KZT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "name": "Супергипс 4 Элит Рок (С410000) 3 кг белый",
+    "category_detail": {
+      "id": 1,
+      "name": "raskhodnye_materialy_zubotekhnicheskie"
+    },
+    "images": [],
+    "description": "",
+    "modifications": [
+      {
+        "id": 1,
+        "name": "Стандарт",
+        "prices": [
+          {
+            "currency_price": 12884,
+            "currency": "KZT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 12,
+    "name": "Супергипс 4 Элит Рок 3 кг кремовый (С410020)",
+    "category_detail": {
+      "id": 1,
+      "name": "raskhodnye_materialy_zubotekhnicheskie"
+    },
+    "images": [],
+    "description": "",
+    "modifications": [
+      {
+        "id": 1,
+        "name": "Стандарт",
+        "prices": [
+          {
+            "currency_price": 12845,
+            "currency": "KZT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 13,
+    "name": "Супергипс 4 Элит Рок 3 кг песочно-коричневый (С410030)",
+    "category_detail": {
+      "id": 1,
+      "name": "raskhodnye_materialy_zubotekhnicheskie"
+    },
+    "images": [],
+    "description": "",
+    "modifications": [
+      {
+        "id": 1,
+        "name": "Стандарт",
+        "prices": [
+          {
+            "currency_price": 10720,
+            "currency": "KZT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 14,
+    "name": "07 ПодолДжест моделировочная масса светло-бежевая 4гр",
+    "category_detail": {
+      "id": 1,
+      "name": "materialy_dlya_nogtevogo_servisa"
+    },
+    "images": [],
+    "description": "",
+    "modifications": [
+      {
+        "id": 1,
+        "name": "Стандарт",
+        "prices": [
+          {
+            "currency_price": 6702,
+            "currency": "KZT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 15,
+    "name": "07 ПодолДжест моделировочная масса светло-розовая 4гр",
+    "category_detail": {
+      "id": 1,
+      "name": "materialy_dlya_nogtevogo_servisa"
+    },
+    "images": [],
+    "description": "",
+    "modifications": [
+      {
+        "id": 1,
+        "name": "Стандарт",
+        "prices": [
+          {
+            "currency_price": 6702,
+            "currency": "KZT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 16,
+    "name": "39 Супергипс 4 Элит Рок 3 кг серебристо-серый (С410010)",
+    "category_detail": {
+      "id": 1,
+      "name": "raskhodnye_materialy_zubotekhnicheskie"
+    },
+    "images": [],
+    "description": "",
+    "modifications": [
+      {
+        "id": 1,
+        "name": "Стандарт",
+        "prices": [
+          {
+            "currency_price": 12352,
+            "currency": "KZT"
+          }
+        ]
+      }
+    ]
+  }
+]

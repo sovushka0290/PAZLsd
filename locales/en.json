@@ -1,0 +1,107 @@
+{
+  "meta": {
+    "homeTitle": "PAZL — marketplace for dentistry",
+    "checkoutTitle": "Checkout — PAZL"
+  },
+  "brand": {
+    "name": "PAZL",
+    "tagline": "Marketplace for dentistry"
+  },
+  "language": {
+    "label": "Language",
+    "kk": "Қазақша",
+    "ru": "Русский",
+    "en": "English"
+  },
+  "header": {
+    "phone": "8 800 123-45-67",
+    "email": "info{'@'}pazl-ai.com",
+    "phoneAria": "Call us",
+    "emailAria": "Send an email"
+  },
+  "hero": {
+    "title": "Everything for dentistry in one place",
+    "subtitle": "Equipment, instruments, and materials for professionals",
+    "searchPlaceholder": "Search products..."
+  },
+  "catalog": {
+    "categoriesTitle": "Categories",
+    "productsFound": "Products found: {count}",
+    "productsFoundBefore": "Products found: ",
+    "noProducts": "No products found",
+    "allCategories": "All",
+    "addToCart": "Add to cart",
+    "loading": "Loading catalog…",
+    "loadError": "Could not load the catalog. Check the API and configuration.",
+    "loadMore": "Load more",
+    "changeCategory": "Select category"
+  },
+  "price": {
+    "onRequest": "On request"
+  },
+  "categories": {
+    "equipment": "Equipment",
+    "implantology": "Implantology",
+    "orthodontics": "Orthodontics",
+    "tools": "Instruments",
+    "diagnostics": "Diagnostics",
+    "hygiene": "Hygiene",
+    "cosmetics": "Cosmetics",
+    "prosthetics": "Prosthetics"
+  },
+  "cart": {
+    "title": "Cart ({count})",
+    "empty": "Your cart is empty",
+    "checkout": "Checkout",
+    "total": "Total:",
+    "remove": "Remove item",
+    "decrease": "Decrease quantity",
+    "increase": "Increase quantity",
+    "open": "Open cart"
+  },
+  "productCard": {
+    "imageAlt": "Image: {name}"
+  },
+  "checkout": {
+    "pageTitle": "Checkout",
+    "back": "Back",
+    "contactTitle": "Contact details",
+    "fields": {
+      "name": "Name *",
+      "namePlaceholder": "Enter your name",
+      "company": "Company name *",
+      "companyPlaceholder": "Your clinic name",
+      "address": "Delivery address *",
+      "addressPlaceholder": "City, street, building",
+      "phone": "Phone *",
+      "phonePlaceholder": "+7 (___) ___-__-__"
+    },
+    "submit": "Confirm order",
+    "submitting": "Submitting...",
+    "validationError": "Please fill in name and phone",
+    "submitError": "Failed to submit order. Please try again.",
+    "orderTitle": "Your order",
+    "cartEmpty": "Cart is empty",
+    "lineSummary": "{qty} × {price}",
+    "goodsCount": "Items ({count})",
+    "shipping": "Shipping",
+    "freeShipping": "Free",
+    "grandTotal": "Total:",
+    "successTitle": "Order placed!",
+    "successBody": "Thank you for your order. We will contact you shortly to confirm.",
+    "backHome": "Back to home"
+  },
+  "footer": {
+    "aboutTitle": "PAZL",
+    "aboutText": "Professional equipment and supplies for dental clinics",
+    "contactsTitle": "Contacts",
+    "phoneLabel": "Phone:",
+    "emailLabel": "Email:",
+    "hours": "Mon–Fri: 9:00 - 18:00",
+    "infoTitle": "Information",
+    "aboutCompany": "About company",
+    "delivery": "Delivery and payment",
+    "warranty": "Warranty",
+    "copyright": "© {year} PAZL. All rights reserved."
+  }
+}

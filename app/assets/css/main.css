@@ -1,0 +1,33 @@
+@import "tailwindcss";
+@source "../../../src";
+@import "@nuxt/ui";
+
+@theme static {
+  --font-sans: "Inter", system-ui, sans-serif;
+}
+
+:root {
+  --ui-bg: white;
+  --ui-text: var(--color-neutral-900);
+}
+
+.dark {
+  --ui-bg: var(--color-neutral-950);
+  --ui-text: var(--color-neutral-100);
+}
+
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
+}
+
+body {
+  background-color: var(--ui-bg);
+  color: var(--ui-text);
+  transition: background-color 0.3s, color 0.3s;
+  @apply antialiased;
+}
+
+/* Ensure Tailwind 4 variants work with .dark class */
+@variant dark (&:where(.dark, .dark *));

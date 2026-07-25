@@ -1,0 +1,42 @@
+{
+  "name": "pazl-web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "api-snapshot": "tsx scripts/fetch-api-snapshot.ts",
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "eslint .",
+    "typecheck": "nuxt typecheck",
+    "docker:build": "DOCKER_BUILDKIT=1 docker build --platform linux/amd64 -t pazl-web-from-local:latest .",
+    "deploy:sync": "bash \"${PAZL_ROOT:-../pazl}/deploy/1vps-prod/deploy-from-local.sh\" sync",
+    "deploy:back": "bash \"${PAZL_ROOT:-../pazl}/deploy/1vps-prod/deploy-from-local.sh\" backend",
+    "deploy:front": "npm run build && SKIP_NPM_BUILD=1 bash \"${PAZL_ROOT:-../pazl}/deploy/1vps-prod/deploy-from-local.sh\" frontend",
+    "deploy:all": "npm run build && SKIP_NPM_BUILD=1 bash \"${PAZL_ROOT:-../pazl}/deploy/1vps-prod/deploy-from-local.sh\" all"
+  },
+  "dependencies": {
+    "@iconify-json/lucide": "^1.2.102",
+    "@iconify-json/simple-icons": "^1.2.78",
+    "@nuxt/ui": "^4.6.1",
+    "@nuxtjs/i18n": "^10.2.4",
+    "@pinia/nuxt": "^0.11.3",
+    "axios": "^1.18.0",
+    "cheerio": "^1.2.0",
+    "h3": "^1.15.11",
+    "nuxt": "^4.4.2",
+    "pinia": "^3.0.4",
+    "tailwindcss": "^4.2.2"
+  },
+  "devDependencies": {
+    "@nuxt/eslint": "^1.15.2",
+    "@nuxtjs/color-mode": "^4.0.0",
+    "@types/node": "^25.6.0",
+    "eslint": "^10.2.0",
+    "sass": "^1.99.0",
+    "tsx": "^4.20.3",
+    "typescript": "^6.0.2",
+    "vue-tsc": "^3.2.6"
+  }
+}

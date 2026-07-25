@@ -1,0 +1,149 @@
+{
+  "meta": {
+    "homeTitle": "PAZL — стоматологияға арналған маркетплейс",
+    "checkoutTitle": "Тапсырыс рәсімдеу — PAZL"
+  },
+  "brand": {
+    "name": "PAZL",
+    "tagline": "Стоматологияға арналған маркетплейс"
+  },
+  "language": {
+    "label": "Тіл",
+    "kk": "Қазақша",
+    "ru": "Русский",
+    "en": "English"
+  },
+  "header": {
+    "phone": "8 800 123-45-67",
+    "email": "info{'@'}pazl-ai.com",
+    "phoneAria": "Қоңырау шалу",
+    "emailAria": "Электрондық поштаға жазу"
+  },
+  "hero": {
+    "title": "Стоматологияға қажеттінің бәрі бір жерде",
+    "subtitle": "Кәсіби мамандарға арналған жабдықтар, құралдар және материалдар",
+    "searchPlaceholder": "Тауарларды іздеу..."
+  },
+  "catalog": {
+    "categoriesTitle": "Санаттар",
+    "productsFound": "Табылған тауарлар: {count}",
+    "productsFoundBefore": "Табылған тауарлар: ",
+    "noProducts": "Тауарлар табылмады",
+    "allCategories": "Барлығы",
+    "addToCart": "Себетке",
+    "loading": "Каталог жүктелуде…",
+    "loadError": "Каталогты жүктеу мүмкін болмады. API мен баптауларды тексеріңіз.",
+    "loadMore": "Тағы көрсету",
+    "changeCategory": "Санатты таңдау"
+  },
+  "price": {
+    "onRequest": "Сұрау бойынша"
+  },
+  "categories": {
+    "equipment": "Жабдықтар",
+    "implantology": "Имплантология",
+    "orthodontics": "Ортодонтия",
+    "tools": "Құралдар",
+    "diagnostics": "Диагностика",
+    "hygiene": "Гигиена",
+    "cosmetics": "Косметология",
+    "prosthetics": "Протездеу"
+  },
+  "cart": {
+    "title": "Себет ({count})",
+    "empty": "Себетіңіз бос",
+    "checkout": "Тапсырыс рәсімдеу",
+    "total": "Барлығы:",
+    "remove": "Жою",
+    "decrease": "Санын азайту",
+    "increase": "Санын арттыру",
+    "open": "Себетті ашу"
+  },
+  "productCard": {
+    "imageAlt": "Сурет: {name}"
+  },
+  "checkout": {
+    "pageTitle": "Тапсырыс рәсімдеу",
+    "back": "Артқа",
+    "contactTitle": "Байланыс ақпараты",
+    "fields": {
+      "name": "Аты-жөні *",
+      "namePlaceholder": "Атыңызды енгізіңіз",
+      "company": "Компания атауы *",
+      "companyPlaceholder": "Клиникаңыздың атауы",
+      "address": "Жеткізу мекенжайы *",
+      "addressPlaceholder": "Қала, көше, үй",
+      "phone": "Телефон *",
+      "phonePlaceholder": "+7 (___) ___-__-__"
+    },
+    "submit": "Тапсырысты растау",
+    "submitting": "Жіберілуде...",
+    "validationError": "Атыңызды және телефоныңызды толтырыңыз",
+    "submitError": "Тапсырысты жіберу мүмкін болмады. Қайталап көріңіз.",
+    "orderTitle": "Сіздің тапсырысыңыз",
+    "cartEmpty": "Себет бос",
+    "lineSummary": "{qty} × {price}",
+    "goodsCount": "Тауарлар ({count})",
+    "shipping": "Жеткізу",
+    "freeShipping": "Тегін",
+    "grandTotal": "Барлығы:",
+    "successTitle": "Тапсырыс рәсімделді!",
+    "successBody": "Тапсырысыңыз үшін рахмет. Растау үшін жақын арада сізбен байланысамыз.",
+    "backHome": "Басты бетке оралу"
+  },
+  "auth": {
+    "loginTitle": "Жүйеге кіру",
+    "loginSubtitle": "Жеке кабинетке кіру үшін мәліметтерді енгізіңіз",
+    "phone": "Телефон нөмірі",
+    "phonePlaceholder": "+7 (___) ___-__-__",
+    "password": "Құпия сөз",
+    "passwordPlaceholder": "Құпия сөзді енгізіңіз",
+    "loginButton": "Кіру",
+    "loggingIn": "Кіру...",
+    "fillAllFields": "Барлық өрістерді толтырыңыз",
+    "loginError": "Кіру қатесі. Мәліметтерді тексеріңіз.",
+    "noAccount": "Аккаунтыңыз жоқ па?",
+    "registerLink": "Тіркелу",
+    "backToStore": "Дүкенге оралу",
+    "registerTitle": "Тіркелу",
+    "registerSubtitle": "Тапсырыс беру үшін аккаунт жасаңыз",
+    "firstName": "Атыңыз",
+    "firstNamePlaceholder": "Иван",
+    "createPasswordPlaceholder": "Құпия сөз ойлап табыңыз",
+    "minPassword": "Кем дегенде 6 таңба",
+    "registerButton": "Тіркелу",
+    "registering": "Тіркелу...",
+    "registerError": "Тіркелу қатесі",
+    "hasAccount": "Аккаунтыңыз бар ма?",
+    "loginLink": "Кіру",
+    "smsTitle": "Нөмірді растау",
+    "smsSentTo": "Код мына нөмірге жіберілді",
+    "smsPlaceholder": "0000",
+    "verifyButton": "Растау",
+    "verifying": "Тексеру...",
+    "resendCode": "Кодты қайта жіберу",
+    "resendIn": "Кодты {seconds} сек кейін қайта жіберу",
+    "backToForm": "Тіркелуге оралу",
+    "enterCode": "Кодты енгізіңіз",
+    "wrongCode": "Қате код",
+    "smsError": "SMS жіберу қатесі",
+    "cabinet": "Жеке кабинет",
+    "logout": "Шығу",
+    "profile": "Профиль",
+    "orders": "Тапсырыстар",
+    "login": "Кіру"
+  },
+  "footer": {
+    "aboutTitle": "PAZL",
+    "aboutText": "Стоматологиялық клиникаларға арналған кәсіби жабдықтар мен материалдар",
+    "contactsTitle": "Байланыс",
+    "phoneLabel": "Телефон:",
+    "emailLabel": "Email:",
+    "hours": "Дс-жм: 9:00 - 18:00",
+    "infoTitle": "Ақпарат",
+    "aboutCompany": "Компания туралы",
+    "delivery": "Жеткізу және төлем",
+    "warranty": "Кепілдік",
+    "copyright": "© {year} PAZL. Барлық құқықтар қорғалған."
+  }
+}

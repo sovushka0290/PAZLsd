@@ -1,0 +1,28 @@
+# Сборка и публикация образа в GitLab Container Registry (как у pazl).
+# На сервере в .env.prod: FRONT_IMAGE=registry.gitlab.com/<group>/<project>:latest
+
+stages:
+  - build
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: "/certs"
+  DOCKER_BUILDKIT: "1"
+  FRONT_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+
+build_push_image:
+  stage: build
+  image: docker:27.0.3-cli
+  services:
+    - docker:27.0.3-dind
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin
+  script:
+    - docker build -t "$FRONT_IMAGE" -t "$CI_REGISTRY_IMAGE:latest" .
+    - docker push "$FRONT_IMAGE"
+    - |
+      if [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ]; then
+        docker push "$CI_REGISTRY_IMAGE:latest"
+      fi
+  rules:
+    - if: $CI_COMMIT_BRANCH
