@@ -22,10 +22,11 @@
     <!-- Image -->
     <div class="relative aspect-square w-full overflow-hidden rounded-xl bg-slate-50 flex items-center justify-center p-3 mb-3">
       <img
-        :src="product.image || '/images/nophoto.png'"
+        :src="imgSrc"
         :alt="product.name"
         class="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
         loading="lazy"
+        @error="onImgError"
       >
     </div>
 
@@ -123,6 +124,15 @@ const formatPrice = useFormattedPrice()
 const categoryLabel = computed(() => props.product.categoryName)
 const cartItem = computed(() => cart.items.find(i => i.id === props.product.id))
 const quantity = computed(() => cartItem.value?.quantity ?? 0)
+
+const imgSrc = ref(props.product.image || '/images/nophoto.png')
+watch(() => props.product.image, (newVal) => {
+  imgSrc.value = newVal || '/images/nophoto.png'
+})
+
+function onImgError() {
+  imgSrc.value = '/images/nophoto.png'
+}
 </script>
 
 <style scoped lang="scss">
