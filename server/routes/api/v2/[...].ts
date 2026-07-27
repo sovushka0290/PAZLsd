@@ -7,26 +7,25 @@ import {
   proxyRequest
 } from 'h3'
 import { getStoredOrders } from '../../../utils/orderStore'
-import dbData from '../../../../data/scraped_products_500.json'
+import { defaultCategories, defaultProducts, Category, Product } from '../../../utils/defaultMockDb'
 
-interface Category {
-  id: number
-  name: string
-  slug: string
-  parent: number | null
-  products_count?: number
+let scrapedCategories: Category[] = []
+let scrapedProducts: Product[] = []
+
+try {
+  const dbData = require('../../../../data/scraped_products_500.json')
+  if (Array.isArray(dbData?.categories) && dbData.categories.length > 0) {
+    scrapedCategories = dbData.categories as Category[]
+  }
+  if (Array.isArray(dbData?.products) && dbData.products.length > 0) {
+    scrapedProducts = dbData.products as Product[]
+  }
+} catch (e) {
+  // If JSON file reading fails in Vercel serverless lambda, fall back to embedded DB
 }
 
-interface Product {
-  id: number
-  name: string
-  code?: string
-  category: number
-  category_detail?: { id: number; name: string; slug: string }
-  description: string
-  images?: { id: number; image: string; is_base?: boolean }[]
-  modifications?: any[]
-}
+const activeCategories: Category[] = scrapedCategories.length > 0 ? scrapedCategories : defaultCategories
+const activeProducts: Product[] = scrapedProducts.length > 0 ? scrapedProducts : defaultProducts
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig(event)
@@ -43,17 +42,8 @@ export default defineEventHandler(async (event) => {
   const method = event.method.toUpperCase()
   console.log(`[Mock API v2] ${method} ${pathname}`)
 
-  // Load mock DB
-  let categories: Category[] = []
-  let products: Product[] = []
-  
-  try {
-    categories = dbData.categories as Category[]
-    products = dbData.products as Product[]
-  } catch (err) {
-    setResponseStatus(event, 500)
-    return { error: 'Mock database error.' }
-  }
+  const categories = activeCategories
+  const products = activeProducts
 
   const paginate = (items: any[], page: number, pageSize: number) => {
     const start = (page - 1) * pageSize
@@ -133,7 +123,6 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    // Default response for PATCH/PUT updates (order status, profile, etc.)
     return {
       success: true,
       message: 'Обновлено успешно',
@@ -259,7 +248,7 @@ export default defineEventHandler(async (event) => {
       contact: o.contact || o.phone,
       total: o.total,
       address: o.address || 'г. Алматы',
-      items: o.items.map((it: any, i: number) => ({
+      items: (o.items || []).map((it: any, i: number) => ({
         id: i + 1,
         name: it.name,
         product_name: it.name,
