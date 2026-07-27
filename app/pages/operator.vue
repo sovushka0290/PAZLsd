@@ -427,6 +427,10 @@ const { data: feedbacks, pending: pendingFeedbacks, refresh: refreshFeedbacks } 
   return []
 }, { watch: [() => authStore.isAuthenticated] })
 
+onMounted(() => {
+  refreshOrders()
+})
+
 // Computed properties for filtering
 const filteredOrders = computed(() => {
   if (!orders.value) return []
