@@ -279,7 +279,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 
 definePageMeta({
@@ -307,7 +307,7 @@ const fileInput = ref(null)
 const { data: ordersData, pending: pendingOrders, refresh: refreshOrders } = await useAsyncData('operator-orders', async () => {
   try {
     const res = await $fetch('/api/v2/operator/orders/')
-    let results = Array.isArray(res?.results) ? res.results : (Array.isArray(res) ? res : [])
+    let results = Array.isArray((res as any)?.results) ? (res as any).results : (Array.isArray(res) ? res : [])
 
     if (import.meta.client) {
       try {
