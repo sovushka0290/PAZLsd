@@ -105,9 +105,10 @@ export const useAuthStore = defineStore('auth', {
         )
         this.user = data.user
         this._saveToCookies()
-      } catch {
-        // Token expired — try refresh
-        await this.refreshAccessToken()
+      } catch (err: any) {
+        if (err?.status === 401 || err?.statusCode === 401) {
+          await this.refreshAccessToken()
+        }
       }
     },
 
@@ -132,10 +133,12 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async refreshAccessToken() {
-      if (!this.refreshToken) {
+      if (!this.refreshToken || (this as any)._isRefreshing) {
         this.logout()
         return
       }
+
+      ;(this as any)._isRefreshing = true
 
       const config = useRuntimeConfig()
       const baseURL = import.meta.env.SSR
@@ -153,11 +156,10 @@ export const useAuthStore = defineStore('auth', {
         this.token = data.access
         if (data.refresh) this.refreshToken = data.refresh
         this._saveToCookies()
-
-        // Re-fetch user data
-        await this.fetchMe()
       } catch {
         this.logout()
+      } finally {
+        ;(this as any)._isRefreshing = false
       }
     },
 
@@ -280,9 +282,10 @@ export const useAuthStore = defineStore('auth', {
     },
 
     _saveToCookies() {
-      const tokenCookie = useCookie('pazl_token')
-      const refreshCookie = useCookie('pazl_refresh')
-      const userCookie = useCookie('pazl_user')
+      const opts = { maxAge: 60 * 60 * 24 * 7, sameSite: 'lax' as const, path: '/' }
+      const tokenCookie = useCookie('pazl_token', opts)
+      const refreshCookie = useCookie('pazl_refresh', opts)
+      const userCookie = useCookie('pazl_user', opts)
 
       tokenCookie.value = this.token
       refreshCookie.value = this.refreshToken
