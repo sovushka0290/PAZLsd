@@ -84,12 +84,12 @@
           </button>
         </form>
 
-        <!-- Divider -->
-        <div class="mt-8 pt-6 border-t border-slate-100 text-center">
+        <!-- Demo section (only if enableDemoLogin is true) -->
+        <div v-if="config.public.enableDemoLogin" class="mt-8 pt-6 border-t border-slate-100 text-center">
           <div class="inline-flex items-center justify-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 text-amber-800 text-xs font-black uppercase tracking-widest mb-4">
             🔥 Демо-доступ без регистрации
           </div>
-          <p class="text-sm text-slate-500 mb-4 font-medium">Свободный вход для фаундера и инвесторов</p>
+          <p class="text-sm text-slate-500 mb-4 font-medium">Свободный вход для презентации</p>
           
           <div class="flex flex-col gap-3 mb-6">
             <button
@@ -116,7 +116,9 @@
               <span>📄</span> Читать полную тех. документацию
             </NuxtLink>
           </div>
+        </div>
 
+        <div class="mt-6 pt-6 border-t border-slate-100 text-center">
           <p class="text-sm text-slate-500">
             {{ t('auth.noAccount') }}
             <NuxtLink
@@ -150,6 +152,7 @@ definePageMeta({ layout: false })
 const { t } = useI18n()
 const localePath = useLocalePath()
 const router = useRouter()
+const config = useRuntimeConfig()
 const authStore = useAuthStore()
 
 const phone = ref('')

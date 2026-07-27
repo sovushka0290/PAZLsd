@@ -1,6 +1,13 @@
-import { defineEventHandler, readBody, getRequestURL } from 'h3'
+import { defineEventHandler, readBody, getRequestURL, proxyRequest } from 'h3'
 
 export default defineEventHandler(async (event) => {
+  const config = useRuntimeConfig(event)
+  if (!config.apiSnapshot) {
+    const backendBase = config.apiBackendUrl || config.public.apiBaseUrl || 'http://backend:8000'
+    const target = `${backendBase.replace(/\/$/, '')}${event.path}`
+    return proxyRequest(event, target)
+  }
+
   const u = new URL(getRequestURL(event).href)
   const pathname = u.pathname
   const body = await readBody(event).catch(() => ({}))

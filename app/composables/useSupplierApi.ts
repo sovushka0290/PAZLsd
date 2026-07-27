@@ -101,7 +101,7 @@ export function useSupplierApi() {
         retry: 1
       })
       
-      if (import.meta.client) {
+      if (import.meta.client && (config.public.enableDemoLogin || config.apiSnapshot)) {
         try {
           const localOrders = JSON.parse(localStorage.getItem('mock_orders') || '[]')
           if (localOrders.length > 0) {

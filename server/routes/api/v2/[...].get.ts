@@ -4,7 +4,8 @@ import {
   defineEventHandler,
   getRequestURL,
   setResponseHeader,
-  setResponseStatus
+  setResponseStatus,
+  proxyRequest
 } from 'h3'
 import { getStoredOrders } from '../../../utils/orderStore'
 import dbData from '../../../../data/scraped_products_500.json'
@@ -29,6 +30,13 @@ interface Product {
 }
 
 export default defineEventHandler(async (event) => {
+  const config = useRuntimeConfig(event)
+  if (!config.apiSnapshot) {
+    const backendBase = config.apiBackendUrl || config.public.apiBaseUrl || 'http://backend:8000'
+    const target = `${backendBase.replace(/\/$/, '')}${event.path}`
+    return proxyRequest(event, target)
+  }
+
   const u = new URL(getRequestURL(event).href)
   const pathname = u.pathname // e.g., /api/v2/categories/ or /api/v2/products_detailed/
   console.log('[Mock API v2] Request pathname:', pathname)
