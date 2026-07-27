@@ -406,20 +406,20 @@ const orders = computed(() => Array.isArray(ordersData.value) ? ordersData.value
 
 // Columns for UTable
 const orderColumns = [
-  { accessorKey: 'id', header: 'ID заказа' },
-  { accessorKey: 'date', header: 'Дата' },
-  { accessorKey: 'client', header: 'Клиент' },
-  { accessorKey: 'total', header: 'Сумма' },
-  { accessorKey: 'status', header: 'Статус' },
-  { id: 'actions', header: '' }
+  { key: 'id', label: 'ID заказа' },
+  { key: 'date', label: 'Дата' },
+  { key: 'client', label: 'Клиент' },
+  { key: 'total', label: 'Сумма' },
+  { key: 'status', label: 'Статус' },
+  { key: 'actions', label: '' }
 ]
 
 const feedbackColumns = [
-  { accessorKey: 'date', header: 'Дата' },
-  { accessorKey: 'contact', header: 'Контакт' },
-  { accessorKey: 'message', header: 'Сообщение' },
-  { accessorKey: 'status', header: 'Статус' },
-  { id: 'actions', header: '' }
+  { key: 'date', label: 'Дата' },
+  { key: 'contact', label: 'Контакт' },
+  { key: 'message', label: 'Сообщение' },
+  { key: 'status', label: 'Статус' },
+  { key: 'actions', label: '' }
 ]
 
 const { data: feedbacks, pending: pendingFeedbacks, refresh: refreshFeedbacks } = await useAsyncData('feedbacks', () => {
