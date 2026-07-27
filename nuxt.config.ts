@@ -3,7 +3,8 @@ import { fileURLToPath } from 'node:url'
 
 const r = (p: string) => fileURLToPath(new URL(p, import.meta.url))
 
-const apiSnapshot = process.env.NUXT_API_SNAPSHOT === '1' || process.env.NUXT_API_SNAPSHOT === 'true'
+const isExplicitProdBackend = process.env.NUXT_API_SNAPSHOT === 'false' || process.env.NUXT_API_SNAPSHOT === '0'
+const apiSnapshot = !isExplicitProdBackend
 /** Каталог nuxt.config (корень репо). `data/*` в Nitro — не от `server/`, иначе server/data/... */
 const nuxtProjectRoot = dirname(fileURLToPath(import.meta.url))
 const defaultApiSnapshotDataDir = join(nuxtProjectRoot, 'data', 'api-snapshot')
@@ -72,8 +73,8 @@ export default defineNuxtConfig({
       apiToken: process.env.NUXT_PUBLIC_API_TOKEN ?? '',
       /** R2 CDN origin for media files (rewrites /media/… URLs). */
       mediaBaseUrl: process.env.NUXT_PUBLIC_MEDIA_BASE_URL ?? '',
-      /** Включение демо-кнопок быстрого входа без пароля */
-      enableDemoLogin: process.env.NUXT_PUBLIC_ENABLE_DEMO_LOGIN === 'true'
+      /** Включение демо-кнопок быстрого входа без пароля (по умолчанию включено) */
+      enableDemoLogin: process.env.NUXT_PUBLIC_ENABLE_DEMO_LOGIN !== 'false'
     }
   },
 
