@@ -41,75 +41,46 @@
           </UButton>
         </div>
 
-        <UTable 
-          :rows="filteredOrders" 
-          :columns="orderColumns" 
-          :loading="pendingOrders"
-          class="w-full"
-          :empty-state="{ icon: 'i-lucide-inbox', label: 'Нет заказов по выбранному фильтру' }"
-        >
-          <!-- Custom render for ID -->
-          <template #id-cell="{ row }">
-            <span class="font-bold text-slate-800">#{{ row.id }}</span>
-          </template>
-          <template #id-data="{ row }">
-            <span class="font-bold text-slate-800">#{{ row.id }}</span>
-          </template>
+        <div v-if="filteredOrders.length === 0" class="py-12 text-center text-gray-500">
+          <UIcon name="i-lucide-inbox" class="w-12 h-12 mx-auto mb-3 opacity-40" />
+          <p class="font-medium text-gray-500">Нет заказов по выбранному фильтру</p>
+        </div>
 
-          <!-- Custom render for Date -->
-          <template #date-cell="{ row }">
-            <span class="text-slate-500 text-xs">{{ new Date(row.date).toLocaleString('ru-RU') }}</span>
-          </template>
-          <template #date-data="{ row }">
-            <span class="text-slate-500 text-xs">{{ new Date(row.date).toLocaleString('ru-RU') }}</span>
-          </template>
-
-          <!-- Custom render for Client -->
-          <template #client-cell="{ row }">
-            <div class="flex flex-col">
-              <span class="font-bold text-slate-900">{{ row.name }}</span>
-              <span class="text-xs font-semibold text-blue-600">{{ row.phone }}</span>
-            </div>
-          </template>
-          <template #client-data="{ row }">
-            <div class="flex flex-col">
-              <span class="font-bold text-slate-900">{{ row.name }}</span>
-              <span class="text-xs font-semibold text-blue-600">{{ row.phone }}</span>
-            </div>
-          </template>
-
-          <!-- Custom render for Total -->
-          <template #total-cell="{ row }">
-            <span class="font-bold text-blue-600">{{ row.total }} ₸</span>
-          </template>
-          <template #total-data="{ row }">
-            <span class="font-bold text-blue-600">{{ row.total }} ₸</span>
-          </template>
-
-          <!-- Custom render for Status -->
-          <template #status-cell="{ row }">
-            <UBadge :color="getStatusColor(row.status)" variant="subtle" size="sm" class="capitalize">
-              {{ row.status }}
-            </UBadge>
-          </template>
-          <template #status-data="{ row }">
-            <UBadge :color="getStatusColor(row.status)" variant="subtle" size="sm" class="capitalize">
-              {{ row.status }}
-            </UBadge>
-          </template>
-
-          <!-- Custom render for Actions -->
-          <template #actions-cell="{ row }">
-            <div class="flex items-center gap-2">
-              <UButton size="xs" color="primary" variant="soft" icon="i-lucide-eye" @click="openOrderDetails(row)">Детали</UButton>
-            </div>
-          </template>
-          <template #actions-data="{ row }">
-            <div class="flex items-center gap-2">
-              <UButton size="xs" color="primary" variant="soft" icon="i-lucide-eye" @click="openOrderDetails(row)">Детали</UButton>
-            </div>
-          </template>
-        </UTable>
+        <div v-else class="overflow-x-auto">
+          <table class="w-full text-left text-sm border-collapse">
+            <thead>
+              <tr class="border-b border-gray-200 text-xs font-extrabold text-gray-500 uppercase tracking-wider bg-gray-50/50">
+                <th class="py-3 px-4">ID заказа</th>
+                <th class="py-3 px-4">Дата</th>
+                <th class="py-3 px-4">Клиент</th>
+                <th class="py-3 px-4">Сумма</th>
+                <th class="py-3 px-4">Статус</th>
+                <th class="py-3 px-4 text-right">Действия</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 font-medium">
+              <tr v-for="row in filteredOrders" :key="row.id" class="hover:bg-gray-50/80 transition-colors">
+                <td class="py-3.5 px-4 font-bold text-slate-800">#{{ row.id }}</td>
+                <td class="py-3.5 px-4 text-slate-500 text-xs">{{ new Date(row.date).toLocaleString('ru-RU') }}</td>
+                <td class="py-3.5 px-4">
+                  <div class="flex flex-col">
+                    <span class="font-bold text-slate-900">{{ row.name }}</span>
+                    <span class="text-xs font-semibold text-blue-600">{{ row.phone }}</span>
+                  </div>
+                </td>
+                <td class="py-3.5 px-4 font-bold text-blue-600">{{ row.total }} ₸</td>
+                <td class="py-3.5 px-4">
+                  <UBadge :color="getStatusColor(row.status)" variant="subtle" size="sm" class="capitalize">
+                    {{ row.status }}
+                  </UBadge>
+                </td>
+                <td class="py-3.5 px-4 text-right">
+                  <UButton size="xs" color="primary" variant="soft" icon="i-lucide-eye" @click="openOrderDetails(row)">Детали</UButton>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </UCard>
 
       <!-- Обратная связь -->
@@ -126,50 +97,39 @@
           </UButton>
         </div>
 
-        <UTable 
-          :rows="filteredFeedbacks" 
-          :columns="feedbackColumns" 
-          :loading="pendingFeedbacks"
-          class="w-full"
-          :empty-state="{ icon: 'i-lucide-message-circle', label: 'Нет сообщений по выбранному фильтру' }"
-        >
-          <!-- Custom render for Date -->
-          <template #date-data="{ row }">
-            <span class="text-gray-500">{{ new Date(row.date).toLocaleString('ru-RU') }}</span>
-          </template>
+        <div v-if="filteredFeedbacks.length === 0" class="py-12 text-center text-gray-500">
+          <UIcon name="i-lucide-message-square" class="w-12 h-12 mx-auto mb-3 opacity-40" />
+          <p class="font-medium text-gray-500">Нет обращений по выбранному фильтру</p>
+        </div>
 
-          <!-- Custom render for Contact -->
-          <template #contact-data="{ row }">
-            <div class="flex flex-col">
-              <span class="font-medium text-gray-900">{{ row.name }}</span>
-              <span class="text-sm text-gray-500">{{ row.contact }}</span>
-            </div>
-          </template>
-
-          <!-- Custom render for Message -->
-          <template #message-data="{ row }">
-            <div class="max-w-xs truncate text-gray-700" :title="row.message">
-              {{ row.message }}
-            </div>
-          </template>
-
-          <!-- Custom render for Status -->
-          <template #status-data="{ row }">
-            <UBadge :color="getFeedbackStatusColor(row.status)" variant="subtle" size="sm" class="capitalize">
-              {{ row.status }}
-            </UBadge>
-          </template>
-
-          <!-- Custom render for Actions -->
-          <template #actions-data="{ row }">
-            <div class="flex items-center gap-2">
-              <UButton size="xs" color="gray" variant="ghost" icon="i-lucide-eye" @click="openFeedbackDetails(row)">Текст</UButton>
-              <UDropdown :items="getFeedbackActions(row)" :popper="{ placement: 'bottom-end' }">
-                <UButton color="gray" variant="ghost" icon="i-lucide-more-horizontal" size="xs" />
-              </UDropdown>
-            </div>
-          </template>
-        </UTable>
+        <div v-else class="overflow-x-auto">
+          <table class="w-full text-left text-sm border-collapse">
+            <thead>
+              <tr class="border-b border-gray-200 text-xs font-extrabold text-gray-500 uppercase tracking-wider bg-gray-50/50">
+                <th class="py-3 px-4">Дата</th>
+                <th class="py-3 px-4">Контакт</th>
+                <th class="py-3 px-4">Сообщение</th>
+                <th class="py-3 px-4">Статус</th>
+                <th class="py-3 px-4 text-right">Действия</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 font-medium">
+              <tr v-for="row in filteredFeedbacks" :key="row.id" class="hover:bg-gray-50/80 transition-colors">
+                <td class="py-3.5 px-4 text-slate-500 text-xs">{{ new Date(row.date).toLocaleString('ru-RU') }}</td>
+                <td class="py-3.5 px-4 font-bold text-blue-600">{{ row.contact }}</td>
+                <td class="py-3.5 px-4 text-slate-700 max-w-xs truncate">{{ row.message }}</td>
+                <td class="py-3.5 px-4">
+                  <UBadge :color="getFeedbackStatusColor(row.status)" variant="subtle" size="sm" class="capitalize">
+                    {{ row.status }}
+                  </UBadge>
+                </td>
+                <td class="py-3.5 px-4 text-right">
+                  <UButton size="xs" color="primary" variant="soft" icon="i-lucide-eye" @click="openFeedbackDetails(row)">Просмотр</UButton>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </UCard>
 
       <!-- Конвейер (Upload Catalog) -->
