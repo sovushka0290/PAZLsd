@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  pazl-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pazl-web
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NUXT_API_SNAPSHOT=false
+      - NUXT_PUBLIC_API_BASE_URL=${NUXT_PUBLIC_API_BASE_URL:-https://api.pazl-ai.com}
+      - NUXT_API_BACKEND_URL=${NUXT_API_BACKEND_URL:-http://backend:8000}
+      - NUXT_PUBLIC_ENABLE_DEMO_LOGIN=false
+    env_file:
+      - .env

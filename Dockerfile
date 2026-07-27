@@ -1,20 +1,25 @@
-# Production image for Nuxt 4 (Nitro).
-# Pre-built .output is copied from the host (npm run build runs BEFORE docker build).
-FROM node:24-bookworm-slim
+# Multi-stage Dockerfile for PAZL Nuxt Production B2B App
+FROM node:20-slim AS builder
+WORKDIR /app
 
+# Install dependencies
+COPY package*.json ./
+RUN npm ci
+
+# Copy source code and build project
+COPY . .
+RUN npm run build
+
+# Production runner image
+FROM node:20-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NITRO_HOST=0.0.0.0
 ENV NITRO_PORT=3000
 
-COPY .output/server/package.json ./package.json
-RUN npm install --omit=dev
+# Copy built application output from builder stage
+COPY --from=builder /app/.output ./.output
 
-COPY .output ./.output
-# Снимок API (npm run api-snapshot): нужен при NUXT_API_SNAPSHOT=1, иначе Nitro отдаст 404 по /api/v2/…
-COPY data/api-snapshot ./data/api-snapshot
-
-USER node
 EXPOSE 3000
 CMD ["node", ".output/server/index.mjs"]
