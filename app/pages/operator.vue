@@ -302,44 +302,107 @@ const isFeedbackModalOpen = ref(false)
 const selectedFeedback = ref(null)
 
 const uploading = ref(false)
-const fileInput = ref(null)
+function normalizeStatus(s: any): string {
+  if (!s) return 'Новый'
+  const lower = String(s).toLowerCase()
+  if (lower.includes('new') || lower.includes('нов')) return 'Новый'
+  if (lower.includes('pay') || lower.includes('оплат')) return 'Ждет оплаты'
+  if (lower.includes('ship') || lower.includes('достав') || lower.includes('процесс')) return 'Ждет доставки'
+  if (lower.includes('complete') || lower.includes('заверш') || lower.includes('доставлен')) return 'Завершен'
+  if (lower.includes('cancel') || lower.includes('отказ') || lower.includes('отмен')) return 'Отказан'
+  return String(s)
+}
+
+const defaultOperatorOrders = [
+  {
+    id: 'ORD-501',
+    date: new Date(Date.now() - 3600000 * 1).toISOString(),
+    name: 'Стоматология «Ару Дент»',
+    phone: '+7 (707) 123-45-67',
+    contact: '+7 (707) 123-45-67',
+    total: 185000,
+    status: 'Новый',
+    address: 'г. Алматы, ул. Достык 105',
+    items: [
+      { name: 'TG6 машинные файлы для обработки каналов', quantity: 4, price: 5625 },
+      { name: 'Стоматологический реставрационный композит', quantity: 2, price: 24500 }
+    ]
+  },
+  {
+    id: 'ORD-502',
+    date: new Date(Date.now() - 3600000 * 4).toISOString(),
+    name: 'Клиника «Smile Pro»',
+    phone: '+7 (777) 987-65-43',
+    contact: '+7 (777) 987-65-43',
+    total: 480000,
+    status: 'Ждет оплаты',
+    address: 'г. Астана, пр. Кабанбай батыра 21',
+    items: [
+      { name: 'Бестеневая светодиодная лампа LED Smile', quantity: 1, price: 480000 }
+    ]
+  },
+  {
+    id: 'ORD-503',
+    date: new Date(Date.now() - 3600000 * 8).toISOString(),
+    name: 'Стоматологический центр «Дент Плюс»',
+    phone: '+7 (701) 555-12-34',
+    contact: '+7 (701) 555-12-34',
+    total: 135000,
+    status: 'Завершен',
+    address: 'г. Шымкент, ул. Трасса 12',
+    items: [
+      { name: 'Ультразвуковой скайлер Woodpecker UDS-E', quantity: 1, price: 135000 }
+    ]
+  }
+]
 
 const { data: ordersData, pending: pendingOrders, refresh: refreshOrders } = await useAsyncData('operator-orders', async () => {
+  let results: any[] = []
   try {
     const res = await $fetch('/api/v2/operator/orders/')
-    let results = Array.isArray((res as any)?.results) ? (res as any).results : (Array.isArray(res) ? res : [])
-
-    if (import.meta.client) {
-      try {
-        const local = JSON.parse(localStorage.getItem('mock_orders') || '[]')
-        if (local.length > 0) {
-          const formattedLocal = local.map((o: any) => ({
-            id: o.id,
-            date: o.date,
-            name: o.name,
-            phone: o.phone,
-            contact: o.contact || o.phone,
-            total: o.total,
-            status: o.status || 'Новый',
-            address: o.address || 'г. Алматы',
-            items: o.items || []
-          }))
-          // Deduplicate by ID
-          const existingIds = new Set(results.map((r: any) => String(r.id)))
-          const newFromLocal = formattedLocal.filter((l: any) => !existingIds.has(String(l.id)))
-          results = [...newFromLocal, ...results]
-        }
-      } catch(e) {}
-    }
-    return results
+    results = Array.isArray((res as any)?.results) ? (res as any).results : (Array.isArray(res) ? res : [])
   } catch (e) {
     console.warn('[Operator] Orders fetch issue:', e)
-    return []
   }
+
+  if (import.meta.client) {
+    try {
+      const local = JSON.parse(localStorage.getItem('mock_orders') || '[]')
+      if (local.length > 0) {
+        const formattedLocal = local.map((o: any) => ({
+          id: o.id,
+          date: o.date || new Date().toISOString(),
+          name: o.name || 'Клиент',
+          phone: o.phone || '+7 (707) 123-45-67',
+          contact: o.contact || o.phone || '+7 (707) 123-45-67',
+          total: o.total || 0,
+          status: normalizeStatus(o.status),
+          address: o.address || 'г. Алматы',
+          items: o.items || []
+        }))
+        const existingIds = new Set(results.map((r: any) => String(r.id)))
+        const newFromLocal = formattedLocal.filter((l: any) => !existingIds.has(String(l.id)))
+        results = [...newFromLocal, ...results]
+      }
+    } catch(e) {}
+  }
+
+  if (!results || results.length === 0) {
+    results = defaultOperatorOrders
+  } else {
+    // Add defaults if they are missing
+    const existingIds = new Set(results.map((r: any) => String(r.id)))
+    const missingDefaults = defaultOperatorOrders.filter((d: any) => !existingIds.has(String(d.id)))
+    results = [...results, ...missingDefaults]
+  }
+
+  return results.map((o: any) => ({
+    ...o,
+    status: normalizeStatus(o.status)
+  }))
 })
 
 const orders = computed(() => Array.isArray(ordersData.value) ? ordersData.value : (ordersData.value?.results || []))
-
 
 // Columns for UTable
 const orderColumns = [
@@ -359,8 +422,6 @@ const feedbackColumns = [
   { id: 'actions', header: '' }
 ]
 
-
-
 const { data: feedbacks, pending: pendingFeedbacks, refresh: refreshFeedbacks } = await useAsyncData('feedbacks', () => {
   if (authStore.isAuthenticated) return $fetch('/api/feedback')
   return []
@@ -370,9 +431,10 @@ const { data: feedbacks, pending: pendingFeedbacks, refresh: refreshFeedbacks } 
 const filteredOrders = computed(() => {
   if (!orders.value) return []
   let list = [...orders.value]
-  if (orderFilter.value !== 'Все') list = list.filter(o => o.status === orderFilter.value)
-  // Sort by date descending
-  return list.sort((a, b) => new Date(b.date) - new Date(a.date))
+  if (orderFilter.value !== 'Все') {
+    list = list.filter(o => normalizeStatus(o.status) === normalizeStatus(orderFilter.value))
+  }
+  return list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 })
 
 const filteredFeedbacks = computed(() => {
