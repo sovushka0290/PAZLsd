@@ -304,11 +304,34 @@ const selectedFeedback = ref(null)
 const uploading = ref(false)
 const fileInput = ref(null)
 
-// API fetchers
 const { data: ordersData, pending: pendingOrders, refresh: refreshOrders } = await useAsyncData('operator-orders', async () => {
   try {
     const res = await $fetch('/api/v2/operator/orders/')
-    return res?.results || res || []
+    let results = Array.isArray(res?.results) ? res.results : (Array.isArray(res) ? res : [])
+
+    if (import.meta.client) {
+      try {
+        const local = JSON.parse(localStorage.getItem('mock_orders') || '[]')
+        if (local.length > 0) {
+          const formattedLocal = local.map((o: any) => ({
+            id: o.id,
+            date: o.date,
+            name: o.name,
+            phone: o.phone,
+            contact: o.contact || o.phone,
+            total: o.total,
+            status: o.status || 'Новый',
+            address: o.address || 'г. Алматы',
+            items: o.items || []
+          }))
+          // Deduplicate by ID
+          const existingIds = new Set(results.map((r: any) => String(r.id)))
+          const newFromLocal = formattedLocal.filter((l: any) => !existingIds.has(String(l.id)))
+          results = [...newFromLocal, ...results]
+        }
+      } catch(e) {}
+    }
+    return results
   } catch (e) {
     console.warn('[Operator] Orders fetch issue:', e)
     return []
