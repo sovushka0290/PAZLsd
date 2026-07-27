@@ -1,175 +1,200 @@
 <template>
-  <div class="min-h-screen bg-slate-50 p-4 sm:p-6 lg:p-8">
-    <div class="max-w-7xl mx-auto">
-      <!-- Header -->
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs">
-        <div>
-          <div class="flex items-center gap-3">
-            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 shadow-md shadow-blue-500/20 text-white font-extrabold">
-              <UIcon name="i-lucide-shield-check" class="w-6 h-6" />
-            </div>
-            <div>
-              <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900">Панель оператора</h1>
-              <p class="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">Полное управление заказами, статусами и обращениями клиник</p>
-            </div>
+  <div class="min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 pb-20 sm:pb-8">
+    <div class="max-w-7xl mx-auto space-y-4 sm:space-y-6">
+      
+      <!-- Top Bar / Header -->
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 sm:p-6 bg-white rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-xs gap-3">
+        <div class="flex items-center gap-3">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 shadow-md shadow-blue-500/20 text-white font-extrabold">
+            <UIcon name="i-lucide-shield-check" class="w-6 h-6" />
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-2xl font-black text-slate-900 leading-tight">Панель оператора</h1>
+            <p class="text-xs text-slate-500 font-medium">Управление заказами и обращениями клиник</p>
           </div>
         </div>
-        <div class="flex gap-3 items-center w-full sm:w-auto">
-          <UButton color="white" variant="solid" icon="i-lucide-external-link" :to="localePath('/')" class="rounded-xl font-bold">На сайт</UButton>
-          <UButton color="red" variant="soft" icon="i-lucide-log-out" @click="logout" class="rounded-xl font-bold">Выйти</UButton>
+        
+        <div class="flex gap-2 items-center w-full sm:w-auto justify-end">
+          <UButton color="white" variant="solid" icon="i-lucide-external-link" :to="localePath('/')" size="sm" class="rounded-xl font-bold">На сайт</UButton>
+          <UButton color="red" variant="soft" icon="i-lucide-log-out" @click="logout" size="sm" class="rounded-xl font-bold">Выйти</UButton>
         </div>
       </div>
 
-      <!-- Tabs Navigation -->
-      <div class="flex space-x-2 border-b border-slate-200 mb-6 overflow-x-auto pb-1">
+      <!-- Navigation Tabs (Mobile Scrollable) -->
+      <div class="flex space-x-2 border-b border-slate-200 overflow-x-auto pb-1 no-scrollbar">
         <button 
-          v-for="(tab, i) in [{ label: 'Заказы клиник', icon: 'i-lucide-shopping-bag' }, { label: 'Обращения и Отзывы', icon: 'i-lucide-message-square' }, { label: 'Конвейер каталога', icon: 'i-lucide-upload-cloud' }]" 
+          v-for="(tab, i) in [{ label: 'Заказы клиник', icon: 'i-lucide-shopping-bag' }, { label: 'Обращения', icon: 'i-lucide-message-square' }, { label: 'Конвейер прайсов', icon: 'i-lucide-upload-cloud' }]" 
           :key="i"
           @click="activeTab = i"
           :class="[
-            'flex items-center gap-2 px-5 py-3 text-sm font-extrabold rounded-t-2xl transition-all cursor-pointer whitespace-nowrap',
+            'flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-extrabold rounded-t-xl transition-all cursor-pointer whitespace-nowrap shrink-0',
             activeTab === i ? 'bg-white text-blue-600 shadow-xs border-t-2 border-x border-slate-200 border-t-blue-600' : 'text-slate-500 hover:text-slate-800'
           ]"
         >
-          <UIcon :name="tab.icon" class="w-5 h-5" />
+          <UIcon :name="tab.icon" class="w-4 h-4 sm:w-5 sm:h-5" />
           {{ tab.label }}
         </button>
       </div>
 
-      <!-- Tab 1: Orders -->
-      <UCard v-if="activeTab === 0" class="shadow-sm rounded-3xl border border-slate-200/80 bg-white">
-        <!-- Status Filter Pills -->
-        <div class="flex flex-wrap gap-2 mb-6 border-b border-slate-100 pb-4">
-          <UButton v-for="s in ['Все', 'Новый', 'Ждет оплаты', 'Ждет доставки', 'Завершен', 'Отказан']" :key="s"
-            :color="orderFilter === s ? 'primary' : 'gray'"
-            :variant="orderFilter === s ? 'solid' : 'soft'"
-            @click="orderFilter = s"
-            class="rounded-xl font-bold transition-all"
-            size="sm"
-          >
-            <span v-if="s === 'Новый'" class="w-2 h-2 rounded-full bg-orange-400 mr-1 inline-block"></span>
-            <span v-else-if="s === 'Ждет оплаты'" class="w-2 h-2 rounded-full bg-blue-500 mr-1 inline-block"></span>
-            <span v-else-if="s === 'Ждет доставки'" class="w-2 h-2 rounded-full bg-purple-500 mr-1 inline-block"></span>
-            <span v-else-if="s === 'Завершен'" class="w-2 h-2 rounded-full bg-emerald-500 mr-1 inline-block"></span>
-            <span v-else-if="s === 'Отказан'" class="w-2 h-2 rounded-full bg-red-500 mr-1 inline-block"></span>
-            {{ s === 'Все' ? 'Все заказы' : s }}
-          </UButton>
+      <!-- TAB 0: ORDERS -->
+      <div v-if="activeTab === 0" class="space-y-4">
+        <!-- Status Filter Pills (Scrollable on Mobile) -->
+        <div class="bg-white p-3 sm:p-4 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-xs overflow-x-auto">
+          <div class="flex gap-1.5 sm:gap-2 min-w-max">
+            <button
+              v-for="s in ['Все', 'Новый', 'Ждет оплаты', 'Ждет доставки', 'Завершен', 'Отказан']"
+              :key="s"
+              type="button"
+              @click="orderFilter = s"
+              :class="[
+                'px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap',
+                orderFilter === s 
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' 
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              ]"
+            >
+              <span :class="['w-2 h-2 rounded-full', getStatusDotBgClass(s)]"></span>
+              <span>{{ s === 'Все' ? 'Все заказы' : s }}</span>
+            </button>
+          </div>
         </div>
 
-        <div v-if="filteredOrders.length === 0" class="py-16 text-center text-slate-400">
-          <UIcon name="i-lucide-inbox" class="w-14 h-14 mx-auto mb-3 opacity-30 text-blue-500" />
-          <p class="font-extrabold text-base text-slate-700">Нет заказов по выбранному фильтру</p>
+        <!-- Empty State -->
+        <div v-if="filteredOrders.length === 0" class="bg-white p-12 rounded-2xl border border-slate-200 text-center text-slate-400">
+          <UIcon name="i-lucide-inbox" class="w-12 h-12 mx-auto mb-2 opacity-30 text-blue-500" />
+          <p class="font-extrabold text-sm text-slate-700">Нет заказов по выбранному фильтру</p>
           <p class="text-xs text-slate-400 mt-1">Оформите заказ в корзине или смените фильтр</p>
         </div>
 
-        <div v-else class="overflow-x-auto">
-          <table class="w-full text-left text-sm border-collapse">
-            <thead>
-              <tr class="border-b border-slate-200 text-xs font-extrabold text-slate-400 uppercase tracking-wider bg-slate-50/80">
-                <th class="py-3.5 px-4 rounded-tl-xl">ID Заказа</th>
-                <th class="py-3.5 px-4">Дата</th>
-                <th class="py-3.5 px-4">Заказчик (Клиника)</th>
-                <th class="py-3.5 px-4">Сумма</th>
-                <th class="py-3.5 px-4">Быстрый статус</th>
-                <th class="py-3.5 px-4 text-right rounded-tr-xl">Действия</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 font-medium">
-              <tr 
-                v-for="row in filteredOrders" 
-                :key="row.id" 
-                class="hover:bg-blue-50/40 transition-colors cursor-pointer group"
-                @click="openOrderDetails(row)"
-              >
-                <!-- Order ID -->
-                <td class="py-4 px-4 font-extrabold text-slate-900 group-hover:text-blue-600 transition-colors">
-                  <span class="inline-flex items-center gap-1.5 bg-slate-100 group-hover:bg-blue-100 text-slate-800 group-hover:text-blue-700 px-2.5 py-1 rounded-lg text-xs font-mono">
-                    #{{ row.id }}
-                  </span>
-                </td>
+        <!-- MOBILE VIEW (< md): Responsive Order Cards -->
+        <div v-else class="block md:hidden space-y-3">
+          <div 
+            v-for="row in filteredOrders" 
+            :key="row.id"
+            @click="openOrderDetails(row)"
+            class="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-xs hover:border-blue-500 active:scale-99 transition-all cursor-pointer space-y-3"
+          >
+            <!-- Card Header: ID & Status -->
+            <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+              <span class="text-xs font-mono font-extrabold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md">
+                #{{ row.id }}
+              </span>
+              <UBadge :color="getStatusColor(row.status)" variant="solid" size="xs" class="rounded-md font-extrabold">
+                {{ row.status }}
+              </UBadge>
+            </div>
 
-                <!-- Date -->
-                <td class="py-4 px-4 text-slate-500 text-xs font-semibold">
-                  {{ formatDate(row.date) }}
-                </td>
+            <!-- Client / Clinic Details -->
+            <div class="space-y-1">
+              <div class="font-extrabold text-slate-900 text-base leading-snug">
+                {{ row.name }}
+              </div>
+              <div class="text-xs font-bold text-blue-600 flex items-center gap-1">
+                <UIcon name="i-lucide-phone" class="w-3.5 h-3.5" />
+                {{ row.phone }}
+              </div>
+              <div class="text-xs text-slate-400 font-medium truncate flex items-center gap-1">
+                <UIcon name="i-lucide-map-pin" class="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <span class="truncate">{{ row.address || 'г. Алматы' }}</span>
+              </div>
+            </div>
 
-                <!-- Client / Clinic -->
-                <td class="py-4 px-4">
-                  <div class="flex flex-col">
-                    <span class="font-extrabold text-slate-900 text-sm">{{ row.name }}</span>
-                    <span class="text-xs font-semibold text-blue-600 flex items-center gap-1 mt-0.5">
-                      <UIcon name="i-lucide-phone" class="w-3 h-3" />
-                      {{ row.phone }}
-                    </span>
-                  </div>
-                </td>
+            <!-- Card Footer: Total Price & Tap Prompt -->
+            <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
+              <div>
+                <span class="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider block">Сумма заказа</span>
+                <span class="text-lg font-black text-blue-600 leading-none">{{ formatPrice(row.total) }} ₸</span>
+              </div>
 
-                <!-- Total Sum -->
-                <td class="py-4 px-4 font-black text-blue-600 text-base">
-                  {{ formatPrice(row.total) }} ₸
-                </td>
-
-                <!-- Quick Status Dots/Pills -->
-                <td class="py-4 px-4" @click.stop>
-                  <div class="flex items-center gap-1.5 flex-wrap">
-                    <button
-                      v-for="st in ['Новый', 'Ждет оплаты', 'Ждет доставки', 'Завершен', 'Отказан']"
-                      :key="st"
-                      type="button"
-                      :title="`Сменить статус на: ${st}`"
-                      @click="updateOrderStatus(row.id, st)"
-                      :class="[
-                        'px-2 py-1 text-[11px] font-extrabold rounded-lg transition-all flex items-center gap-1 border cursor-pointer',
-                        row.status === st 
-                          ? getStatusBadgeClasses(st)
-                          : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100 hover:text-slate-700 opacity-65 hover:opacity-100'
-                      ]"
-                    >
-                      <span :class="['w-1.5 h-1.5 rounded-full', getStatusDotBgClass(st)]"></span>
-                      <span>{{ st }}</span>
-                    </button>
-                  </div>
-                </td>
-
-                <!-- Actions -->
-                <td class="py-4 px-4 text-right" @click.stop>
-                  <div class="flex items-center justify-end gap-2">
-                    <UButton 
-                      size="xs" 
-                      color="blue" 
-                      variant="soft" 
-                      icon="i-lucide-eye" 
-                      @click="openOrderDetails(row)"
-                      class="rounded-lg font-bold"
-                    >
-                      Детали
-                    </UButton>
-
-                    <UButton 
-                      size="xs" 
-                      color="red" 
-                      variant="ghost" 
-                      icon="i-lucide-trash-2" 
-                      @click="deleteOrder(row.id)"
-                      title="Удалить заказ"
-                      class="rounded-lg hover:bg-red-50"
-                    />
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+              <div class="flex items-center gap-1 text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-xl">
+                <span>Подробнее</span>
+                <UIcon name="i-lucide-chevron-right" class="w-4 h-4" />
+              </div>
+            </div>
+          </div>
         </div>
-      </UCard>
 
-      <!-- Tab 2: Feedback -->
-      <UCard v-else-if="activeTab === 1" class="shadow-sm rounded-3xl border border-slate-200/80 bg-white">
-        <div class="flex flex-wrap gap-2 mb-6 border-b border-slate-100 pb-4">
+        <!-- DESKTOP VIEW (>= md): Table -->
+        <div class="hidden md:block bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm border-collapse">
+              <thead>
+                <tr class="border-b border-slate-200 text-xs font-extrabold text-slate-400 uppercase tracking-wider bg-slate-50">
+                  <th class="py-3.5 px-4">ID Заказа</th>
+                  <th class="py-3.5 px-4">Дата</th>
+                  <th class="py-3.5 px-4">Заказчик (Клиника)</th>
+                  <th class="py-3.5 px-4">Сумма</th>
+                  <th class="py-3.5 px-4">Быстрый статус</th>
+                  <th class="py-3.5 px-4 text-right">Действие</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 font-medium">
+                <tr 
+                  v-for="row in filteredOrders" 
+                  :key="row.id" 
+                  class="hover:bg-blue-50/40 transition-colors cursor-pointer group"
+                  @click="openOrderDetails(row)"
+                >
+                  <td class="py-4 px-4 font-extrabold text-slate-900 group-hover:text-blue-600 transition-colors">
+                    <span class="inline-flex items-center gap-1 bg-slate-100 group-hover:bg-blue-100 text-slate-800 group-hover:text-blue-700 px-2.5 py-1 rounded-lg text-xs font-mono">
+                      #{{ row.id }}
+                    </span>
+                  </td>
+                  <td class="py-4 px-4 text-slate-500 text-xs font-semibold">
+                    {{ formatDate(row.date) }}
+                  </td>
+                  <td class="py-4 px-4">
+                    <div class="flex flex-col">
+                      <span class="font-extrabold text-slate-900 text-sm">{{ row.name }}</span>
+                      <span class="text-xs font-semibold text-blue-600 flex items-center gap-1 mt-0.5">
+                        <UIcon name="i-lucide-phone" class="w-3 h-3" />
+                        {{ row.phone }}
+                      </span>
+                    </div>
+                  </td>
+                  <td class="py-4 px-4 font-black text-blue-600 text-base">
+                    {{ formatPrice(row.total) }} ₸
+                  </td>
+                  <td class="py-4 px-4" @click.stop>
+                    <div class="flex items-center gap-1 flex-wrap">
+                      <button
+                        v-for="st in ['Новый', 'Ждет оплаты', 'Ждет доставки', 'Завершен', 'Отказан']"
+                        :key="st"
+                        type="button"
+                        @click="updateOrderStatus(row.id, st)"
+                        :class="[
+                          'px-2 py-1 text-[11px] font-extrabold rounded-lg transition-all flex items-center gap-1 border cursor-pointer',
+                          row.status === st 
+                            ? getStatusBadgeClasses(st)
+                            : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100 hover:text-slate-700'
+                        ]"
+                      >
+                        <span :class="['w-1.5 h-1.5 rounded-full', getStatusDotBgClass(st)]"></span>
+                        <span>{{ st }}</span>
+                      </button>
+                    </div>
+                  </td>
+                  <td class="py-4 px-4 text-right" @click.stop>
+                    <div class="flex items-center justify-end gap-2">
+                      <UButton size="xs" color="blue" variant="soft" icon="i-lucide-eye" @click="openOrderDetails(row)" class="rounded-lg font-bold">Детали</UButton>
+                      <UButton size="xs" color="red" variant="ghost" icon="i-lucide-trash-2" @click="deleteOrder(row.id)" class="rounded-lg hover:bg-red-50" />
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 1: FEEDBACK -->
+      <div v-else-if="activeTab === 1" class="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
+        <div class="flex gap-2 overflow-x-auto pb-2">
           <UButton v-for="s in ['Все', 'новое', 'в работе', 'завершено']" :key="s"
             :color="feedbackFilter === s ? 'primary' : 'gray'"
             :variant="feedbackFilter === s ? 'soft' : 'ghost'"
             @click="feedbackFilter = s"
-            class="rounded-xl font-bold"
+            class="rounded-xl font-bold shrink-0"
             size="sm"
           >
             {{ s === 'Все' ? 'Все обращения' : s }}
@@ -178,193 +203,196 @@
 
         <div v-if="filteredFeedbacks.length === 0" class="py-12 text-center text-slate-400">
           <UIcon name="i-lucide-message-square" class="w-12 h-12 mx-auto mb-3 opacity-30 text-blue-500" />
-          <p class="font-bold text-slate-600">Нет обращений по выбранному фильтру</p>
+          <p class="font-bold text-slate-600">Нет обращений</p>
         </div>
 
-        <div v-else class="overflow-x-auto">
-          <table class="w-full text-left text-sm border-collapse">
-            <thead>
-              <tr class="border-b border-slate-200 text-xs font-extrabold text-slate-400 uppercase tracking-wider bg-slate-50">
-                <th class="py-3.5 px-4">Дата</th>
-                <th class="py-3.5 px-4">Контакт</th>
-                <th class="py-3.5 px-4">Сообщение</th>
-                <th class="py-3.5 px-4">Статус</th>
-                <th class="py-3.5 px-4 text-right">Действия</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 font-medium">
-              <tr v-for="row in filteredFeedbacks" :key="row.id" class="hover:bg-slate-50 transition-colors">
-                <td class="py-3.5 px-4 text-slate-500 text-xs">{{ formatDate(row.date) }}</td>
-                <td class="py-3.5 px-4 font-bold text-blue-600">{{ row.contact }}</td>
-                <td class="py-3.5 px-4 text-slate-700 max-w-xs truncate">{{ row.message }}</td>
-                <td class="py-3.5 px-4">
-                  <UBadge :color="getFeedbackStatusColor(row.status)" variant="subtle" size="sm" class="capitalize rounded-lg font-bold">
-                    {{ row.status }}
-                  </UBadge>
-                </td>
-                <td class="py-3.5 px-4 text-right">
-                  <UButton size="xs" color="primary" variant="soft" icon="i-lucide-eye" @click="openFeedbackDetails(row)" class="rounded-lg">Просмотр</UButton>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div v-else class="space-y-2">
+          <div 
+            v-for="row in filteredFeedbacks" 
+            :key="row.id" 
+            @click="openFeedbackDetails(row)"
+            class="p-4 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-100/80 transition-all cursor-pointer flex justify-between items-center"
+          >
+            <div class="space-y-1">
+              <div class="font-bold text-blue-600 text-sm">{{ row.contact }}</div>
+              <div class="text-xs text-slate-600 max-w-md truncate">{{ row.message }}</div>
+              <div class="text-[10px] text-slate-400">{{ formatDate(row.date) }}</div>
+            </div>
+            <UBadge :color="getFeedbackStatusColor(row.status)" variant="subtle" size="xs" class="rounded-md font-bold">
+              {{ row.status }}
+            </UBadge>
+          </div>
         </div>
-      </UCard>
+      </div>
 
-      <!-- Tab 3: Catalog Conveyor -->
-      <UCard v-else-if="activeTab === 2" class="shadow-sm rounded-3xl border border-slate-200/80 bg-white">
-        <div class="flex flex-col items-center justify-center py-16 border-2 border-dashed border-slate-300 rounded-2xl hover:border-blue-500 transition-all cursor-pointer bg-slate-50 hover:bg-blue-50/50 group" @click="fileInput.click()">
-          <UIcon name="i-lucide-upload-cloud" class="w-16 h-16 text-slate-400 group-hover:text-blue-600 mb-4 transition-transform group-hover:-translate-y-1" />
-          <h3 class="text-xl font-extrabold text-slate-800 group-hover:text-blue-600 mb-2">Загрузить Excel прайс-лист</h3>
-          <p class="text-slate-500 text-sm mb-6">Поддерживаемые форматы: .xlsx, .xls</p>
+      <!-- TAB 2: CATALOG UPLOAD -->
+      <div v-else-if="activeTab === 2" class="bg-white p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-xs">
+        <div class="flex flex-col items-center justify-center py-12 border-2 border-dashed border-slate-300 rounded-2xl hover:border-blue-500 transition-all cursor-pointer bg-slate-50 hover:bg-blue-50/50 group" @click="fileInput.click()">
+          <UIcon name="i-lucide-upload-cloud" class="w-14 h-14 text-slate-400 group-hover:text-blue-600 mb-3" />
+          <h3 class="text-lg font-extrabold text-slate-800 group-hover:text-blue-600 mb-1">Загрузить Excel прайс-лист</h3>
+          <p class="text-slate-500 text-xs mb-4">Форматы: .xlsx, .xls</p>
           <input type="file" ref="fileInput" class="hidden" accept=".xlsx,.xls" @change="handleFileUpload" />
-          <UButton color="blue" variant="solid" size="lg" icon="i-lucide-file-spreadsheet" class="rounded-xl font-bold shadow-md shadow-blue-500/20">Выбрать прайс-лист</UButton>
+          <UButton color="blue" variant="solid" size="md" icon="i-lucide-file-spreadsheet" class="rounded-xl font-bold">Выбрать прайс-лист</UButton>
         </div>
-      </UCard>
+      </div>
+
     </div>
 
-    <!-- Модальное окно ПОЛНОЙ информации о заказе -->
-    <UModal v-model="isOrderModalOpen" :ui="{ width: 'sm:max-w-2xl' }">
-      <div v-if="selectedOrder" class="bg-white rounded-3xl p-6 sm:p-8 space-y-6">
-        <!-- Header -->
-        <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+    <!-- MOBILE-OPTIMIZED ORDER DETAILS MODAL -->
+    <UModal v-model="isOrderModalOpen" :ui="{ width: 'w-full sm:max-w-xl', margin: 'm-2 sm:m-auto' }">
+      <div v-if="selectedOrder" class="bg-white rounded-3xl p-5 sm:p-7 space-y-5 max-h-[90vh] overflow-y-auto">
+        
+        <!-- Modal Top Header -->
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
           <div>
-            <div class="flex items-center gap-2">
-              <span class="text-xs font-mono font-bold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg">#{{ selectedOrder.id }}</span>
-              <UBadge :color="getStatusColor(selectedOrder.status)" variant="solid" class="rounded-lg font-bold">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-xs font-mono font-black bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg">#{{ selectedOrder.id }}</span>
+              <UBadge :color="getStatusColor(selectedOrder.status)" variant="solid" class="rounded-lg font-extrabold text-xs">
                 {{ selectedOrder.status }}
               </UBadge>
             </div>
-            <p class="text-xs text-slate-400 font-semibold mt-1">Оформлен: {{ formatDate(selectedOrder.date) }}</p>
+            <p class="text-[11px] text-slate-400 font-semibold mt-1">Оформлен: {{ formatDate(selectedOrder.date) }}</p>
           </div>
           <UButton color="gray" variant="ghost" icon="i-lucide-x" class="rounded-xl" @click="isOrderModalOpen = false" />
         </div>
 
-        <!-- Info Grid (Client & Supplier) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <!-- Client Card -->
-          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/60 space-y-2">
-            <div class="flex items-center gap-2 text-xs font-extrabold uppercase text-slate-400 tracking-wider">
-              <UIcon name="i-lucide-building-2" class="w-4 h-4 text-blue-600" />
-              <span>Заказчик (Клиника)</span>
-            </div>
-            <div class="font-extrabold text-slate-900 text-base">{{ selectedOrder.name }}</div>
-            <div class="text-xs font-bold text-blue-600 flex items-center gap-1">
-              <UIcon name="i-lucide-phone" class="w-3.5 h-3.5" />
-              {{ selectedOrder.phone }}
-            </div>
-            <div class="text-xs text-slate-500 font-medium flex items-center gap-1">
-              <UIcon name="i-lucide-map-pin" class="w-3.5 h-3.5 text-slate-400" />
-              {{ selectedOrder.address || 'г. Алматы' }}
-            </div>
+        <!-- CLIENT / CLINIC HIGHLIGHT BOX (Сразу видно имя и телефон!) -->
+        <div class="bg-blue-50/70 border border-blue-200/80 p-4 rounded-2xl space-y-2">
+          <div class="flex items-center justify-between text-xs font-extrabold uppercase text-blue-700 tracking-wider">
+            <span class="flex items-center gap-1.5">
+              <UIcon name="i-lucide-building-2" class="w-4 h-4" />
+              Заказчик (Клиника)
+            </span>
           </div>
 
-          <!-- Supplier Card -->
-          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/60 space-y-2">
-            <div class="flex items-center gap-2 text-xs font-extrabold uppercase text-slate-400 tracking-wider">
-              <UIcon name="i-lucide-truck" class="w-4 h-4 text-emerald-600" />
-              <span>Поставщик и Склад</span>
-            </div>
-            <div class="font-extrabold text-slate-900 text-base">ТОО «Стома Поставщик»</div>
-            <div class="text-xs text-slate-500 font-medium flex items-center gap-1">
-              <UIcon name="i-lucide-warehouse" class="w-3.5 h-3.5 text-emerald-600" />
-              Центральный склад (Алматы)
-            </div>
-            <div class="text-xs text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-md inline-block">
-              Прямая отгрузка PAZL
-            </div>
+          <div class="text-lg font-black text-slate-900 leading-tight">
+            {{ selectedOrder.name }}
+          </div>
+
+          <div class="flex items-center gap-2 pt-1 flex-wrap">
+            <a 
+              :href="`tel:${selectedOrder.phone}`" 
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 text-white font-extrabold text-xs hover:bg-blue-700 transition-colors shadow-xs"
+            >
+              <UIcon name="i-lucide-phone-call" class="w-3.5 h-3.5" />
+              <span>{{ selectedOrder.phone }}</span>
+            </a>
+
+            <a 
+              :href="`https://wa.me/${selectedOrder.phone.replace(/[^0-9]/g, '')}`" 
+              target="_blank"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 text-white font-extrabold text-xs hover:bg-emerald-700 transition-colors shadow-xs"
+            >
+              <UIcon name="i-lucide-message-circle" class="w-3.5 h-3.5" />
+              <span>WhatsApp</span>
+            </a>
+          </div>
+
+          <div class="text-xs text-slate-500 font-semibold flex items-center gap-1 pt-1">
+            <UIcon name="i-lucide-map-pin" class="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            <span>Адрес: {{ selectedOrder.address || 'г. Алматы' }}</span>
           </div>
         </div>
 
-        <!-- Order Items Table -->
+        <!-- SUPPLIER INFO BOX -->
+        <div class="bg-slate-50 border border-slate-200/80 p-3.5 rounded-2xl space-y-1">
+          <div class="text-xs font-extrabold uppercase text-slate-400 tracking-wider flex items-center gap-1.5">
+            <UIcon name="i-lucide-truck" class="w-3.5 h-3.5 text-emerald-600" />
+            <span>Поставщик</span>
+          </div>
+          <div class="font-extrabold text-slate-800 text-sm">ТОО «Стома Поставщик» (КазМедИмпорт)</div>
+          <div class="text-xs text-slate-500 font-medium">Центральный склад отгрузки (Алматы)</div>
+        </div>
+
+        <!-- ITEMS LIST -->
         <div>
-          <h4 class="text-xs font-extrabold uppercase text-slate-400 tracking-wider mb-3">Состав заказа</h4>
+          <h4 class="text-xs font-extrabold uppercase text-slate-400 tracking-wider mb-2">Товары в заказе</h4>
           <div class="border border-slate-200/80 rounded-2xl overflow-hidden divide-y divide-slate-100">
             <div 
               v-for="(item, idx) in selectedOrder.items" 
               :key="idx" 
-              class="flex items-center justify-between p-3.5 bg-slate-50/40 hover:bg-slate-50 text-sm transition-colors"
+              class="p-3 bg-slate-50/40 flex justify-between items-center gap-2 text-xs"
             >
-              <div class="font-bold text-slate-800 pr-2 max-w-xs">{{ item.name }}</div>
+              <div class="font-bold text-slate-800 min-w-0 pr-2">
+                {{ item.name }}
+              </div>
               <div class="text-right shrink-0">
-                <span class="text-xs font-semibold text-slate-500 block">{{ item.quantity }} шт × {{ formatPrice(item.price) }} ₸</span>
-                <span class="font-extrabold text-blue-600 text-sm">{{ formatPrice(item.price * item.quantity) }} ₸</span>
+                <span class="text-[11px] text-slate-400 block">{{ item.quantity }} шт × {{ formatPrice(item.price) }} ₸</span>
+                <span class="font-extrabold text-blue-600 text-xs">{{ formatPrice(item.price * item.quantity) }} ₸</span>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Total Sum Accent Box -->
-        <div class="bg-blue-50/80 border border-blue-200/80 p-4 rounded-2xl flex items-center justify-between">
-          <span class="text-sm font-extrabold text-slate-700 uppercase tracking-wider">Итого к оплате:</span>
-          <span class="text-2xl font-black text-blue-600 leading-none">{{ formatPrice(selectedOrder.total) }} ₸</span>
+        <!-- TOTAL SUM ACCENT BANNER -->
+        <div class="bg-slate-900 text-white p-4 rounded-2xl flex items-center justify-between shadow-sm">
+          <span class="text-xs font-extrabold uppercase tracking-wider text-slate-300">Итоговая сумма:</span>
+          <span class="text-xl sm:text-2xl font-black text-emerald-400 leading-none">{{ formatPrice(selectedOrder.total) }} ₸</span>
         </div>
 
-        <!-- Status Action Buttons in Modal -->
-        <div class="pt-2 border-t border-slate-100 space-y-3">
-          <label class="block text-xs font-extrabold uppercase text-slate-400 tracking-wider">Быстро изменить статус:</label>
-          <div class="flex flex-wrap gap-2">
+        <!-- CHANGE STATUS PANELS (Big Touch Friendly Buttons) -->
+        <div class="space-y-2 pt-2 border-t border-slate-100">
+          <label class="block text-xs font-extrabold uppercase text-slate-400 tracking-wider">Изменить статус заказа:</label>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
             <button
               v-for="st in ['Новый', 'Ждет оплаты', 'Ждет доставки', 'Завершен', 'Отказан']"
               :key="st"
               type="button"
               @click="updateOrderStatus(selectedOrder.id, st)"
               :class="[
-                'px-3 py-1.5 text-xs font-extrabold rounded-xl transition-all flex items-center gap-1.5 border cursor-pointer',
+                'p-2.5 rounded-xl text-xs font-extrabold transition-all border flex items-center justify-center gap-1.5 cursor-pointer text-center',
                 selectedOrder.status === st 
                   ? getStatusBadgeClasses(st)
-                  : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200'
+                  : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
               ]"
             >
-              <span :class="['w-2 h-2 rounded-full', getStatusDotBgClass(st)]"></span>
-              {{ st }}
+              <span :class="['w-2 h-2 rounded-full shrink-0', getStatusDotBgClass(st)]"></span>
+              <span class="truncate">{{ st }}</span>
             </button>
           </div>
         </div>
 
-        <!-- Footer Modal Controls -->
-        <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+        <!-- MODAL FOOTER CONTROLS -->
+        <div class="flex items-center justify-between pt-3 border-t border-slate-100 gap-2">
           <UButton 
             color="red" 
             variant="soft" 
             icon="i-lucide-trash-2" 
             @click="deleteOrder(selectedOrder.id)"
-            class="rounded-xl font-bold"
+            size="sm"
+            class="rounded-xl font-extrabold"
           >
-            Удалить заказ
+            Удалить
           </UButton>
+
           <UButton 
             color="gray" 
             variant="solid" 
             @click="isOrderModalOpen = false"
-            class="rounded-xl font-bold"
+            size="sm"
+            class="rounded-xl font-extrabold"
           >
             Закрыть
           </UButton>
         </div>
+
       </div>
     </UModal>
 
-    <!-- Модальное окно Деталей отзыва -->
+    <!-- MOBILE FEEDBACK MODAL -->
     <UModal v-model="isFeedbackModalOpen">
-      <div v-if="selectedFeedback" class="bg-white rounded-3xl p-6 space-y-4">
-        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-          <h3 class="text-lg font-bold text-slate-900">Обращение от {{ selectedFeedback.contact }}</h3>
+      <div v-if="selectedFeedback" class="bg-white rounded-3xl p-5 space-y-3">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+          <h3 class="text-base font-bold text-slate-900">Обращение от {{ selectedFeedback.contact }}</h3>
           <UButton color="gray" variant="ghost" icon="i-lucide-x" class="rounded-xl" @click="isFeedbackModalOpen = false" />
         </div>
-        
-        <div class="space-y-3">
-          <div class="flex items-center gap-2">
-            <UBadge :color="getFeedbackStatusColor(selectedFeedback.status)" variant="subtle">{{ selectedFeedback.status }}</UBadge>
-            <span class="text-xs text-slate-400">{{ formatDate(selectedFeedback.date) }}</span>
-          </div>
-          
-          <div class="bg-slate-50 p-4 rounded-2xl text-sm text-slate-700 leading-relaxed font-medium">
-            {{ selectedFeedback.message }}
-          </div>
+        <div class="text-xs text-slate-400">{{ formatDate(selectedFeedback.date) }}</div>
+        <div class="bg-slate-50 p-4 rounded-2xl text-xs text-slate-700 leading-relaxed font-medium">
+          {{ selectedFeedback.message }}
         </div>
       </div>
     </UModal>
+
   </div>
 </template>
 
@@ -483,7 +511,7 @@ const { data: ordersData, pending: pendingOrders, refresh: refreshOrders } = awa
         const formattedLocal = local.map((o: any) => ({
           id: o.id,
           date: o.date || new Date().toISOString(),
-          name: o.name || 'Клиент',
+          name: o.name || 'Стоматологическая клиника',
           phone: o.phone || '+7 (707) 123-45-67',
           contact: o.contact || o.phone || '+7 (707) 123-45-67',
           total: o.total || 0,
@@ -571,7 +599,7 @@ function updateOrderStatus(id: string, newStatus: string) {
         localStorage.setItem('mock_orders', JSON.stringify(local))
       }
     }
-    toast.add({ title: `Статус заказа изменено на "${newStatus}"`, color: 'green', icon: 'i-lucide-check-circle' })
+    toast.add({ title: `Статус заказа изменен на "${newStatus}"`, color: 'green', icon: 'i-lucide-check-circle' })
   } catch (e) {
     console.error('Update status error', e)
   }
@@ -671,3 +699,13 @@ function logout() {
 
 useHead({ title: 'Панель оператора | PAZL' })
 </script>
+
+<style scoped>
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+</style>
