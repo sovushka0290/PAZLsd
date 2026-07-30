@@ -9,8 +9,8 @@
             <UIcon name="i-lucide-shield-check" class="w-6 h-6" />
           </div>
           <div>
-            <h1 class="text-lg sm:text-2xl font-black text-slate-900 leading-tight">Панель оператора</h1>
-            <p class="text-xs text-slate-500 font-medium">Управление заказами и обращениями клиник</p>
+            <h1 class="text-lg sm:text-2xl font-black text-slate-900 leading-tight">Панель оператора PAZL</h1>
+            <p class="text-xs text-slate-500 font-medium">Управление заказами, P2P цепочкой и документами (Procure-to-Pay)</p>
           </div>
         </div>
         
@@ -23,7 +23,7 @@
       <!-- Navigation Tabs (Mobile Scrollable) -->
       <div class="flex space-x-2 border-b border-slate-200 overflow-x-auto pb-1 no-scrollbar">
         <button 
-          v-for="(tab, i) in [{ label: 'Заказы клиник', icon: 'i-lucide-shopping-bag' }, { label: 'Обращения', icon: 'i-lucide-message-square' }, { label: 'Конвейер прайсов', icon: 'i-lucide-upload-cloud' }]" 
+          v-for="(tab, i) in [{ label: 'Заказы (P2P Флоу)', icon: 'i-lucide-shopping-bag' }, { label: 'Обращения', icon: 'i-lucide-message-square' }, { label: 'Конвейер прайсов', icon: 'i-lucide-upload-cloud' }]" 
           :key="i"
           @click="activeTab = i"
           :class="[
@@ -36,13 +36,13 @@
         </button>
       </div>
 
-      <!-- TAB 0: ORDERS -->
+      <!-- TAB 0: ORDERS (P2P FLOW) -->
       <div v-if="activeTab === 0" class="space-y-4">
-        <!-- Status Filter Pills (Scrollable on Mobile) -->
+        <!-- Status Filter Pills -->
         <div class="bg-white p-3 sm:p-4 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-xs overflow-x-auto">
           <div class="flex gap-1.5 sm:gap-2 min-w-max">
             <button
-              v-for="s in ['Все', 'Новый', 'Ждет оплаты', 'Ждет доставки', 'Завершен', 'Отказан']"
+              v-for="s in ['Все', 'Новый', 'Подтвержден', 'Оплачен', 'В доставке', 'Завершен', 'Претензия']"
               :key="s"
               type="button"
               @click="orderFilter = s"
@@ -74,11 +74,16 @@
             @click="openOrderDetails(row)"
             class="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-xs hover:border-blue-500 active:scale-99 transition-all cursor-pointer space-y-3"
           >
-            <!-- Card Header: ID & Status -->
+            <!-- Card Header: ID, P2P Stage, Status -->
             <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
-              <span class="text-xs font-mono font-extrabold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md">
-                #{{ row.id }}
-              </span>
+              <div class="flex items-center gap-1.5">
+                <span class="text-xs font-mono font-extrabold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md">
+                  #{{ row.id }}
+                </span>
+                <span class="text-[10px] font-black text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">
+                  Шаг {{ getP2PStageStep(row.p2pStage || 'CREATED') }}/13
+                </span>
+              </div>
               <UBadge :color="getStatusColor(row.status)" variant="solid" size="xs" class="rounded-md font-extrabold">
                 {{ row.status }}
               </UBadge>
@@ -107,8 +112,7 @@
               </div>
 
               <div class="flex items-center gap-1 text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-xl">
-                <span>Подробнее</span>
-                <UIcon name="i-lucide-chevron-right" class="w-4 h-4" />
+                <span>P2P Детали →</span>
               </div>
             </div>
           </div>
@@ -121,11 +125,11 @@
               <thead>
                 <tr class="border-b border-slate-200 text-xs font-extrabold text-slate-400 uppercase tracking-wider bg-slate-50">
                   <th class="py-3.5 px-4">ID Заказа</th>
-                  <th class="py-3.5 px-4">Дата</th>
+                  <th class="py-3.5 px-4">P2P Этап (13 шагов)</th>
                   <th class="py-3.5 px-4">Заказчик (Клиника)</th>
                   <th class="py-3.5 px-4">Сумма</th>
-                  <th class="py-3.5 px-4">Быстрый статус</th>
-                  <th class="py-3.5 px-4 text-right">Действие</th>
+                  <th class="py-3.5 px-4">Статус</th>
+                  <th class="py-3.5 px-4 text-right">Действия</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100 font-medium">
@@ -140,8 +144,11 @@
                       #{{ row.id }}
                     </span>
                   </td>
-                  <td class="py-4 px-4 text-slate-500 text-xs font-semibold">
-                    {{ formatDate(row.date) }}
+                  <td class="py-4 px-4">
+                    <div class="flex flex-col">
+                      <span class="text-xs font-black text-slate-800">{{ getP2PStageName(row.p2pStage || 'CREATED') }}</span>
+                      <span class="text-[10px] font-extrabold text-blue-600">Этап {{ getP2PStageStep(row.p2pStage || 'CREATED') }} из 13</span>
+                    </div>
                   </td>
                   <td class="py-4 px-4">
                     <div class="flex flex-col">
@@ -156,27 +163,13 @@
                     {{ formatPrice(row.total) }} ₸
                   </td>
                   <td class="py-4 px-4" @click.stop>
-                    <div class="flex items-center gap-1 flex-wrap">
-                      <button
-                        v-for="st in ['Новый', 'Ждет оплаты', 'Ждет доставки', 'Завершен', 'Отказан']"
-                        :key="st"
-                        type="button"
-                        @click="updateOrderStatus(row.id, st)"
-                        :class="[
-                          'px-2 py-1 text-[11px] font-extrabold rounded-lg transition-all flex items-center gap-1 border cursor-pointer',
-                          row.status === st 
-                            ? getStatusBadgeClasses(st)
-                            : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100 hover:text-slate-700'
-                        ]"
-                      >
-                        <span :class="['w-1.5 h-1.5 rounded-full', getStatusDotBgClass(st)]"></span>
-                        <span>{{ st }}</span>
-                      </button>
-                    </div>
+                    <UBadge :color="getStatusColor(row.status)" variant="solid" size="sm" class="rounded-lg font-extrabold">
+                      {{ row.status }}
+                    </UBadge>
                   </td>
                   <td class="py-4 px-4 text-right" @click.stop>
                     <div class="flex items-center justify-end gap-2">
-                      <UButton size="xs" color="blue" variant="soft" icon="i-lucide-eye" @click="openOrderDetails(row)" class="rounded-lg font-bold">Детали</UButton>
+                      <UButton size="xs" color="blue" variant="soft" icon="i-lucide-eye" @click="openOrderDetails(row)" class="rounded-lg font-bold">P2P Карточка</UButton>
                       <UButton size="xs" color="red" variant="ghost" icon="i-lucide-trash-2" @click="deleteOrder(row.id)" class="rounded-lg hover:bg-red-50" />
                     </div>
                   </td>
@@ -238,104 +231,301 @@
 
     </div>
 
-    <!-- MOBILE-OPTIMIZED ORDER DETAILS MODAL -->
-    <UModal v-model="isOrderModalOpen" :ui="{ width: 'w-full sm:max-w-xl', margin: 'm-2 sm:m-auto' }">
-      <div v-if="selectedOrder" class="bg-white rounded-3xl p-5 sm:p-7 space-y-5 max-h-[90vh] overflow-y-auto">
+    <!-- FULL 13-STEP P2P PROCURE-TO-PAY ORDER MODAL -->
+    <UModal v-model="isOrderModalOpen" :ui="{ width: 'w-full sm:max-w-3xl', margin: 'm-2 sm:m-auto' }">
+      <div v-if="selectedOrder" class="bg-white rounded-3xl p-4 sm:p-7 space-y-6 max-h-[90vh] overflow-y-auto">
         
-        <!-- Modal Top Header -->
+        <!-- Modal Top Bar -->
         <div class="flex items-center justify-between border-b border-slate-100 pb-3">
           <div>
             <div class="flex items-center gap-2 flex-wrap">
-              <span class="text-xs font-mono font-black bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg">#{{ selectedOrder.id }}</span>
+              <span class="text-xs font-mono font-black bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg">Заказ #{{ selectedOrder.id }}</span>
               <UBadge :color="getStatusColor(selectedOrder.status)" variant="solid" class="rounded-lg font-extrabold text-xs">
                 {{ selectedOrder.status }}
               </UBadge>
+              <span class="text-xs font-bold text-slate-500">Этап {{ getP2PStageStep(selectedOrder.p2pStage || 'CREATED') }} из 13</span>
             </div>
             <p class="text-[11px] text-slate-400 font-semibold mt-1">Оформлен: {{ formatDate(selectedOrder.date) }}</p>
           </div>
           <UButton color="gray" variant="ghost" icon="i-lucide-x" class="rounded-xl" @click="isOrderModalOpen = false" />
         </div>
 
-        <!-- CLIENT / CLINIC HIGHLIGHT BOX (Сразу видно имя и телефон!) -->
-        <div class="bg-blue-50/70 border border-blue-200/80 p-4 rounded-2xl space-y-2">
-          <div class="flex items-center justify-between text-xs font-extrabold uppercase text-blue-700 tracking-wider">
-            <span class="flex items-center gap-1.5">
-              <UIcon name="i-lucide-building-2" class="w-4 h-4" />
-              Заказчик (Клиника)
+        <!-- 13-STEP P2P PROGRESS STEPPER BAR -->
+        <div class="bg-slate-900 text-white p-4 rounded-2xl space-y-3 shadow-md">
+          <div class="flex items-center justify-between text-xs font-extrabold">
+            <span class="text-blue-400 flex items-center gap-1.5 uppercase tracking-wider">
+              <UIcon name="i-lucide-git-commit" class="w-4 h-4" />
+              Цепочка P2P (Procure-to-Pay):
             </span>
+            <span class="text-emerald-400 font-black text-sm">{{ getP2PStageName(selectedOrder.p2pStage || 'CREATED') }}</span>
           </div>
 
-          <div class="text-lg font-black text-slate-900 leading-tight">
-            {{ selectedOrder.name }}
-          </div>
-
-          <div class="flex items-center gap-2 pt-1 flex-wrap">
-            <a 
-              :href="`tel:${selectedOrder.phone}`" 
-              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 text-white font-extrabold text-xs hover:bg-blue-700 transition-colors shadow-xs"
-            >
-              <UIcon name="i-lucide-phone-call" class="w-3.5 h-3.5" />
-              <span>{{ selectedOrder.phone }}</span>
-            </a>
-
-            <a 
-              :href="`https://wa.me/${selectedOrder.phone.replace(/[^0-9]/g, '')}`" 
-              target="_blank"
-              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 text-white font-extrabold text-xs hover:bg-emerald-700 transition-colors shadow-xs"
-            >
-              <UIcon name="i-lucide-message-circle" class="w-3.5 h-3.5" />
-              <span>WhatsApp</span>
-            </a>
-          </div>
-
-          <div class="text-xs text-slate-500 font-semibold flex items-center gap-1 pt-1">
-            <UIcon name="i-lucide-map-pin" class="w-3.5 h-3.5 text-slate-400 shrink-0" />
-            <span>Адрес: {{ selectedOrder.address || 'г. Алматы' }}</span>
-          </div>
-        </div>
-
-        <!-- SUPPLIER INFO BOX -->
-        <div class="bg-slate-50 border border-slate-200/80 p-3.5 rounded-2xl space-y-1">
-          <div class="text-xs font-extrabold uppercase text-slate-400 tracking-wider flex items-center gap-1.5">
-            <UIcon name="i-lucide-truck" class="w-3.5 h-3.5 text-emerald-600" />
-            <span>Поставщик</span>
-          </div>
-          <div class="font-extrabold text-slate-800 text-sm">ТОО «Стома Поставщик» (КазМедИмпорт)</div>
-          <div class="text-xs text-slate-500 font-medium">Центральный склад отгрузки (Алматы)</div>
-        </div>
-
-        <!-- ITEMS LIST -->
-        <div>
-          <h4 class="text-xs font-extrabold uppercase text-slate-400 tracking-wider mb-2">Товары в заказе</h4>
-          <div class="border border-slate-200/80 rounded-2xl overflow-hidden divide-y divide-slate-100">
+          <!-- Step Progress Bar -->
+          <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
             <div 
-              v-for="(item, idx) in selectedOrder.items" 
-              :key="idx" 
-              class="p-3 bg-slate-50/40 flex justify-between items-center gap-2 text-xs"
+              class="bg-gradient-to-r from-blue-500 to-emerald-400 h-full transition-all duration-500"
+              :style="{ width: `${(getP2PStageStep(selectedOrder.p2pStage || 'CREATED') / 13) * 100}%` }"
+            ></div>
+          </div>
+
+          <!-- Advance P2P Stage Action Button -->
+          <div class="flex justify-between items-center pt-1">
+            <span class="text-[11px] text-slate-400">Шаг {{ getP2PStageStep(selectedOrder.p2pStage || 'CREATED') }} из 13</span>
+            
+            <button
+              type="button"
+              @click="advanceP2PStage(selectedOrder)"
+              class="px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-400 active:scale-98 text-slate-950 font-black text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
             >
-              <div class="font-bold text-slate-800 min-w-0 pr-2">
-                {{ item.name }}
+              <span>Продвинуть этап P2P ⏩</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- MODAL SUB-TABS: (1. Клиника & Товары, 2. Документы P2P, 3. Таймлайн и Аудит) -->
+        <div class="flex border-b border-slate-200 gap-2 overflow-x-auto pb-1 no-scrollbar">
+          <button 
+            v-for="t in [
+              { id: 'details', label: 'Информация & Товары', icon: 'i-lucide-package' },
+              { id: 'docs', label: 'Реестр документов (6 видов)', icon: 'i-lucide-file-text' },
+              { id: 'audit', label: 'Таймлайн & Аудит', icon: 'i-lucide-history' }
+            ]"
+            :key="t.id"
+            @click="modalTab = t.id"
+            :class="[
+              'px-3.5 py-2 text-xs font-extrabold rounded-xl transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer',
+              modalTab === t.id ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            ]"
+          >
+            <UIcon :name="t.icon" class="w-4 h-4" />
+            <span>{{ t.label }}</span>
+          </button>
+        </div>
+
+        <!-- TAB CONTENT 1: DETAILS & CLIENT HIGHLIGHT -->
+        <div v-if="modalTab === 'details'" class="space-y-4">
+          <!-- CLIENT / CLINIC HIGHLIGHT BOX -->
+          <div class="bg-blue-50/70 border border-blue-200/80 p-4 rounded-2xl space-y-2">
+            <div class="text-xs font-extrabold uppercase text-blue-700 tracking-wider flex items-center gap-1.5">
+              <UIcon name="i-lucide-building-2" class="w-4 h-4" />
+              <span>Заказчик (Клиника)</span>
+            </div>
+
+            <div class="text-lg font-black text-slate-900 leading-tight">
+              {{ selectedOrder.name }}
+            </div>
+
+            <div class="flex items-center gap-2 pt-1 flex-wrap">
+              <a 
+                :href="`tel:${selectedOrder.phone}`" 
+                class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-600 text-white font-extrabold text-xs hover:bg-blue-700 transition-colors shadow-xs"
+              >
+                <UIcon name="i-lucide-phone-call" class="w-3.5 h-3.5" />
+                <span>{{ selectedOrder.phone }}</span>
+              </a>
+
+              <a 
+                :href="`https://wa.me/${selectedOrder.phone.replace(/[^0-9]/g, '')}`" 
+                target="_blank"
+                class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white font-extrabold text-xs hover:bg-emerald-700 transition-colors shadow-xs"
+              >
+                <UIcon name="i-lucide-message-circle" class="w-3.5 h-3.5" />
+                <span>WhatsApp</span>
+              </a>
+            </div>
+
+            <div class="text-xs text-slate-500 font-semibold flex items-center gap-1 pt-1">
+              <UIcon name="i-lucide-map-pin" class="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              <span>Адрес доставки: {{ selectedOrder.address || 'г. Алматы, Достык 105' }}</span>
+            </div>
+          </div>
+
+          <!-- SUPPLIER INFO BOX -->
+          <div class="bg-slate-50 border border-slate-200/80 p-3.5 rounded-2xl space-y-1">
+            <div class="text-xs font-extrabold uppercase text-slate-400 tracking-wider flex items-center gap-1.5">
+              <UIcon name="i-lucide-truck" class="w-3.5 h-3.5 text-emerald-600" />
+              <span>Поставщик</span>
+            </div>
+            <div class="font-extrabold text-slate-800 text-sm">ТОО «Стома Поставщик» (КазМедИмпорт)</div>
+            <div class="text-xs text-slate-500 font-medium">Центральный склад отгрузки (Алматы)</div>
+          </div>
+
+          <!-- ITEMS LIST -->
+          <div>
+            <h4 class="text-xs font-extrabold uppercase text-slate-400 tracking-wider mb-2">Товары в заказе</h4>
+            <div class="border border-slate-200/80 rounded-2xl overflow-hidden divide-y divide-slate-100">
+              <div 
+                v-for="(item, idx) in selectedOrder.items" 
+                :key="idx" 
+                class="p-3 bg-slate-50/40 flex justify-between items-center gap-2 text-xs"
+              >
+                <div class="font-bold text-slate-800 min-w-0 pr-2">
+                  {{ item.name }}
+                </div>
+                <div class="text-right shrink-0">
+                  <span class="text-[11px] text-slate-400 block">{{ item.quantity }} шт × {{ formatPrice(item.price) }} ₸</span>
+                  <span class="font-extrabold text-blue-600 text-xs">{{ formatPrice(item.price * item.quantity) }} ₸</span>
+                </div>
               </div>
-              <div class="text-right shrink-0">
-                <span class="text-[11px] text-slate-400 block">{{ item.quantity }} шт × {{ formatPrice(item.price) }} ₸</span>
-                <span class="font-extrabold text-blue-600 text-xs">{{ formatPrice(item.price * item.quantity) }} ₸</span>
+            </div>
+          </div>
+
+          <!-- TOTAL SUM BANNER -->
+          <div class="bg-slate-900 text-white p-4 rounded-2xl flex items-center justify-between shadow-sm">
+            <span class="text-xs font-extrabold uppercase tracking-wider text-slate-300">Итоговая сумма:</span>
+            <span class="text-xl sm:text-2xl font-black text-emerald-400 leading-none">{{ formatPrice(selectedOrder.total) }} ₸</span>
+          </div>
+        </div>
+
+        <!-- TAB CONTENT 2: P2P DOCUMENTS REGISTER -->
+        <div v-else-if="modalTab === 'docs'" class="space-y-3">
+          <div class="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Реестр документов по заказу №{{ selectedOrder.id }}:</div>
+
+          <div class="space-y-2.5">
+            <!-- 1. Счет на оплату -->
+            <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50 flex items-center justify-between gap-2">
+              <div class="flex items-center gap-3">
+                <div class="p-2 rounded-xl bg-blue-100 text-blue-600 font-bold">
+                  <UIcon name="i-lucide-file-text" class="w-5 h-5" />
+                </div>
+                <div>
+                  <div class="font-extrabold text-slate-900 text-sm">Счет на оплату №INV-4029</div>
+                  <div class="text-[11px] text-slate-400">Сформирован автоматически • PDF</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-1">
+                <UButton size="xs" color="blue" variant="soft" icon="i-lucide-download" @click="downloadDoc('Счет на оплату')">PDF</UButton>
+                <UButton size="xs" color="emerald" variant="soft" icon="i-lucide-share-2" @click="shareDoc('Счет на оплату')">WA</UButton>
+              </div>
+            </div>
+
+            <!-- 2. Платежное поручение -->
+            <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50 flex items-center justify-between gap-2">
+              <div class="flex items-center gap-3">
+                <div class="p-2 rounded-xl bg-emerald-100 text-emerald-600 font-bold">
+                  <UIcon name="i-lucide-credit-card" class="w-5 h-5" />
+                </div>
+                <div>
+                  <div class="font-extrabold text-slate-900 text-sm">Платежное поручение №PAY-9921</div>
+                  <div class="text-[11px] text-emerald-600 font-bold">Статус: Подтвержден 100%</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-1">
+                <UButton size="xs" color="gray" variant="soft" icon="i-lucide-download" @click="downloadDoc('Платежное поручение')">Скачать</UButton>
+              </div>
+            </div>
+
+            <!-- 3. Путевой лист -->
+            <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50 flex items-center justify-between gap-2">
+              <div class="flex items-center gap-3">
+                <div class="p-2 rounded-xl bg-purple-100 text-purple-600 font-bold">
+                  <UIcon name="i-lucide-map-pin" class="w-5 h-5" />
+                </div>
+                <div>
+                  <div class="font-extrabold text-slate-900 text-sm">Путевой лист №PL-102</div>
+                  <div class="text-[11px] text-slate-400">Водитель: Арман Т. (Gazel 777)</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-1">
+                <UButton size="xs" color="gray" variant="soft" icon="i-lucide-eye" @click="downloadDoc('Путевой лист')">Карта</UButton>
+              </div>
+            </div>
+
+            <!-- 4. Накладная (ТТН) -->
+            <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50 flex items-center justify-between gap-2">
+              <div class="flex items-center gap-3">
+                <div class="p-2 rounded-xl bg-orange-100 text-orange-600 font-bold">
+                  <UIcon name="i-lucide-package-check" class="w-5 h-5" />
+                </div>
+                <div>
+                  <div class="font-extrabold text-slate-900 text-sm">Товарная накладная №TTN-8820</div>
+                  <div class="text-[11px] text-slate-400">Отгружено 100% со склада</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-1">
+                <UButton size="xs" color="blue" variant="soft" icon="i-lucide-download" @click="downloadDoc('Накладная')">PDF</UButton>
+              </div>
+            </div>
+
+            <!-- 5. Электронный счет-фактура (ЭСФ) -->
+            <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50 flex items-center justify-between gap-2">
+              <div class="flex items-center gap-3">
+                <div class="p-2 rounded-xl bg-indigo-100 text-indigo-600 font-bold">
+                  <UIcon name="i-lucide-key-round" class="w-5 h-5" />
+                </div>
+                <div>
+                  <div class="font-extrabold text-slate-900 text-sm">ЭСФ №ESF-4401</div>
+                  <div class="text-[11px] text-emerald-600 font-bold">Подписан ЭЦП (ИСФ РК)</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-1">
+                <UButton size="xs" color="emerald" variant="solid" icon="i-lucide-check-check" @click="downloadDoc('ЭСФ')">ЭЦП Подписан</UButton>
+              </div>
+            </div>
+
+            <!-- 6. Акт сверки -->
+            <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50 flex items-center justify-between gap-2">
+              <div class="flex items-center gap-3">
+                <div class="p-2 rounded-xl bg-slate-200 text-slate-700 font-bold">
+                  <UIcon name="i-lucide-file-check" class="w-5 h-5" />
+                </div>
+                <div>
+                  <div class="font-extrabold text-slate-900 text-sm">Акт сверки №ACT-2026</div>
+                  <div class="text-[11px] text-slate-400">Сформирован за текущий период</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-1">
+                <UButton size="xs" color="gray" variant="soft" icon="i-lucide-download" @click="downloadDoc('Акт сверки')">Скачать</UButton>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- TOTAL SUM ACCENT BANNER -->
-        <div class="bg-slate-900 text-white p-4 rounded-2xl flex items-center justify-between shadow-sm">
-          <span class="text-xs font-extrabold uppercase tracking-wider text-slate-300">Итоговая сумма:</span>
-          <span class="text-xl sm:text-2xl font-black text-emerald-400 leading-none">{{ formatPrice(selectedOrder.total) }} ₸</span>
+        <!-- TAB CONTENT 3: AUDIT TIMELINE -->
+        <div v-else-if="modalTab === 'audit'" class="space-y-4">
+          <div class="text-xs font-extrabold text-slate-500 uppercase tracking-wider">История событий и лог аудита (Audit Log):</div>
+          
+          <div class="space-y-3 relative before:absolute before:inset-0 before:left-3.5 before:w-0.5 before:bg-slate-200">
+            <div class="relative flex items-start gap-3 pl-8">
+              <span class="absolute left-2 top-1.5 w-3 h-3 rounded-full bg-blue-600 ring-4 ring-white"></span>
+              <div>
+                <div class="text-xs font-extrabold text-slate-900">Заказ создан и оформлен клиникой</div>
+                <div class="text-[11px] text-slate-400">Пользователь: {{ selectedOrder.name }} • {{ formatDate(selectedOrder.date) }}</div>
+              </div>
+            </div>
+
+            <div class="relative flex items-start gap-3 pl-8">
+              <span class="absolute left-2 top-1.5 w-3 h-3 rounded-full bg-emerald-500 ring-4 ring-white"></span>
+              <div>
+                <div class="text-xs font-extrabold text-slate-900">Поставщик подтвердил позиции и зарезервировал склад</div>
+                <div class="text-[11px] text-slate-400">Актер: Менеджер поставщика ТОО Стома • Автоматически</div>
+              </div>
+            </div>
+
+            <div class="relative flex items-start gap-3 pl-8">
+              <span class="absolute left-2 top-1.5 w-3 h-3 rounded-full bg-purple-500 ring-4 ring-white"></span>
+              <div>
+                <div class="text-xs font-extrabold text-slate-900">Выставлен счет №INV-4029 и загружено платежное поручение</div>
+                <div class="text-[11px] text-slate-400">Оплата подтверждена 100%</div>
+              </div>
+            </div>
+
+            <div class="relative flex items-start gap-3 pl-8">
+              <span class="absolute left-2 top-1.5 w-3 h-3 rounded-full bg-orange-400 ring-4 ring-white"></span>
+              <div>
+                <div class="text-xs font-extrabold text-slate-900">Комплектация и сформирована накладная №TTN-8820</div>
+                <div class="text-[11px] text-slate-400">Передано курьеру доставки</div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <!-- CHANGE STATUS PANELS (Big Touch Friendly Buttons) -->
+        <!-- STATUS SELECTION BUTTONS -->
         <div class="space-y-2 pt-2 border-t border-slate-100">
           <label class="block text-xs font-extrabold uppercase text-slate-400 tracking-wider">Изменить статус заказа:</label>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
             <button
-              v-for="st in ['Новый', 'Ждет оплаты', 'Ждет доставки', 'Завершен', 'Отказан']"
+              v-for="st in ['Новый', 'Подтвержден', 'Оплачен', 'В доставке', 'Завершен', 'Претензия']"
               :key="st"
               type="button"
               @click="updateOrderStatus(selectedOrder.id, st)"
@@ -410,6 +600,7 @@ const toast = useToast()
 const activeTab = ref(0)
 const orderFilter = ref('Все')
 const feedbackFilter = ref('Все')
+const modalTab = ref('details')
 
 // Modals state
 const isOrderModalOpen = ref(false)
@@ -420,6 +611,51 @@ const selectedFeedback = ref<any>(null)
 
 const uploading = ref(false)
 const fileInput = ref<any>(null)
+
+const p2pStages = [
+  { key: 'CREATED', step: 1, name: '1. Создание заказа' },
+  { key: 'CONFIRMED', step: 2, name: '2. Подтверждение поставщиком' },
+  { key: 'RESERVED', step: 3, name: '3. Резервирование товара' },
+  { key: 'INVOICED', step: 4, name: '4. Счет на оплату' },
+  { key: 'PAID', step: 5, name: '5. Оплата / Платежка' },
+  { key: 'ASSEMBLING', step: 6, name: '6. Комплектация на складе' },
+  { key: 'SHIPPED', step: 7, name: '7. Отгрузка' },
+  { key: 'WAYBILL', step: 8, name: '8. Путевой лист' },
+  { key: 'DELIVERED', step: 9, name: '9. Накладная и Прибытие' },
+  { key: 'RECEIPT_CONFIRMED', step: 10, name: '10. Подтверждение получения' },
+  { key: 'DISPUTED', step: 11, name: '11. Претензия / Возврат' },
+  { key: 'ESF_SIGNED', step: 12, name: '12. Электронный счет-фактура (ЭСФ)' },
+  { key: 'COMPLETED', step: 13, name: '13. Акт сверки и Завершение' }
+]
+
+function getP2PStageStep(stageKey: string): number {
+  const found = p2pStages.find(s => s.key === stageKey)
+  return found ? found.step : 1
+}
+
+function getP2PStageName(stageKey: string): string {
+  const found = p2pStages.find(s => s.key === stageKey)
+  return found ? found.name : '1. Создание заказа'
+}
+
+function advanceP2PStage(order: any) {
+  const currentStep = getP2PStageStep(order.p2pStage || 'CREATED')
+  const nextStage = p2pStages.find(s => s.step === (currentStep >= 13 ? 13 : currentStep + 1))
+  if (nextStage) {
+    order.p2pStage = nextStage.key
+    if (nextStage.step >= 12) order.status = 'Завершен'
+    else if (nextStage.step >= 7) order.status = 'В доставке'
+    else if (nextStage.step >= 4) order.status = 'Оплачен'
+    else if (nextStage.step >= 2) order.status = 'Подтвержден'
+    
+    toast.add({ 
+      title: `P2P Шаг ${nextStage.step}/13: ${nextStage.name}`,
+      description: 'Этап P2P цепочки обновлен!', 
+      color: 'green',
+      icon: 'i-lucide-git-commit'
+    })
+  }
+}
 
 function formatDate(d: string | undefined): string {
   if (!d) return ''
@@ -445,10 +681,11 @@ function normalizeStatus(s: any): string {
   if (!s) return 'Новый'
   const lower = String(s).toLowerCase()
   if (lower.includes('new') || lower.includes('нов')) return 'Новый'
-  if (lower.includes('pay') || lower.includes('оплат')) return 'Ждет оплаты'
-  if (lower.includes('ship') || lower.includes('достав') || lower.includes('процесс')) return 'Ждет доставки'
-  if (lower.includes('complete') || lower.includes('заверш') || lower.includes('доставлен')) return 'Завершен'
-  if (lower.includes('cancel') || lower.includes('отказ') || lower.includes('отмен')) return 'Отказан'
+  if (lower.includes('confirm') || lower.includes('подтвержд')) return 'Подтвержден'
+  if (lower.includes('pay') || lower.includes('оплат')) return 'Оплачен'
+  if (lower.includes('ship') || lower.includes('достав')) return 'В доставке'
+  if (lower.includes('complete') || lower.includes('заверш')) return 'Завершен'
+  if (lower.includes('dispute') || lower.includes('претенз') || lower.includes('брак')) return 'Претензия'
   return String(s)
 }
 
@@ -461,6 +698,7 @@ const defaultOperatorOrders = [
     contact: '+7 (707) 123-45-67',
     total: 185000,
     status: 'Новый',
+    p2pStage: 'CREATED',
     address: 'г. Алматы, ул. Достык 105',
     items: [
       { name: 'TG6 машинные файлы для обработки каналов', quantity: 4, price: 5625 },
@@ -474,7 +712,8 @@ const defaultOperatorOrders = [
     phone: '+7 (777) 987-65-43',
     contact: '+7 (777) 987-65-43',
     total: 480000,
-    status: 'Ждет оплаты',
+    status: 'Оплачен',
+    p2pStage: 'PAID',
     address: 'г. Астана, пр. Кабанбай батыра 21',
     items: [
       { name: 'Бестеневая светодиодная лампа LED Smile', quantity: 1, price: 480000 }
@@ -488,6 +727,7 @@ const defaultOperatorOrders = [
     contact: '+7 (701) 555-12-34',
     total: 135000,
     status: 'Завершен',
+    p2pStage: 'COMPLETED',
     address: 'г. Шымкент, ул. Трасса 12',
     items: [
       { name: 'Ультразвуковой скайлер Woodpecker UDS-E', quantity: 1, price: 135000 }
@@ -516,6 +756,7 @@ const { data: ordersData, pending: pendingOrders, refresh: refreshOrders } = awa
           contact: o.contact || o.phone || '+7 (707) 123-45-67',
           total: o.total || 0,
           status: normalizeStatus(o.status),
+          p2pStage: o.p2pStage || 'CREATED',
           address: o.address || 'г. Алматы',
           items: o.items || []
         }))
@@ -569,6 +810,7 @@ const filteredFeedbacks = computed(() => {
 
 function openOrderDetails(order: any) {
   selectedOrder.value = order
+  modalTab.value = 'details'
   isOrderModalOpen.value = true
 }
 
@@ -627,13 +869,22 @@ function deleteOrder(id: string) {
   }
 }
 
+function downloadDoc(docName: string) {
+  toast.add({ title: `Скачивание ${docName}...`, description: 'Файл успешно сгенерирован (PDF).', color: 'blue', icon: 'i-lucide-download' })
+}
+
+function shareDoc(docName: string) {
+  toast.add({ title: `Отправка в WhatsApp: ${docName}`, description: 'Ссылка отправлена заказчику.', color: 'emerald', icon: 'i-lucide-share-2' })
+}
+
 function getStatusColor(status: string) {
   switch (normalizeStatus(status)) {
     case 'Новый': return 'orange'
-    case 'Ждет оплаты': return 'blue'
-    case 'Ждет доставки': return 'purple'
+    case 'Подтвержден': return 'blue'
+    case 'Оплачен': return 'purple'
+    case 'В доставке': return 'indigo'
     case 'Завершен': return 'emerald'
-    case 'Отказан': return 'red'
+    case 'Претензия': return 'red'
     default: return 'gray'
   }
 }
@@ -641,10 +892,11 @@ function getStatusColor(status: string) {
 function getStatusDotBgClass(status: string) {
   switch (normalizeStatus(status)) {
     case 'Новый': return 'bg-orange-500'
-    case 'Ждет оплаты': return 'bg-blue-500'
-    case 'Ждет доставки': return 'bg-purple-500'
+    case 'Подтвержден': return 'bg-blue-500'
+    case 'Оплачен': return 'bg-purple-500'
+    case 'В доставке': return 'bg-indigo-500'
     case 'Завершен': return 'bg-emerald-500'
-    case 'Отказан': return 'bg-red-500'
+    case 'Претензия': return 'bg-red-500'
     default: return 'bg-slate-400'
   }
 }
@@ -652,10 +904,11 @@ function getStatusDotBgClass(status: string) {
 function getStatusBadgeClasses(status: string) {
   switch (normalizeStatus(status)) {
     case 'Новый': return 'bg-orange-500 text-white border-orange-500 shadow-xs'
-    case 'Ждет оплаты': return 'bg-blue-600 text-white border-blue-600 shadow-xs'
-    case 'Ждет доставки': return 'bg-purple-600 text-white border-purple-600 shadow-xs'
+    case 'Подтвержден': return 'bg-blue-600 text-white border-blue-600 shadow-xs'
+    case 'Оплачен': return 'bg-purple-600 text-white border-purple-600 shadow-xs'
+    case 'В доставке': return 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
     case 'Завершен': return 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
-    case 'Отказан': return 'bg-red-600 text-white border-red-600 shadow-xs'
+    case 'Претензия': return 'bg-red-600 text-white border-red-600 shadow-xs'
     default: return 'bg-slate-600 text-white border-slate-600'
   }
 }
