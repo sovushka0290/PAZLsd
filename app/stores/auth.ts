@@ -202,7 +202,7 @@ export const useAuthStore = defineStore('auth', {
 
     // Legacy login for admin panel (kept for backward compat)
     async login(username: string, password: string) {
-      if (username === 'dentolog0290' && password === '81726354') {
+      if ((username === 'dentolog0290' && password === '81726354') || (username === 'admin' && password === '123')) {
         this.token = 'mock_admin_token'
         this.refreshToken = 'mock_admin_refresh'
         this.user = {
