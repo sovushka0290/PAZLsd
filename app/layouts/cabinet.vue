@@ -111,6 +111,6 @@ const navItems = computed(() => {
 
 function logout() {
   authStore.logout()
-  window.location.href = localePath('/login')
+  router.push(localePath('/login'))
 }
 </script>

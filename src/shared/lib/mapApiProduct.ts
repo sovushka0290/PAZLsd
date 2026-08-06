@@ -2,7 +2,8 @@ import type { ApiProductDetailed } from '@fsd/shared/api/types'
 import type { ProductViewModel } from '@fsd/entities/product/model/types'
 import { resolveMediaUrl } from '@fsd/shared/lib/resolveMediaUrl'
 
-const PLACEHOLDER_IMAGE = '/images/nophoto.png'
+const PLACEHOLDER_IMAGE
+  = 'https://placehold.co/400x400/e5e7eb/6b7280?text=PAZL'
 
 function stripHtml(text: string | undefined): string {
   return (text ?? '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()

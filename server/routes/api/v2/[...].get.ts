@@ -4,11 +4,9 @@ import {
   defineEventHandler,
   getRequestURL,
   setResponseHeader,
-  setResponseStatus,
-  proxyRequest
+  setResponseStatus
 } from 'h3'
 import { getStoredOrders } from '../../../utils/orderStore'
-import dbData from '../../../../data/scraped_products_500.json'
 
 interface Category {
   id: number
@@ -30,30 +28,25 @@ interface Product {
 }
 
 export default defineEventHandler(async (event) => {
-  const config = useRuntimeConfig(event)
-  if (!config.apiSnapshot) {
-    const backendBase = config.apiBackendUrl || config.public.apiBaseUrl || 'http://backend:8000'
-    const target = `${backendBase.replace(/\/$/, '')}${event.path}`
-    return proxyRequest(event, target)
-  }
-
   const u = new URL(getRequestURL(event).href)
   const pathname = u.pathname // e.g., /api/v2/categories/ or /api/v2/products_detailed/
   console.log('[Mock API v2] Request pathname:', pathname)
   
   // Load mock DB
-  let categories: Category[] = []
-  let products: Product[] = []
-  
+  let dataRaw = ""
   try {
-    categories = dbData.categories as Category[]
-    products = dbData.products as Product[]
+    const dataPath = join(process.cwd(), 'data', 'scraped_products_500.json')
+    dataRaw = await readFile(dataPath, 'utf-8')
   } catch (err) {
-    console.error('[Mock API v2] Failed to parse scraped_products_500.json:', err)
+    console.error('[Mock API v2] Failed to read scraped_products_500.json:', err)
     setResponseStatus(event, 500)
-    return { error: 'Mock database error.' }
+    return { error: 'Mock database not found. Please run prepare_500_mock.py script first.' }
   }
 
+  const { categories, products } = JSON.parse(dataRaw) as {
+    categories: Category[]
+    products: Product[]
+  }
   console.log('[Mock API v2] DB loaded. categories:', categories?.length, 'products:', products?.length)
 
   // Helper to paginate array
@@ -268,13 +261,10 @@ export default defineEventHandler(async (event) => {
 
     const mockOrders = stored.map((o: any) => ({
       id: o.id,
-      number: String(o.id),
       contractor_number: o.id,
       order_sum: o.total,
-      total_amount: o.total,
       currency: 'KZT',
       date_created: o.date,
-      created_at: o.date,
       date: o.date,
       status: o.status,
       status_name: o.status,
@@ -283,9 +273,7 @@ export default defineEventHandler(async (event) => {
       phone: o.phone,
       contact: o.contact || o.phone,
       total: o.total,
-      supplier: { id: 1, name: 'PAZL Dental' },
-      supplier_name: 'PAZL Dental',
-      delivery_address: o.address || 'г. Алматы',
+      address: o.address || 'г. Алматы',
       items: o.items.map((it: any, i: number) => ({
         id: i + 1,
         name: it.name,
@@ -300,43 +288,11 @@ export default defineEventHandler(async (event) => {
   }
 
   // 10. GET /api/v2/orders/{id}/
-  const orderDetailRegex = /\/orders\/([^/]+)\/?$/
+  const orderDetailRegex = /\/orders\/(\d+)\/?$/
   const orderMatch = pathname.match(orderDetailRegex)
   if (orderMatch && orderMatch[1]) {
-    const orderId = orderMatch[1]
-    const stored = getStoredOrders()
-    const found = stored.find((o: any) => String(o.id) === String(orderId))
-    if (found) {
-      return {
-        id: found.id,
-        number: String(found.id),
-        contractor_number: found.id,
-        order_sum: found.total,
-        total_amount: found.total,
-        currency: 'KZT',
-        date_created: found.date,
-        created_at: found.date,
-        status: found.status,
-        status_name: found.status,
-        status_display: found.status,
-        supplier: { id: 1, name: 'PAZL Dental' },
-        supplier_name: 'PAZL Dental',
-        pay_method_name: 'Безналичный расчет / Kaspi QR',
-        delivery_address: found.address || 'г. Алматы',
-        contact: found.contact || found.phone,
-        name: found.name,
-        phone: found.phone,
-        items: found.items.map((it: any, i: number) => ({
-          id: i + 1,
-          product_name: it.name,
-          name: it.name,
-          quantity: it.quantity,
-          price: it.price,
-          total: it.price * it.quantity
-        }))
-      }
-    }
-    if (orderId === '301') {
+    const orderId = parseInt(orderMatch[1], 10)
+    if (orderId === 301) {
       return {
         id: 301,
         contractor_number: 'ORD-2026-001',
@@ -360,7 +316,7 @@ export default defineEventHandler(async (event) => {
         ]
       }
     }
-    if (orderId === '302') {
+    if (orderId === 302) {
       return {
         id: 302,
         contractor_number: 'ORD-2026-002',

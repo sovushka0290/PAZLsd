@@ -27,66 +27,6 @@ export const useAuthStore = defineStore('auth', {
     isSupplier: (state) => state.user?.role === 'supplier'
   },
   actions: {
-    async loginClinic(params: { clinicName: string; phone: string; contactPerson?: string; address?: string; bin?: string }) {
-      const clinicName = params.clinicName.trim()
-      const phone = params.phone.trim()
-      const contactPerson = (params.contactPerson || '').trim()
-      const address = (params.address || '').trim()
-      const bin = (params.bin || '').trim()
-
-      this.token = `clinic_token_${Date.now()}`
-      this.refreshToken = `clinic_refresh_${Date.now()}`
-      this.user = {
-        id: `clinic_${Date.now()}`,
-        phone: phone || '+7 (707) 123-45-67',
-        first_name: clinicName || 'Стоматологическая клиника',
-        last_name: contactPerson,
-        email: '',
-        role: 'buyer',
-        phone_confirmed: true,
-        company_name: clinicName || 'Стоматологическая клиника',
-        company_bin: bin || '120940023412',
-        current_contractor_id: 12
-      }
-
-      this._saveToCookies()
-      if (import.meta.client) {
-        try {
-          localStorage.setItem('pazl_clinic_profile', JSON.stringify({
-            clinicName,
-            phone,
-            contactPerson,
-            address,
-            bin
-          }))
-        } catch {}
-      }
-    },
-
-    async updateClinicProfile(params: { clinicName?: string; phone?: string; contactPerson?: string; address?: string; bin?: string }) {
-      if (!this.user) return
-      if (params.clinicName) {
-        this.user.first_name = params.clinicName
-        this.user.company_name = params.clinicName
-      }
-      if (params.phone) this.user.phone = params.phone
-      if (params.contactPerson !== undefined) this.user.last_name = params.contactPerson
-      if (params.bin !== undefined) this.user.company_bin = params.bin
-
-      this._saveToCookies()
-      if (import.meta.client) {
-        try {
-          localStorage.setItem('pazl_clinic_profile', JSON.stringify({
-            clinicName: this.user.company_name || this.user.first_name,
-            phone: this.user.phone,
-            contactPerson: this.user.last_name,
-            address: params.address || '',
-            bin: this.user.company_bin
-          }))
-        } catch {}
-      }
-    },
-
     async loginByPhone(phone: string, password: string) {
       const config = useRuntimeConfig()
       const baseURL = import.meta.env.SSR
@@ -165,10 +105,9 @@ export const useAuthStore = defineStore('auth', {
         )
         this.user = data.user
         this._saveToCookies()
-      } catch (err: any) {
-        if (err?.status === 401 || err?.statusCode === 401) {
-          await this.refreshAccessToken()
-        }
+      } catch {
+        // Token expired — try refresh
+        await this.refreshAccessToken()
       }
     },
 
@@ -193,12 +132,10 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async refreshAccessToken() {
-      if (!this.refreshToken || (this as any)._isRefreshing) {
+      if (!this.refreshToken) {
         this.logout()
         return
       }
-
-      ;(this as any)._isRefreshing = true
 
       const config = useRuntimeConfig()
       const baseURL = import.meta.env.SSR
@@ -216,10 +153,11 @@ export const useAuthStore = defineStore('auth', {
         this.token = data.access
         if (data.refresh) this.refreshToken = data.refresh
         this._saveToCookies()
+
+        // Re-fetch user data
+        await this.fetchMe()
       } catch {
         this.logout()
-      } finally {
-        ;(this as any)._isRefreshing = false
       }
     },
 
@@ -262,7 +200,7 @@ export const useAuthStore = defineStore('auth', {
 
     // Legacy login for admin panel (kept for backward compat)
     async login(username: string, password: string) {
-      if ((username === 'dentolog0290' && password === '81726354') || (username === 'admin' && password === '123')) {
+      if (username === 'dentolog0290' && password === '81726354') {
         this.token = 'mock_admin_token'
         this.refreshToken = 'mock_admin_refresh'
         this.user = {
@@ -342,10 +280,9 @@ export const useAuthStore = defineStore('auth', {
     },
 
     _saveToCookies() {
-      const opts = { maxAge: 60 * 60 * 24 * 7, sameSite: 'lax' as const, path: '/' }
-      const tokenCookie = useCookie('pazl_token', opts)
-      const refreshCookie = useCookie('pazl_refresh', opts)
-      const userCookie = useCookie('pazl_user', opts)
+      const tokenCookie = useCookie('pazl_token')
+      const refreshCookie = useCookie('pazl_refresh')
+      const userCookie = useCookie('pazl_user')
 
       tokenCookie.value = this.token
       refreshCookie.value = this.refreshToken

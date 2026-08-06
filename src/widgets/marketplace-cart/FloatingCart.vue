@@ -33,7 +33,7 @@
     <!-- Slideover for Cart Details -->
     <USlideover
       v-model:open="open"
-      :ui="{ width: 'w-full max-w-md' }"
+      :ui="({ width: 'w-full max-w-md' } as any)"
     >
       <template #title>
         <span class="inline-flex items-center gap-2">

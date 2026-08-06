@@ -4,49 +4,55 @@
       <!-- Header -->
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
         <div>
-          <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900">Товары</h1>
-          <p class="text-slate-500 mt-1 font-medium">Управление ассортиментом магазина</p>
+          <h1 class="text-2xl md:text-3xl font-black text-slate-900">Каталог товаров (PIM)</h1>
+          <p class="text-slate-500 mt-1 font-medium text-xs">Управление ассортиментом магазина, остатками и ценами</p>
         </div>
-        <button
-          @click="openAddModal"
-          class="inline-flex items-center justify-center px-5 py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-all shadow-sm active:scale-95 gap-2"
-        >
-          <UIcon name="lucide:plus" class="w-5 h-5" />
-          <span>Добавить товар</span>
-        </button>
+        <div class="flex items-center gap-3">
+          <NuxtLink
+            to="/admin/products/moderation"
+            class="inline-flex items-center justify-center px-4 py-2.5 rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-black transition-all gap-1.5"
+          >
+            <span>🛡️</span>
+            <span>Модерация партий</span>
+          </NuxtLink>
+          <button
+            @click="openAddModal"
+            class="inline-flex items-center justify-center px-5 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black transition-all shadow-md shadow-blue-600/20 active:scale-95 gap-1.5 cursor-pointer"
+          >
+            <span>+</span>
+            <span>Добавить товар</span>
+          </button>
+        </div>
       </div>
 
       <!-- Filters -->
       <div class="flex flex-col md:flex-row gap-4 bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
         <div class="flex-1 relative">
-          <UIcon name="lucide:search" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+          <UIcon name="lucide:search" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
           <input
             v-model="searchQuery"
             type="text"
-            placeholder="Поиск товаров..."
-            class="w-full pl-11 pr-4 py-3 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-600 outline-none font-medium text-slate-900 placeholder:text-slate-400 transition-all"
+            placeholder="Поиск товаров по названию или артикулу..."
+            class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-600 outline-none font-medium text-xs text-slate-900 placeholder:text-slate-400 transition-all"
           />
         </div>
         <div class="w-full md:w-64 relative">
           <select
             v-model="selectedCategory"
-            class="w-full pl-4 pr-10 py-3 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-600 outline-none font-medium text-slate-900 appearance-none transition-all cursor-pointer"
+            class="w-full pl-4 pr-10 py-2.5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-600 outline-none font-bold text-xs text-slate-900 appearance-none transition-all cursor-pointer"
           >
-            <option value="">Все категории</option>
-            <option v-for="cat in uniqueCategories" :key="cat" :value="cat">
-              {{ cat }}
+            <option :value="null">Все категории</option>
+            <option v-for="cat in categories" :key="cat.id" :value="cat.id">
+              {{ cat.icon || '🦷' }} {{ cat.name }}
             </option>
           </select>
-          <UIcon name="lucide:chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 pointer-events-none" />
+          <UIcon name="lucide:chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 pointer-events-none" />
         </div>
       </div>
 
       <!-- Loading / Error -->
-      <div v-if="pending" class="flex justify-center p-12 bg-white rounded-3xl border border-slate-100 shadow-sm">
+      <div v-if="isLoading" class="flex justify-center p-12 bg-white rounded-3xl border border-slate-100 shadow-sm">
         <UIcon name="lucide:loader-2" class="w-8 h-8 text-blue-600 animate-spin" />
-      </div>
-      <div v-else-if="error" class="p-6 bg-red-50 text-red-600 rounded-3xl font-medium text-center">
-        Ошибка при загрузке товаров: {{ error.message }}
       </div>
 
       <!-- Content -->
@@ -54,306 +60,219 @@
         <!-- Desktop Table -->
         <div class="hidden md:block bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
           <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
+            <table class="w-full text-left border-collapse text-xs">
               <thead>
                 <tr class="border-b border-slate-100 bg-slate-50/50">
-                  <th class="p-4 font-bold text-slate-500 text-sm w-16">Фото</th>
-                  <th class="p-4 font-bold text-slate-500 text-sm">Название</th>
-                  <th class="p-4 font-bold text-slate-500 text-sm">Категория</th>
-                  <th class="p-4 font-bold text-slate-500 text-sm text-right">Цена</th>
-                  <th class="p-4 font-bold text-slate-500 text-sm text-center">Статус</th>
-                  <th class="p-4 font-bold text-slate-500 text-sm text-right w-24">Действия</th>
+                  <th class="p-4 font-bold text-slate-400 uppercase tracking-wider w-16">Фото</th>
+                  <th class="p-4 font-bold text-slate-400 uppercase tracking-wider">Название / Артикул</th>
+                  <th class="p-4 font-bold text-slate-400 uppercase tracking-wider">Категория</th>
+                  <th class="p-4 font-bold text-slate-400 uppercase tracking-wider text-right">Цена</th>
+                  <th class="p-4 font-bold text-slate-400 uppercase tracking-wider text-center">Остаток</th>
+                  <th class="p-4 font-bold text-slate-400 uppercase tracking-wider text-right w-24">Действия</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody class="divide-y divide-slate-100">
                 <tr
                   v-for="product in paginatedProducts"
                   :key="product.id"
-                  class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors group"
+                  class="hover:bg-blue-50/30 transition-colors group"
                 >
                   <td class="p-4">
-                    <img :src="product.image || 'https://via.placeholder.com/40'" alt="Product" class="w-10 h-10 rounded-xl object-cover border border-slate-100" />
+                    <img 
+                      :src="product.image || 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=400&q=80'" 
+                      :alt="product.name" 
+                      class="w-10 h-10 rounded-xl object-cover border border-slate-100"
+                      @error="(e: any) => e.target.src = 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=400&q=80'" 
+                    />
                   </td>
                   <td class="p-4">
-                    <div class="font-bold text-slate-900 truncate max-w-xs">{{ product.name }}</div>
-                    <div class="text-xs text-slate-400 font-medium mt-0.5">Арт: {{ product.sku || '-' }}</div>
+                    <div class="font-extrabold text-slate-900 text-sm truncate max-w-sm">{{ product.name }}</div>
+                    <div class="text-[11px] text-slate-400 font-mono mt-0.5">Арт: {{ product.code || product.sku || `SKU-${product.id}` }}</div>
                   </td>
                   <td class="p-4 font-medium text-slate-600">
-                    <span class="inline-flex px-2.5 py-1 rounded-lg bg-slate-100 text-xs text-slate-600">{{ product.category }}</span>
-                  </td>
-                  <td class="p-4 font-extrabold text-slate-900 text-right whitespace-nowrap">
-                    {{ formatPrice(product.price) }}
-                  </td>
-                  <td class="p-4 text-center">
-                    <span :class="getStatusClass(product.status)" class="inline-flex px-3 py-1 rounded-xl text-xs font-bold">
-                      {{ getStatusLabel(product.status) }}
+                    <span class="inline-flex px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 font-bold text-[11px]">
+                      {{ getCategoryName(product.category) }}
                     </span>
                   </td>
-                  <td class="p-4">
-                    <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button @click="openEditModal(product)" class="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors">
-                        <UIcon name="lucide:pencil" class="w-4 h-4" />
-                      </button>
-                      <button @click="confirmDelete(product)" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors">
-                        <UIcon name="lucide:trash-2" class="w-4 h-4" />
-                      </button>
-                    </div>
+                  <td class="p-4 font-black text-blue-600 text-right whitespace-nowrap text-sm">
+                    {{ formatPrice(product.price) }} ₸
                   </td>
-                </tr>
-                <tr v-if="paginatedProducts.length === 0">
-                  <td colspan="6" class="p-12 text-center text-slate-500 font-medium">Товары не найдены</td>
+                  <td class="p-4 text-center font-bold text-slate-700">
+                    {{ product.stock || 50 }} шт.
+                  </td>
+                  <td class="p-4 text-right space-x-1">
+                    <button @click="openEditModal(product)" class="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors cursor-pointer">
+                      ✏️
+                    </button>
+                    <button @click="confirmDelete(product)" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors cursor-pointer">
+                      🗑️
+                    </button>
+                  </td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        <!-- Mobile Cards -->
-        <div class="md:hidden space-y-4">
+        <!-- Mobile Card List -->
+        <div class="block md:hidden space-y-3">
           <div
             v-for="product in paginatedProducts"
             :key="product.id"
-            @click="openEditModal(product)"
-            class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 flex gap-4 relative active:scale-95 transition-transform"
+            class="bg-white p-4 rounded-2xl border border-slate-100 space-y-3"
           >
-            <img :src="product.image || 'https://via.placeholder.com/80'" alt="Product" class="w-20 h-20 rounded-2xl object-cover shrink-0 border border-slate-100" />
-            <div class="flex-1 min-w-0 flex flex-col justify-between py-1">
-              <div>
-                <h3 class="font-bold text-slate-900 text-sm line-clamp-2">{{ product.name }}</h3>
-                <span class="inline-flex mt-1.5 px-2 py-0.5 rounded-md bg-slate-100 text-[10px] font-medium text-slate-600">
-                  {{ product.category }}
-                </span>
-              </div>
-              <div class="flex items-center justify-between mt-2">
-                <span class="font-extrabold text-blue-600">{{ formatPrice(product.price) }}</span>
-                <span :class="getStatusClass(product.status)" class="px-2 py-0.5 rounded-lg text-[10px] font-bold">
-                  {{ getStatusLabel(product.status) }}
-                </span>
+            <div class="flex items-center gap-3">
+              <img :src="product.image || 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=400&q=80'" class="w-14 h-14 rounded-xl object-cover shrink-0" />
+              <div class="min-w-0 flex-1">
+                <div class="font-bold text-slate-900 text-sm truncate">{{ product.name }}</div>
+                <div class="text-xs text-blue-600 font-black mt-0.5">{{ formatPrice(product.price) }} ₸</div>
               </div>
             </div>
-            <div class="absolute top-2 right-2">
-              <button @click.stop="confirmDelete(product)" class="p-2 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors">
-                <UIcon name="lucide:trash-2" class="w-4 h-4" />
-              </button>
+            <div class="flex items-center justify-between pt-2 border-t border-slate-50">
+              <span class="text-xs font-bold bg-slate-100 px-2 py-1 rounded-md">{{ getCategoryName(product.category) }}</span>
+              <div class="flex items-center gap-1">
+                <button @click="openEditModal(product)" class="px-3 py-1 bg-slate-100 rounded-lg text-xs font-bold">✏️ Изменить</button>
+                <button @click="confirmDelete(product)" class="px-3 py-1 bg-red-50 text-red-600 rounded-lg text-xs font-bold">🗑️</button>
+              </div>
             </div>
-          </div>
-          <div v-if="paginatedProducts.length === 0" class="p-8 text-center bg-white rounded-3xl border border-slate-100 text-slate-500 font-medium">
-            Товары не найдены
           </div>
         </div>
 
         <!-- Pagination -->
-        <div v-if="totalPages > 1" class="mt-6 flex justify-center gap-2">
+        <div v-if="totalPages > 1" class="flex justify-center items-center gap-2 mt-6">
           <button
-            @click="currentPage--"
             :disabled="currentPage === 1"
-            class="p-2 rounded-xl bg-white border border-slate-100 text-slate-600 disabled:opacity-50 hover:bg-slate-50 transition-colors"
+            @click="currentPage--"
+            class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold disabled:opacity-40 cursor-pointer"
           >
-            <UIcon name="lucide:chevron-left" class="w-5 h-5" />
+            ← Назад
           </button>
-          <div class="flex items-center gap-1 bg-white px-2 rounded-xl border border-slate-100">
-            <button
-              v-for="page in totalPages"
-              :key="page"
-              @click="currentPage = page"
-              class="w-8 h-8 flex items-center justify-center rounded-lg text-sm font-bold transition-colors"
-              :class="currentPage === page ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-50'"
-            >
-              {{ page }}
-            </button>
-          </div>
+          <span class="text-xs font-bold text-slate-600">{{ currentPage }} / {{ totalPages }}</span>
           <button
-            @click="currentPage++"
             :disabled="currentPage === totalPages"
-            class="p-2 rounded-xl bg-white border border-slate-100 text-slate-600 disabled:opacity-50 hover:bg-slate-50 transition-colors"
+            @click="currentPage++"
+            class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold disabled:opacity-40 cursor-pointer"
           >
-            <UIcon name="lucide:chevron-right" class="w-5 h-5" />
+            Вперед →
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Product Modal -->
-    <div v-if="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-      <div class="bg-white rounded-[2rem] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-        <div class="sticky top-0 bg-white/80 backdrop-blur-md px-6 py-4 border-b border-slate-100 flex items-center justify-between z-10">
-          <h2 class="text-xl font-extrabold text-slate-900">{{ isEditing ? 'Редактировать товар' : 'Новый товар' }}</h2>
-          <button @click="closeModal" class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">
-            <UIcon name="lucide:x" class="w-5 h-5" />
-          </button>
-        </div>
-        
-        <form @submit.prevent="saveProduct" class="p-6 space-y-5">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div class="md:col-span-2 space-y-1.5">
-              <label class="block text-sm font-bold text-slate-700">Название товара *</label>
-              <input v-model="form.name" required type="text" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none font-medium text-slate-900 transition-all" />
-            </div>
-            
-            <div class="space-y-1.5">
-              <label class="block text-sm font-bold text-slate-700">Цена (₸) *</label>
-              <input v-model.number="form.price" required type="number" min="0" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none font-medium text-slate-900 transition-all" />
-            </div>
+    <!-- Modal Form -->
+    <UModal v-model="isModalOpen" :ui="{ width: 'w-full sm:max-w-lg' }">
+      <div class="bg-white rounded-3xl p-6 space-y-4 max-h-[85vh] overflow-y-auto">
+        <h3 class="text-base font-black text-slate-900">
+          {{ isEditing ? '✏️ Редактирование товара' : '+ Добавление нового товара' }}
+        </h3>
 
-            <div class="space-y-1.5">
-              <label class="block text-sm font-bold text-slate-700">Категория</label>
-              <div class="relative">
-                <select v-model="form.category" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none font-medium text-slate-900 appearance-none transition-all cursor-pointer">
-                  <option value="">Выберите категорию</option>
-                  <option v-for="cat in uniqueCategories" :key="cat" :value="cat">{{ cat }}</option>
-                </select>
-                <UIcon name="lucide:chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 pointer-events-none" />
-              </div>
-            </div>
+        <form @submit.prevent="saveProduct" class="space-y-3 text-xs">
+          <div>
+            <label class="font-bold text-slate-700 block mb-1">Название товара *</label>
+            <input v-model="form.name" type="text" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl" required />
+          </div>
 
-            <div class="space-y-1.5">
-              <label class="block text-sm font-bold text-slate-700">Артикул / SKU</label>
-              <input v-model="form.sku" type="text" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none font-medium text-slate-900 transition-all" />
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="font-bold text-slate-700 block mb-1">Цена (₸) *</label>
+              <input v-model.number="form.price" type="number" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-blue-600" required />
             </div>
-
-            <div class="space-y-1.5">
-              <label class="block text-sm font-bold text-slate-700">Производитель / Бренд</label>
-              <input v-model="form.brand" type="text" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none font-medium text-slate-900 transition-all" />
-            </div>
-            
-            <div class="space-y-1.5">
-              <label class="block text-sm font-bold text-slate-700">Единица измерения</label>
-              <div class="relative">
-                <select v-model="form.unit" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none font-medium text-slate-900 appearance-none transition-all cursor-pointer">
-                  <option value="шт">Штука (шт)</option>
-                  <option value="уп">Упаковка (уп)</option>
-                  <option value="кг">Килограмм (кг)</option>
-                  <option value="м">Метр (м)</option>
-                </select>
-                <UIcon name="lucide:chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 pointer-events-none" />
-              </div>
-            </div>
-
-            <div class="space-y-1.5">
-              <label class="block text-sm font-bold text-slate-700">Статус</label>
-              <div class="relative">
-                <select v-model="form.status" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none font-medium text-slate-900 appearance-none transition-all cursor-pointer">
-                  <option value="active">Активен</option>
-                  <option value="hidden">Скрыт</option>
-                  <option value="out_of_stock">Нет в наличии</option>
-                </select>
-                <UIcon name="lucide:chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 pointer-events-none" />
-              </div>
-            </div>
-
-            <div class="md:col-span-2 space-y-1.5">
-              <label class="block text-sm font-bold text-slate-700">Описание</label>
-              <textarea v-model="form.description" rows="3" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none font-medium text-slate-900 transition-all resize-none"></textarea>
-            </div>
-            
-            <div class="md:col-span-2 space-y-1.5">
-              <label class="block text-sm font-bold text-slate-700">URL изображения</label>
-              <input v-model="form.image" type="text" placeholder="https://..." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none font-medium text-slate-900 transition-all" />
+            <div>
+              <label class="font-bold text-slate-700 block mb-1">Категория *</label>
+              <select v-model="form.category" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold" required>
+                <option v-for="c in categories" :key="c.id" :value="c.id">
+                  {{ c.icon || '🦷' }} {{ c.name }}
+                </option>
+              </select>
             </div>
           </div>
 
-          <div class="flex flex-col-reverse md:flex-row justify-end gap-3 pt-4 border-t border-slate-100">
-            <button type="button" @click="closeModal" class="px-6 py-3 rounded-2xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors w-full md:w-auto text-center">
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="font-bold text-slate-700 block mb-1">Артикул</label>
+              <input v-model="form.code" type="text" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono" />
+            </div>
+            <div>
+              <label class="font-bold text-slate-700 block mb-1">Остаток</label>
+              <input v-model.number="form.stock" type="number" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl" />
+            </div>
+          </div>
+
+          <div>
+            <label class="font-bold text-slate-700 block mb-1">Картинка (URL)</label>
+            <input v-model="form.image" type="text" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-[11px]" />
+          </div>
+
+          <div>
+            <label class="font-bold text-slate-700 block mb-1">Описание</label>
+            <textarea v-model="form.description" rows="3" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl"></textarea>
+          </div>
+
+          <div class="pt-3 flex justify-end gap-2">
+            <button type="button" @click="isModalOpen = false" class="px-4 py-2 bg-slate-100 text-slate-700 font-bold rounded-xl cursor-pointer">
               Отмена
             </button>
-            <button type="submit" class="px-6 py-3 rounded-2xl font-bold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 transition-colors w-full md:w-auto text-center">
-              Сохранить
+            <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl shadow-md cursor-pointer">
+              {{ isEditing ? 'Сохранить изменения' : 'Создать' }}
             </button>
           </div>
         </form>
       </div>
-    </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div v-if="itemToDelete" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-      <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200 text-center">
-        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600">
-          <UIcon name="lucide:alert-triangle" class="w-8 h-8" />
-        </div>
-        <h3 class="text-xl font-extrabold text-slate-900 mb-2">Удалить товар?</h3>
-        <p class="text-slate-500 font-medium mb-6">
-          Вы уверены, что хотите удалить товар "{{ itemToDelete.name }}"? Это действие нельзя отменить.
-        </p>
-        <div class="flex gap-3">
-          <button @click="itemToDelete = null" class="flex-1 py-3 rounded-2xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">
-            Отмена
-          </button>
-          <button @click="executeDelete" class="flex-1 py-3 rounded-2xl font-bold text-white bg-red-600 hover:bg-red-700 transition-colors">
-            Удалить
-          </button>
-        </div>
-      </div>
-    </div>
+    </UModal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
-import { useAuthStore } from '~/stores/auth'
-import { useToast } from '#imports'
+import { ref, computed, onMounted } from 'vue'
 
-definePageMeta({
-  layout: 'admin',
-  middleware: ['admin-auth']
-})
+definePageMeta({ layout: 'admin', middleware: ['admin-auth'] })
 
-const authStore = useAuthStore()
 const toast = useToast()
 
-const LOCAL_STORAGE_KEY = 'pazl_admin_products_edits'
+const products = ref<any[]>([])
+const categories = ref<any[]>([])
+const isLoading = ref(true)
 
-interface Product {
-  id: string | number
-  name: string
-  price: number
-  category: string
-  sku?: string
-  brand?: string
-  unit?: string
-  status?: 'active' | 'hidden' | 'out_of_stock' | string
-  description?: string
-  image?: string
-}
-
-// Data fetching
-const { data: serverProducts, pending, error } = await useFetch<Product[]>('/api/products-mock', {
-  default: () => []
-})
-
-const localProducts = ref<Product[]>([])
-
-onMounted(() => {
-  // Merge server data with local storage modifications
-  try {
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEY)
-    if (saved) {
-      localProducts.value = JSON.parse(saved)
-    } else {
-      localProducts.value = [...(serverProducts.value || [])]
-    }
-  } catch (e) {
-    localProducts.value = [...(serverProducts.value || [])]
-  }
-})
-
-// Save to local storage whenever list changes
-const saveToStorage = () => {
-  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(localProducts.value))
-}
-
-// Filters & Search
 const searchQuery = ref('')
-const selectedCategory = ref('')
+const selectedCategory = ref<number | null>(null)
 const currentPage = ref(1)
 const itemsPerPage = 20
 
-const uniqueCategories = computed(() => {
-  const cats = new Set(localProducts.value.map(p => p.category).filter(Boolean))
-  return Array.from(cats).sort()
+const isModalOpen = ref(false)
+const isEditing = ref(false)
+const form = ref<any>({
+  id: null,
+  name: '',
+  price: 0,
+  category: 1,
+  code: '',
+  stock: 50,
+  image: '',
+  description: ''
+})
+
+async function fetchData() {
+  isLoading.value = true
+  try {
+    const [pRes, cRes] = await Promise.all([
+      $fetch<{ results: any[] }>('/api/catalog/products'),
+      $fetch<{ results: any[] }>('/api/catalog/categories')
+    ])
+    products.value = pRes?.results || []
+    categories.value = cRes?.results || []
+  } catch (err) {
+    console.error('Error fetching admin products:', err)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchData()
 })
 
 const filteredProducts = computed(() => {
-  let result = localProducts.value
+  let result = products.value
 
   if (selectedCategory.value) {
     result = result.filter(p => p.category === selectedCategory.value)
@@ -363,15 +282,14 @@ const filteredProducts = computed(() => {
     const q = searchQuery.value.toLowerCase()
     result = result.filter(p => 
       p.name?.toLowerCase().includes(q) || 
-      p.sku?.toLowerCase().includes(q) ||
-      p.brand?.toLowerCase().includes(q)
+      p.code?.toLowerCase().includes(q)
     )
   }
 
   return result
 })
 
-const totalPages = computed(() => Math.ceil(filteredProducts.value.length / itemsPerPage))
+const totalPages = computed(() => Math.ceil(filteredProducts.value.length / itemsPerPage) || 1)
 
 const paginatedProducts = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage
@@ -379,109 +297,77 @@ const paginatedProducts = computed(() => {
   return filteredProducts.value.slice(start, end)
 })
 
-// Reset pagination on filter change
-watch([searchQuery, selectedCategory], () => {
-  currentPage.value = 1
-})
-
-// Formatting
-const formatPrice = (price: number | string | undefined) => {
-  if (price == null) return '0 ₸'
-  const num = typeof price === 'string' ? parseFloat(price) : price
-  return new Intl.NumberFormat('ru-RU', {
-    style: 'currency',
-    currency: 'KZT',
-    maximumFractionDigits: 0
-  }).format(num)
+function getCategoryName(catId: number): string {
+  const cat = categories.value.find(c => c.id === catId)
+  return cat ? `${cat.icon || '🦷'} ${cat.name}` : 'Общее'
 }
 
-const getStatusLabel = (status: string | undefined) => {
-  switch (status) {
-    case 'active': return 'Активен'
-    case 'hidden': return 'Скрыт'
-    case 'out_of_stock': return 'Нет в наличии'
-    default: return 'Активен'
-  }
-}
-
-const getStatusClass = (status: string | undefined) => {
-  switch (status) {
-    case 'active': return 'bg-green-100 text-green-700'
-    case 'hidden': return 'bg-slate-200 text-slate-700'
-    case 'out_of_stock': return 'bg-red-100 text-red-700'
-    default: return 'bg-green-100 text-green-700'
-  }
-}
-
-// Modal Form
-const isModalOpen = ref(false)
-const isEditing = ref(false)
-const defaultForm: Product = {
-  id: '',
-  name: '',
-  price: 0,
-  category: '',
-  sku: '',
-  brand: '',
-  unit: 'шт',
-  status: 'active',
-  description: '',
-  image: ''
-}
-const form = ref<Product>({ ...defaultForm })
-
-const openAddModal = () => {
+function openAddModal() {
   isEditing.value = false
-  form.value = { ...defaultForm, id: Date.now().toString() }
+  form.value = {
+    id: null,
+    name: '',
+    price: 15000,
+    category: categories.value[0]?.id || 1,
+    code: `SKU-${Date.now().toString().slice(-4)}`,
+    stock: 50,
+    image: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=400&q=80',
+    description: ''
+  }
   isModalOpen.value = true
 }
 
-const openEditModal = (product: Product) => {
+function openEditModal(prod: any) {
   isEditing.value = true
-  form.value = { ...product, status: product.status || 'active', unit: product.unit || 'шт' }
+  form.value = {
+    id: prod.id,
+    name: prod.name,
+    price: prod.price,
+    category: prod.category,
+    code: prod.code || prod.sku || '',
+    stock: prod.stock || 50,
+    image: prod.image || '',
+    description: prod.description || ''
+  }
   isModalOpen.value = true
 }
 
-const closeModal = () => {
-  isModalOpen.value = false
-}
-
-const saveProduct = () => {
-  if (isEditing.value) {
-    const idx = localProducts.value.findIndex(p => p.id === form.value.id)
-    if (idx !== -1) {
-      localProducts.value[idx] = { ...form.value }
+async function saveProduct() {
+  try {
+    if (isEditing.value && form.value.id) {
+      await $fetch(`/api/catalog/products/${form.value.id}`, {
+        method: 'PUT',
+        body: form.value
+      })
+      toast.add({ title: 'Товар обновлен', color: 'green' })
+    } else {
+      await $fetch('/api/catalog/products', {
+        method: 'POST',
+        body: form.value
+      })
+      toast.add({ title: 'Товар создан', color: 'green' })
     }
-  } else {
-    localProducts.value.unshift({ ...form.value })
+    isModalOpen.value = false
+    await fetchData()
+  } catch (err: any) {
+    alert(err.message || 'Ошибка сохранения')
   }
-  
-  saveToStorage()
-  closeModal()
-  
-  toast.add({
-    title: isEditing.value ? 'Товар обновлен' : 'Товар добавлен',
-    color: 'green'
-  })
 }
 
-// Delete
-const itemToDelete = ref<Product | null>(null)
-
-const confirmDelete = (product: Product) => {
-  itemToDelete.value = product
+async function confirmDelete(prod: any) {
+  if (!confirm(`Удалить товар «${prod.name}»?`)) return
+  try {
+    await $fetch(`/api/catalog/products/${prod.id}`, { method: 'DELETE' })
+    toast.add({ title: 'Товар удален', color: 'gray' })
+    await fetchData()
+  } catch (err: any) {
+    alert(err.message || 'Ошибка удаления')
+  }
 }
 
-const executeDelete = () => {
-  if (itemToDelete.value) {
-    localProducts.value = localProducts.value.filter(p => p.id !== itemToDelete.value!.id)
-    saveToStorage()
-    
-    toast.add({
-      title: 'Товар удален',
-      color: 'red'
-    })
-    itemToDelete.value = null
-  }
+function formatPrice(val: number | string | undefined): string {
+  if (!val) return '0'
+  const num = typeof val === 'string' ? parseFloat(val) : val
+  return isNaN(num) ? '0' : num.toLocaleString('ru-RU')
 }
 </script>

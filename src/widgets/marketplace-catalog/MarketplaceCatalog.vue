@@ -68,7 +68,7 @@
         </div>
 
         <div
-          v-else-if="products.length === 0 && loadState !== 'loading'"
+          v-else-if="products.length === 0 && (loadState as string) !== 'loading'"
           class="py-24 text-center rounded-xl border border-dashed border-gray-200 dark:border-neutral-800"
         >
           <p class="text-lg text-gray-500 dark:text-neutral-400">

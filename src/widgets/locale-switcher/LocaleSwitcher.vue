@@ -4,7 +4,7 @@
     <UButton
       v-for="option in localeButtons"
       :key="option.code"
-      :to="switchLocalePath(option.code)"
+      :to="(switchLocalePath as any)(option.code)"
       size="xs"
       :variant="option.code === locale ? 'solid' : 'ghost'"
       color="neutral"

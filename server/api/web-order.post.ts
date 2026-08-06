@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
     name: body?.name || 'Клиника (Без названия)',
     phone: body?.phone || 'Не указан',
     contact: body?.telegram || body?.phone || 'Контакты не указаны',
-    address: body?.address || 'Казахстан, г. Алматы',
+    address: 'Казахстан, Доставка / Самовывоз',
     total,
     status: 'Новый',
     items: items.length > 0 ? items : [{ name: 'Тестовый товар', quantity: 1, price: 5000 }]
@@ -27,7 +27,6 @@ export default defineEventHandler(async (event) => {
   return {
     success: true,
     order_id: newOrder.id,
-    message: 'Заказ успешно сохранен',
-    order: newOrder
+    message: 'Заказ успешно сохранен'
   }
 })

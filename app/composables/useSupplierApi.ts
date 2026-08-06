@@ -89,7 +89,7 @@ export function useSupplierApi() {
     search?: string
   }): Promise<Paginated<SupplierOrder>> {
     try {
-      const res = await $fetch<Paginated<SupplierOrder>>('orders/', {
+      return await $fetch<Paginated<SupplierOrder>>('orders/', {
         baseURL,
         headers: headers(),
         query: {
@@ -100,37 +100,6 @@ export function useSupplierApi() {
         },
         retry: 1
       })
-      
-      if (import.meta.client && (config.public.enableDemoLogin || config.apiSnapshot)) {
-        try {
-          const localOrders = JSON.parse(localStorage.getItem('mock_orders') || '[]')
-          if (localOrders.length > 0) {
-            const formattedLocal = localOrders.map((o: any) => ({
-              id: o.id,
-              number: String(o.id),
-              created_at: o.date,
-              updated_at: o.date,
-              status: o.status || 'Новый',
-              status_display: o.status || 'Новый',
-              total: o.total,
-              items_count: o.items?.length || 0,
-              buyer_name: o.name,
-              buyer_phone: o.phone,
-              items: o.items?.map((i: any, idx: number) => ({
-                id: idx,
-                product_name: i.name,
-                quantity: i.quantity,
-                price: i.price,
-                total: i.price * i.quantity
-              }))
-            }))
-            res.results = [...formattedLocal, ...res.results]
-            res.count += formattedLocal.length
-          }
-        } catch(e) {}
-      }
-
-      return res
     } catch (e) {
       console.warn('[useSupplierApi] fetchSupplierOrders error', e)
       return { count: 0, next: null, previous: null, results: [] }

@@ -6,10 +6,10 @@
       <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 md:text-3xl">
-            Категории
+            Дерево категорий каталога
           </h1>
           <p class="text-sm text-slate-500 mt-1 font-medium">
-            Управление категориями и подкатегориями каталога
+            Управление иерархией разделов, подкатегорий и 140+ стоматологическими иконками
           </p>
         </div>
         
@@ -25,7 +25,7 @@
       </div>
 
       <!-- Controls Area (Search) -->
-      <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-4 md:flex-row md:items-center">
+      <div class="bg-white p-4 rounded-2xl shadow-xs border border-slate-100 flex flex-col gap-4 md:flex-row md:items-center">
         <UInput
           v-model="searchQuery"
           icon="i-lucide-search"
@@ -37,7 +37,7 @@
       </div>
 
       <!-- Categories Tree -->
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+      <div class="bg-white rounded-3xl shadow-xs border border-slate-100 overflow-hidden">
         <div v-if="filteredCategoriesTree.length === 0" class="p-8 text-center text-slate-500 font-medium">
           Категории не найдены
         </div>
@@ -59,13 +59,17 @@
                   @click="toggleExpand(cat.id)"
                   class="rounded-lg"
                 />
-                <div v-else class="w-8"></div> <!-- Spacer for alignment -->
+                <div v-else class="w-8"></div>
                 
+                <div class="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-xl shrink-0">
+                  {{ cat.icon || '🦷' }}
+                </div>
+
                 <div class="flex flex-col">
-                  <span class="font-extrabold text-slate-900 text-lg">
+                  <span class="font-extrabold text-slate-900 text-base">
                     {{ cat.name }}
                   </span>
-                  <span v-if="cat.description" class="text-sm text-slate-500 line-clamp-1">
+                  <span v-if="cat.description" class="text-xs text-slate-500 line-clamp-1">
                     {{ cat.description }}
                   </span>
                 </div>
@@ -104,17 +108,22 @@
                 :key="sub.id" 
                 class="flex items-center justify-between py-3 pr-4 pl-14 hover:bg-slate-100 transition-colors border-b border-slate-100 last:border-b-0"
               >
-                <div class="flex flex-col">
-                  <span class="font-bold text-slate-800">
-                    {{ sub.name }}
-                  </span>
-                  <span v-if="sub.description" class="text-xs text-slate-500 line-clamp-1">
-                    {{ sub.description }}
-                  </span>
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-base shrink-0">
+                    {{ sub.icon || '📦' }}
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="font-bold text-slate-800 text-sm">
+                      {{ sub.name }}
+                    </span>
+                    <span v-if="sub.description" class="text-xs text-slate-500 line-clamp-1">
+                      {{ sub.description }}
+                    </span>
+                  </div>
                 </div>
 
                 <div class="flex items-center gap-3">
-                  <UBadge color="gray" variant="soft" class="font-bold rounded-lg px-2">
+                  <UBadge color="gray" variant="soft" class="font-bold rounded-lg px-2 text-xs">
                     {{ sub.productCount || 0 }} шт.
                   </UBadge>
                   <div class="flex items-center gap-1">
@@ -143,11 +152,11 @@
       </div>
     </div>
 
-    <!-- Create/Edit Modal -->
-    <UModal v-model="isModalOpen">
-      <div class="p-6 bg-white rounded-2xl space-y-6">
+    <!-- Create/Edit Modal with 140+ Icon Picker -->
+    <UModal v-model="isModalOpen" :ui="{ width: 'w-full sm:max-w-xl' }">
+      <div class="p-6 bg-white rounded-3xl space-y-5 max-h-[85vh] overflow-y-auto">
         <div class="flex items-center justify-between">
-          <h2 class="text-xl font-extrabold text-slate-900">
+          <h2 class="text-xl font-black text-slate-900">
             {{ isEditing ? 'Редактировать категорию' : 'Создать категорию' }}
           </h2>
           <UButton
@@ -159,58 +168,94 @@
           />
         </div>
 
-        <form @submit.prevent="saveCategory" class="space-y-4">
-          <UFormGroup label="Название" required>
-            <UInput 
+        <form @submit.prevent="saveCategory" class="space-y-4 text-xs">
+          <div>
+            <label class="font-bold text-slate-700 block mb-1">Название категории <span class="text-red-500">*</span></label>
+            <input 
               v-model="form.name" 
-              placeholder="Введите название" 
-              size="lg"
-              class="font-medium"
-              :ui="{ base: 'rounded-xl' }"
+              placeholder="Например: Композиты и Пломбирование" 
+              class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold"
+              required
             />
-          </UFormGroup>
+          </div>
 
-          <UFormGroup label="Родительская категория">
-            <USelectMenu
-              v-model="form.parentId"
-              :options="parentOptions"
-              value-attribute="value"
-              option-attribute="label"
-              placeholder="Корневая категория"
-              size="lg"
-              :ui="{ base: 'rounded-xl' }"
-            />
-          </UFormGroup>
+          <div>
+            <label class="font-bold text-slate-700 block mb-1">Родительская категория (если подкатегория)</label>
+            <select v-model="form.parentId" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium">
+              <option :value="null">-- Корневая категория (верхний уровень) --</option>
+              <option v-for="c in rootCategories" :key="c.id" :value="c.id">
+                {{ c.icon || '🦷' }} {{ c.name }}
+              </option>
+            </select>
+          </div>
 
-          <UFormGroup label="Описание">
-            <UTextarea 
+          <!-- Icon Picker Section -->
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="font-bold text-slate-700">Иконка категории:</label>
+              <span class="text-2xl p-1 bg-blue-50 rounded-lg border border-blue-200">{{ form.icon }}</span>
+            </div>
+
+            <div class="border border-slate-200 rounded-2xl p-3 bg-slate-50 space-y-2.5">
+              <!-- Group Tabs -->
+              <div class="flex gap-1 overflow-x-auto pb-1 no-scrollbar text-[11px]">
+                <button
+                  v-for="(grp, gIdx) in iconGroups"
+                  :key="gIdx"
+                  type="button"
+                  @click="activeIconGroupIdx = gIdx"
+                  :class="[
+                    'px-2.5 py-1 rounded-lg font-bold transition-colors whitespace-nowrap cursor-pointer',
+                    activeIconGroupIdx === gIdx ? 'bg-blue-600 text-white' : 'bg-white text-slate-600 border border-slate-200'
+                  ]"
+                >
+                  {{ grp.name }}
+                </button>
+              </div>
+
+              <!-- Icons Grid -->
+              <div class="grid grid-cols-8 gap-2 p-2 bg-white rounded-xl border border-slate-200 max-h-36 overflow-y-auto">
+                <button
+                  v-for="(ic, idx) in iconGroups[activeIconGroupIdx]?.icons || []"
+                  :key="idx"
+                  type="button"
+                  @click="form.icon = ic"
+                  :class="[
+                    'w-9 h-9 rounded-xl flex items-center justify-center text-lg transition-all cursor-pointer',
+                    form.icon === ic ? 'bg-blue-100 ring-2 ring-blue-500 scale-110' : 'hover:bg-slate-100'
+                  ]"
+                >
+                  {{ ic }}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label class="font-bold text-slate-700 block mb-1">Описание (необязательно)</label>
+            <textarea 
               v-model="form.description" 
+              rows="2"
               placeholder="Краткое описание категории"
-              :rows="3"
-              size="lg"
-              :ui="{ base: 'rounded-xl' }"
-            />
-          </UFormGroup>
+              class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl"
+            ></textarea>
+          </div>
 
-          <div class="flex gap-3 pt-2">
-            <UButton 
-              color="gray" 
-              variant="soft" 
-              class="flex-1 justify-center rounded-xl font-bold" 
-              size="lg"
+          <div class="flex gap-3 pt-3">
+            <button 
+              type="button"
+              class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-all cursor-pointer" 
               @click="isModalOpen = false"
             >
               Отмена
-            </UButton>
-            <UButton 
+            </button>
+            <button 
               type="submit" 
-              color="blue" 
-              class="flex-1 justify-center rounded-xl font-bold"
-              size="lg"
+              class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-black shadow-md transition-all cursor-pointer disabled:opacity-50"
               :disabled="!form.name"
             >
               Сохранить
-            </UButton>
+            </button>
           </div>
         </form>
       </div>
@@ -218,38 +263,33 @@
 
     <!-- Delete Confirmation Modal -->
     <UModal v-model="isDeleteModalOpen">
-      <div class="p-6 bg-white rounded-2xl space-y-6 text-center">
-        <div class="mx-auto w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
+      <div class="p-6 bg-white rounded-3xl space-y-4 text-center">
+        <div class="mx-auto w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
           <UIcon name="i-lucide-alert-triangle" class="w-6 h-6 text-red-600" />
         </div>
         
         <div>
-          <h3 class="text-lg font-extrabold text-slate-900 mb-2">Удалить категорию?</h3>
-          <p class="text-sm text-slate-500 font-medium">
-            Вы уверены, что хотите удалить «{{ categoryToDelete?.name }}»? 
-            <span v-if="hasChildren(categoryToDelete?.id)">Вместе с ней будут удалены все подкатегории.</span>
-            Это действие нельзя отменить.
+          <h3 class="text-base font-extrabold text-slate-900 mb-1">Удалить категорию?</h3>
+          <p class="text-xs text-slate-500 font-medium">
+            Вы уверены, что хотите удалить «{{ categoryToDelete?.name }}»?
           </p>
         </div>
 
-        <div class="flex gap-3">
-          <UButton 
-            color="gray" 
-            variant="soft" 
-            class="flex-1 justify-center rounded-xl font-bold" 
-            size="lg"
+        <div class="flex gap-3 pt-2">
+          <button 
+            type="button"
+            class="flex-1 py-2 bg-slate-100 text-slate-700 rounded-xl font-bold text-xs cursor-pointer" 
             @click="isDeleteModalOpen = false"
           >
             Отмена
-          </UButton>
-          <UButton 
-            color="red" 
-            class="flex-1 justify-center rounded-xl font-bold"
-            size="lg"
+          </button>
+          <button 
+            type="button"
+            class="flex-1 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs shadow-md cursor-pointer"
             @click="executeDelete"
           >
             Удалить
-          </UButton>
+          </button>
         </div>
       </div>
     </UModal>
@@ -258,6 +298,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { CATEGORY_ICON_GROUPS } from '~/utils/categoryIcons'
 
 definePageMeta({
   layout: 'admin',
@@ -270,163 +311,101 @@ interface Category {
   id: number
   name: string
   parentId: number | null
+  icon?: string
   description?: string
   productCount?: number
+  children?: Category[]
 }
 
-// Flat structure in state
 const categories = ref<Category[]>([])
-
-// Search and expanded state
 const searchQuery = ref('')
 const expanded = ref<Record<number, boolean>>({})
 
-// Modals state
 const isModalOpen = ref(false)
 const isDeleteModalOpen = ref(false)
 const isEditing = ref(false)
 const categoryToDelete = ref<Category | null>(null)
 
-// Form state
 const form = ref({
   id: null as number | null,
   name: '',
   parentId: null as number | null,
+  icon: '🦷',
   description: ''
 })
 
-const STORAGE_KEY = 'pazl_admin_categories'
+const iconGroups = CATEGORY_ICON_GROUPS
+const activeIconGroupIdx = ref(0)
 
-const defaultData: Category[] = [
-  { id: 1, name: 'Расходные материалы', parentId: null, description: 'Все расходники для стоматологии', productCount: 42 },
-  { id: 11, name: 'Композиты', parentId: 1, productCount: 15 },
-  { id: 12, name: 'Боры и фрезы', parentId: 1, productCount: 8 },
-  { id: 13, name: 'Эндодонтия (файлы, штифты)', parentId: 1, productCount: 5 },
-  { id: 14, name: 'Адгезивные системы', parentId: 1, productCount: 3 },
-  { id: 15, name: 'Оттискные материалы', parentId: 1, productCount: 6 },
-  { id: 16, name: 'Цементы стоматологические', parentId: 1, productCount: 5 },
-  { id: 2, name: 'Оборудование', parentId: null, productCount: 20 },
-  { id: 21, name: 'Стоматологические установки', parentId: 2, productCount: 4 },
-  { id: 22, name: 'Рентген-аппараты', parentId: 2, productCount: 2 },
-  { id: 23, name: 'Автоклавы и стерилизация', parentId: 2, productCount: 5 },
-  { id: 24, name: 'Лампы полимеризационные', parentId: 2, productCount: 6 },
-  { id: 25, name: 'Скайлеры ультразвуковые', parentId: 2, productCount: 3 },
-  { id: 3, name: 'Инструменты', parentId: null, productCount: 35 },
-  { id: 31, name: 'Ручные инструменты', parentId: 3, productCount: 15 },
-  { id: 32, name: 'Наконечники', parentId: 3, productCount: 10 },
-  { id: 33, name: 'Хирургические инструменты', parentId: 3, productCount: 10 },
-  { id: 4, name: 'Ортодонтия', parentId: null, productCount: 12 },
-  { id: 41, name: 'Брекет-системы', parentId: 4, productCount: 8 },
-  { id: 42, name: 'Ортодонтические дуги и лигатуры', parentId: 4, productCount: 4 },
-  { id: 5, name: 'Гигиена и профилактика', parentId: null, productCount: 18 },
-  { id: 51, name: 'Пасты профессиональные', parentId: 5, productCount: 10 },
-  { id: 52, name: 'Фторирование', parentId: 5, productCount: 8 },
-  { id: 6, name: 'Зуботехника', parentId: null, productCount: 25 },
-  { id: 61, name: 'Керамика и циркон', parentId: 6, productCount: 15 },
-  { id: 62, name: 'Гипсы и модели', parentId: 6, productCount: 10 }
-]
+async function fetchCategories() {
+  try {
+    const res = await $fetch<{ results: any[] }>('/api/catalog/categories')
+    if (res && Array.isArray(res.results)) {
+      categories.value = res.results.map(c => ({
+        id: c.id,
+        name: c.name,
+        parentId: c.parentId || null,
+        icon: c.icon || '🦷',
+        description: c.description || '',
+        productCount: c.productCount || 0
+      }))
+    }
+  } catch (err) {
+    console.error('Error fetching categories:', err)
+  }
+}
 
 onMounted(() => {
-  const saved = localStorage.getItem(STORAGE_KEY)
-  if (saved) {
-    try {
-      categories.value = JSON.parse(saved)
-    } catch (e) {
-      categories.value = [...defaultData]
-    }
-  } else {
-    categories.value = [...defaultData]
-    saveToStorage()
-  }
-  
-  // Expand all parent categories by default
-  categories.value.filter(c => c.parentId === null).forEach(c => {
-    expanded.value[c.id] = true
-  })
+  fetchCategories()
 })
 
-const saveToStorage = () => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(categories.value))
-}
-
-const toggleExpand = (id: number) => {
-  expanded.value[id] = !expanded.value[id]
-}
-
-// Tree structure building for UI
-interface CategoryNode extends Category {
-  children?: CategoryNode[]
-}
+const rootCategories = computed(() => {
+  return categories.value.filter(c => !c.parentId)
+})
 
 const filteredCategoriesTree = computed(() => {
-  const q = searchQuery.value.toLowerCase().trim()
-  
-  // Create a deep copy of categories to build tree
-  const items: CategoryNode[] = JSON.parse(JSON.stringify(categories.value))
-  
-  // If searching, we might want to flat list or keep tree if parent/child matches
-  // A simple approach: filter items that match or have children that match
-  let matches = items
-  if (q) {
-    matches = items.filter(c => {
-      const matchSelf = c.name.toLowerCase().includes(q)
-      const hasMatchingChild = items.some(child => child.parentId === c.id && child.name.toLowerCase().includes(q))
-      const hasMatchingParent = items.some(parent => c.parentId === parent.id && parent.name.toLowerCase().includes(q))
-      return matchSelf || hasMatchingChild || hasMatchingParent
-    })
+  let list = categories.value
+  if (searchQuery.value) {
+    const q = searchQuery.value.toLowerCase()
+    list = list.filter(c => c.name.toLowerCase().includes(q))
   }
 
   // Build tree
-  const roots: CategoryNode[] = []
-  const itemMap = new Map<number, CategoryNode>()
-  
-  matches.forEach(item => {
-    item.children = []
-    itemMap.set(item.id, item)
+  const rootMap = new Map<number, Category>()
+  const roots: Category[] = []
+
+  list.forEach(c => {
+    if (!c.parentId) {
+      const copy = { ...c, children: [] }
+      rootMap.set(c.id, copy)
+      roots.push(copy)
+    }
   })
 
-  matches.forEach(item => {
-    if (item.parentId === null) {
-      roots.push(item)
-    } else {
-      const parent = itemMap.get(item.parentId)
-      if (parent) {
-        parent.children!.push(item)
-      } else if (q) {
-        // If searching and parent isn't in matches, just show as root for now
-        roots.push(item)
-      }
+  list.forEach(c => {
+    if (c.parentId && rootMap.has(c.parentId)) {
+      rootMap.get(c.parentId)!.children!.push({ ...c })
+    } else if (c.parentId && !rootMap.has(c.parentId)) {
+      roots.push({ ...c, children: [] })
     }
   })
 
   return roots
 })
 
-// Options for parent category dropdown
-const parentOptions = computed(() => {
-  const options = [{ label: 'Корневая категория', value: null }]
-  // Only allow setting top-level categories as parent (1 level deep) to keep UI simple
-  // Exclude current category if editing
-  const parents = categories.value.filter(c => c.parentId === null && c.id !== form.value.id)
-  parents.forEach(p => {
-    options.push({ label: p.name, value: p.id as any })
-  })
-  return options
-})
-
-const hasChildren = (id?: number | null) => {
-  if (!id) return false
-  return categories.value.some(c => c.parentId === id)
+function toggleExpand(id: number) {
+  expanded.value[id] = !expanded.value[id]
 }
 
-const openModal = (category: Category | null = null) => {
-  if (category) {
+function openModal(cat: Category | null) {
+  if (cat) {
     isEditing.value = true
     form.value = {
-      id: category.id,
-      name: category.name,
-      parentId: category.parentId,
-      description: category.description || ''
+      id: cat.id,
+      name: cat.name,
+      parentId: cat.parentId,
+      icon: cat.icon || '🦷',
+      description: cat.description || ''
     }
   } else {
     isEditing.value = false
@@ -434,62 +413,52 @@ const openModal = (category: Category | null = null) => {
       id: null,
       name: '',
       parentId: null,
+      icon: '🦷',
       description: ''
     }
   }
   isModalOpen.value = true
 }
 
-const saveCategory = () => {
-  if (isEditing.value && form.value.id) {
-    const index = categories.value.findIndex(c => c.id === form.value.id)
-    if (index !== -1) {
-      categories.value[index] = {
-        ...categories.value[index],
-        name: form.value.name,
-        parentId: form.value.parentId,
-        description: form.value.description
-      }
-      toast.add({ title: 'Успех', description: 'Категория обновлена', color: 'green' })
+async function saveCategory() {
+  try {
+    if (isEditing.value && form.value.id) {
+      await $fetch(`/api/catalog/categories/${form.value.id}`, {
+        method: 'PUT',
+        body: form.value
+      })
+      toast.add({ title: 'Категория обновлена', color: 'green' })
+    } else {
+      await $fetch('/api/catalog/categories', {
+        method: 'POST',
+        body: form.value
+      })
+      toast.add({ title: 'Категория создана', color: 'green' })
     }
-  } else {
-    const newId = Math.max(...categories.value.map(c => c.id), 0) + 1
-    const newCategory: Category = {
-      id: newId,
-      name: form.value.name,
-      parentId: form.value.parentId,
-      description: form.value.description,
-      productCount: 0
-    }
-    categories.value.push(newCategory)
-    // auto expand parent if exists
-    if (newCategory.parentId) {
-      expanded.value[newCategory.parentId] = true
-    }
-    toast.add({ title: 'Успех', description: 'Категория создана', color: 'green' })
+    isModalOpen.value = false
+    await fetchCategories()
+  } catch (err: any) {
+    alert(err.message || 'Ошибка сохранения')
   }
-  
-  saveToStorage()
-  isModalOpen.value = false
 }
 
-const confirmDelete = (category: Category) => {
-  categoryToDelete.value = category
+function confirmDelete(cat: Category) {
+  categoryToDelete.value = cat
   isDeleteModalOpen.value = true
 }
 
-const executeDelete = () => {
+async function executeDelete() {
   if (!categoryToDelete.value) return
-  
-  const idToDelete = categoryToDelete.value.id
-  // Remove the category itself
-  categories.value = categories.value.filter(c => c.id !== idToDelete)
-  // Remove all children
-  categories.value = categories.value.filter(c => c.parentId !== idToDelete)
-  
-  saveToStorage()
-  toast.add({ title: 'Удалено', description: 'Категория успешно удалена', color: 'red' })
-  isDeleteModalOpen.value = false
-  categoryToDelete.value = null
+  try {
+    await $fetch(`/api/catalog/categories/${categoryToDelete.value.id}`, {
+      method: 'DELETE'
+    })
+    toast.add({ title: 'Категория удалена', color: 'gray' })
+    isDeleteModalOpen.value = false
+    categoryToDelete.value = null
+    await fetchCategories()
+  } catch (err: any) {
+    alert(err.message || 'Ошибка удаления')
+  }
 }
 </script>

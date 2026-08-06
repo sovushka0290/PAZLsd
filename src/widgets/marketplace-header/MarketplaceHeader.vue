@@ -129,13 +129,12 @@
         
         <!-- Login / Cabinet Link -->
         <NuxtLink
-          :to="localePath(authStore.isAuthenticated ? (authStore.isAdmin ? '/admin' : (authStore.isOperator ? '/operator' : (authStore.isSupplier ? '/supplier/products' : '/cabinet'))) : '/login')"
-          class="flex items-center justify-center h-9 w-9 sm:h-10 sm:w-auto sm:px-3.5 rounded-xl bg-slate-50 hover:bg-blue-50 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-slate-700 hover:text-blue-600 dark:text-neutral-200 font-bold transition-all border border-slate-200/60 dark:border-neutral-700/50 shrink-0"
+          :to="localePath(authStore.isAuthenticated ? (authStore.isAdmin ? '/admin' : (authStore.isSupplier ? '/supplier/products' : '/cabinet')) : '/login')"
+          class="flex items-center justify-center h-9 w-9 sm:h-10 sm:w-auto sm:px-3 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-slate-700 dark:text-neutral-200 font-medium transition-colors border border-slate-200/50 dark:border-neutral-700/50 shrink-0"
         >
-          <span class="text-sm mr-1 sm:mr-1.5" v-if="authStore.isAuthenticated">🏥</span>
-          <UIcon v-else name="i-lucide-user" class="w-4 h-4 sm:w-4.5 sm:h-4.5 sm:mr-1.5 text-blue-600" />
-          <span class="hidden sm:block text-xs max-w-[130px] truncate">
-            {{ authStore.isAuthenticated ? (authStore.user?.company_name || authStore.user?.first_name || 'Кабинет') : 'Вход для клиник' }}
+          <UIcon name="i-lucide-user" class="w-4 h-4 sm:w-5 sm:h-5 sm:mr-1.5" />
+          <span class="hidden sm:block text-xs sm:text-sm">
+            {{ authStore.isAuthenticated ? t('auth.cabinet') : t('auth.login') }}
           </span>
         </NuxtLink>
 

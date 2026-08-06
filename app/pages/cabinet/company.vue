@@ -1,171 +1,103 @@
 <template>
   <div class="max-w-4xl mx-auto space-y-6">
     <div class="flex items-center justify-between">
-      <div>
-        <h1 class="text-2xl font-black text-slate-900">Данные клиники и реквизиты</h1>
-        <p class="text-sm text-slate-500 font-medium mt-1">Информация используется для автоматического оформления заказов и накладных</p>
-      </div>
-      <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
-        ✅ Верифицированная клиника
-      </span>
+      <h1 class="text-2xl font-bold text-slate-800">Данные организации</h1>
     </div>
 
-    <div class="bg-white rounded-3xl shadow-sm border border-slate-200/80 p-6 sm:p-8">
-      <form class="space-y-6" @submit.prevent="handleSaveCompany">
-        <!-- Section 1: Basic Info -->
+    <div v-if="loading" class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 animate-pulse">
+      <div class="h-8 bg-slate-100 rounded w-1/3 mb-6"></div>
+      <div class="space-y-4">
+        <div class="h-4 bg-slate-100 rounded w-full"></div>
+        <div class="h-4 bg-slate-100 rounded w-2/3"></div>
+        <div class="h-4 bg-slate-100 rounded w-1/2"></div>
+      </div>
+    </div>
+
+    <div v-else-if="!company" class="bg-white p-12 rounded-2xl shadow-sm border border-slate-200 text-center">
+      <div class="text-6xl mb-4">🏢</div>
+      <h3 class="text-xl font-bold text-slate-800 mb-2">Организация не найдена</h3>
+      <p class="text-slate-500">Данные организации не заполнены. Обратитесь к менеджеру.</p>
+    </div>
+
+    <div v-else class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+        <h2 class="text-xl font-bold text-slate-800">{{ company.name || 'Название организации' }}</h2>
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium" :class="company.is_verified ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-600'">
+          {{ company.is_verified ? '✅ Верифицирован' : '⏳ Не верифицирован' }}
+        </span>
+      </div>
+      
+      <div class="p-6 space-y-8">
         <div>
-          <h2 class="text-sm font-extrabold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-            <span>🏥</span> Основная информация
-          </h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <h3 class="text-sm font-medium text-slate-500 mb-4 uppercase tracking-wider">Основная информация</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                Название клиники / организации <span class="text-red-500">*</span>
-              </label>
-              <input
-                v-model="form.clinicName"
-                type="text"
-                class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
-                required
-              />
-            </div>
-
-            <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                БИН / ИИН клиники
-              </label>
-              <input
-                v-model="form.bin"
-                type="text"
-                placeholder="12-значный номер"
-                class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
-              />
+              <p class="text-sm text-slate-500 mb-1">БИН/ИИН</p>
+              <p class="font-medium text-slate-800">{{ company.bin || 'Не указан' }}</p>
             </div>
           </div>
         </div>
 
-        <!-- Section 2: Contacts -->
         <div class="border-t border-slate-100 pt-6">
-          <h2 class="text-sm font-extrabold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-            <span>📱</span> Контактные данные
-          </h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <h3 class="text-sm font-medium text-slate-500 mb-4 uppercase tracking-wider">Адреса</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                Контактный телефон / WhatsApp <span class="text-red-500">*</span>
-              </label>
-              <input
-                v-model="form.phone"
-                type="tel"
-                class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
-                required
-              />
+              <p class="text-sm text-slate-500 mb-1">Юридический адрес</p>
+              <p class="font-medium text-slate-800">{{ company.legal_address || 'Не указан' }}</p>
             </div>
-
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                Контактное лицо / Главный врач
-              </label>
-              <input
-                v-model="form.contactPerson"
-                type="text"
-                placeholder="ФИО врача или снабженца"
-                class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
-              />
+              <p class="text-sm text-slate-500 mb-1">Фактический адрес</p>
+              <p class="font-medium text-slate-800">{{ company.actual_address || 'Не указан' }}</p>
             </div>
           </div>
         </div>
 
-        <!-- Section 3: Delivery Address -->
         <div class="border-t border-slate-100 pt-6">
-          <h2 class="text-sm font-extrabold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-            <span>📍</span> Адрес доставки стоматологических материалов
-          </h2>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-              Город, улица, дом, кабинет
-            </label>
-            <input
-              v-model="form.address"
-              type="text"
-              placeholder="г. Алматы, пр. Абая 42, каб. 5"
-              class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
-            />
+          <h3 class="text-sm font-medium text-slate-500 mb-4 uppercase tracking-wider">Банковские реквизиты</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <p class="text-sm text-slate-500 mb-1">Банк</p>
+              <p class="font-medium text-slate-800">{{ company.bank_name || 'Не указан' }}</p>
+            </div>
+            <div>
+              <p class="text-sm text-slate-500 mb-1">БИК</p>
+              <p class="font-medium text-slate-800">{{ company.bik || 'Не указан' }}</p>
+            </div>
+            <div class="md:col-span-2">
+              <p class="text-sm text-slate-500 mb-1">Расчётный счёт (IBAN)</p>
+              <p class="font-medium text-slate-800">{{ company.iban || 'Не указан' }}</p>
+            </div>
           </div>
         </div>
-
-        <div v-if="saveSuccess" class="p-4 bg-emerald-50 text-emerald-800 rounded-2xl text-xs font-bold border border-emerald-200 flex items-center gap-2">
-          <span>✅</span>
-          Данные клиники успешно сохранены и обновлены в профиле!
-        </div>
-
-        <div class="pt-4 flex items-center justify-end border-t border-slate-100">
-          <button
-            type="submit"
-            :disabled="isSaving"
-            class="px-8 py-3.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-extrabold text-sm rounded-2xl shadow-md shadow-blue-500/20 transition-all cursor-pointer disabled:opacity-50"
-          >
-            {{ isSaving ? 'Сохранение...' : 'Сохранить данные' }}
-          </button>
-        </div>
-      </form>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
-import { useAuthStore } from '~/stores/auth'
+import { ref, onMounted } from 'vue'
+import { useCabinetApi } from '~/composables/useCabinetApi'
+
+const { t } = useI18n()
 
 definePageMeta({
   layout: 'cabinet',
   middleware: 'cabinet-auth'
 })
 
-const authStore = useAuthStore()
-const isSaving = ref(false)
-const saveSuccess = ref(false)
+const { fetchMyContractor } = useCabinetApi()
 
-const form = reactive({
-  clinicName: '',
-  phone: '',
-  contactPerson: '',
-  address: '',
-  bin: ''
-})
+const company = ref<any>(null)
+const loading = ref(true)
 
-onMounted(() => {
-  const u = authStore.user
-  if (u) {
-    form.clinicName = u.company_name || u.first_name || 'ТОО «Dent Smile»'
-    form.phone = u.phone || '+7 (777) 123-45-67'
-    form.contactPerson = u.last_name || 'Алихан Бактыбай'
-    form.bin = (u as any).company_bin || '120940023412'
-    form.address = (u as any).address || 'г. Алматы, ул. Абая 42, офис 5'
-  }
-})
-
-async function handleSaveCompany() {
-  isSaving.value = true
-  saveSuccess.value = false
+onMounted(async () => {
   try {
-    await authStore.updateClinicProfile({
-      clinicName: form.clinicName,
-      phone: form.phone,
-      contactPerson: form.contactPerson,
-      address: form.address,
-      bin: form.bin
-    })
-    saveSuccess.value = true
-    setTimeout(() => { saveSuccess.value = false }, 4000)
+    company.value = await fetchMyContractor()
   } catch (e) {
     console.error(e)
+    company.value = null
   } finally {
-    isSaving.value = false
+    loading.value = false
   }
-}
-
-useSeoMeta({
-  title: 'Реквизиты и данные клиники | PAZL'
 })
 </script>

@@ -68,7 +68,13 @@ const getStatusBadge = (status: string) => {
     reviewing: { label: 'На проверке', class: 'bg-amber-100 text-amber-800' },
     verified: { label: 'Верифицирован', class: 'bg-green-100 text-green-800' }
   }
-  return map[status] || map.registered
+  return map[status] || { label: 'Зарегистрирован', class: 'bg-slate-100 text-slate-800' }
+}
+
+const showAlert = (msg: string) => {
+  if (typeof window !== 'undefined') {
+    window.alert(msg)
+  }
 }
 </script>
 
@@ -98,8 +104,8 @@ const getStatusBadge = (status: string) => {
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <div class="p-6 border-b border-slate-200 flex justify-between items-center bg-slate-50">
           <h2 class="text-lg font-medium text-slate-900">Основная информация</h2>
-          <span :class="['px-3 py-1 rounded-full text-sm font-medium', getStatusBadge(profile.status).class]">
-            {{ getStatusBadge(profile.status).label }}
+          <span :class="['px-3 py-1 rounded-full text-sm font-medium', getStatusBadge(profile.status || 'registered').class]">
+            {{ getStatusBadge(profile.status || 'registered').label }}
           </span>
         </div>
         
@@ -133,9 +139,9 @@ const getStatusBadge = (status: string) => {
                   <p class="text-sm font-medium text-slate-800">{{ profile.document_file || 'Справка_госрегистрация.pdf' }}</p>
                   <p class="text-xs text-slate-500">Документ загружен и передан на модерацию администратору</p>
                 </div>
-                <span class="ml-auto text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                  Проверено
-                </span>
+                <a href="#" @click.prevent="showAlert('Просмотр документа')" class="ml-auto text-xs font-semibold text-blue-600 hover:text-blue-800">
+                  Просмотреть
+                </a>
               </div>
             </div>
             <div class="md:col-span-2">

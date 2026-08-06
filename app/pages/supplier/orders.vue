@@ -142,8 +142,8 @@ const changeStatus = async (id: number | string, newStatus: string) => {
           <tbody class="bg-white divide-y divide-slate-200">
             <tr v-for="order in orders" :key="order.id" class="hover:bg-slate-50 transition-colors">
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">#{{ order.id }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{{ order.buyerName }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{{ order.date }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{{ order.buyer_name || (order as any).buyerName || 'Клиника' }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{{ order.created_at || (order as any).date || '-' }}</td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <span :class="['px-2.5 py-0.5 rounded-full text-xs font-medium', getStatusColor(order.status)]">
                   {{ getStatusLabel(order.status) }}

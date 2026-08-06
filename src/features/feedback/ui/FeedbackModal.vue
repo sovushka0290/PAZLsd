@@ -13,7 +13,7 @@
     <UModal v-model:open="isOpen">
       <template #content>
         <UCard
-          :ui="{ ring: 'ring-1 ring-slate-100 dark:ring-neutral-800', divide: 'divide-y divide-slate-100 dark:divide-neutral-800', rounded: 'rounded-3xl', shadow: 'shadow-2xl' }" class="bg-white dark:bg-neutral-900"
+          :ui="({ ring: 'ring-1 ring-slate-100 dark:ring-neutral-800', divide: 'divide-y divide-slate-100 dark:divide-neutral-800', rounded: 'rounded-3xl', shadow: 'shadow-2xl' } as any)" class="bg-white dark:bg-neutral-900"
         >
           <template #header>
             <div class="flex items-center justify-between">
@@ -91,22 +91,13 @@ async function submitForm() {
 
   isSubmitting.value = true
   
-  try {
-    await $fetch('/api/feedback', {
-      method: 'POST',
-      body: {
-        name: form.name,
-        contact: form.phone,
-        message: form.message
-      }
-    })
-  } catch (e) {
-    console.error('Feedback submission error', e)
-  } finally {
-    isSubmitting.value = false
-    isSubmitted.value = true
-  }
+  // Имитация отправки данных (в будущем здесь будет API запрос)
+  await new Promise(resolve => setTimeout(resolve, 1000))
   
+  isSubmitting.value = false
+  isSubmitted.value = true
+  
+  // Сброс формы через секунду после закрытия (если юзер откроет снова)
   setTimeout(() => {
     form.name = ''
     form.phone = ''

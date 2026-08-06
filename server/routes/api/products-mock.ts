@@ -55,30 +55,16 @@ export default defineEventHandler(async (event) => {
     return source
       .filter((product: any) => {
         const name = typeof product.name === 'string' ? product.name.trim() : ''
-        if (!name || name.length < 3) return false
-        
-        // Filter out junk: clinics, phone numbers, instagram handles, doctors
-        const junkPatterns = [
-          /^\d{10,}$/,
-          /^[\+]?7\d{10}/,
-          /dental\s*clinic/i,
-          /^doctor[~\s]/i,
-          /^[\+]?\s*доктор/i,
-          /клиника\s*[«"']/i,
-          /^стоматолог\s/i,
-          /дент\s+(караган|алмат|астан|шымк)/i,
-          /🦷/,
-        ]
-        if (junkPatterns.some(p => p.test(name))) return false
-        
+        const description = (product.description ?? '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+        const hasImage = Array.isArray(product.images) && product.images.some((img: any) => typeof img?.image === 'string' && img.image.trim())
         const hasPrice = Array.isArray(product.modifications) && product.modifications.some((mod: any) => {
           return Array.isArray(mod?.prices) && mod.prices.some((pr: any) => {
             const value = pr?.currency_price ?? pr?.original_currency_price
-            return typeof value === 'number' && !Number.isNaN(value) && value > 0
+            return typeof value === 'number' && !Number.isNaN(value)
           })
         })
 
-        return Boolean(name && hasPrice)
+        return Boolean(name && description && hasImage && hasPrice)
       })
       .map((product: any, index: number) => ({
       id: product.id ?? index + 1,

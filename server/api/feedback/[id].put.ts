@@ -10,12 +10,12 @@ export default defineEventHandler(async (event) => {
   if (!id) throw createError({ statusCode: 400, statusMessage: 'ID is required' })
   if (!fs.existsSync(dbPath)) throw createError({ statusCode: 404, statusMessage: 'No feedbacks found' })
 
-  let list = []
+  let list: any[] = []
   try {
     list = JSON.parse(fs.readFileSync(dbPath, 'utf-8'))
   } catch(e) {}
 
-  const fIndex = list.findIndex(f => f.id === id)
+  const fIndex = list.findIndex((f: any) => f.id === id)
   if (fIndex === -1) throw createError({ statusCode: 404, statusMessage: 'Feedback not found' })
 
   list[fIndex].status = body.status
