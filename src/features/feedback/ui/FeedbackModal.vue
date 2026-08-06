@@ -91,13 +91,22 @@ async function submitForm() {
 
   isSubmitting.value = true
   
-  // Имитация отправки данных (в будущем здесь будет API запрос)
-  await new Promise(resolve => setTimeout(resolve, 1000))
+  try {
+    await $fetch('/api/feedback', {
+      method: 'POST',
+      body: {
+        name: form.name,
+        contact: form.phone,
+        message: form.message
+      }
+    })
+  } catch (e) {
+    console.error('Feedback submission error', e)
+  } finally {
+    isSubmitting.value = false
+    isSubmitted.value = true
+  }
   
-  isSubmitting.value = false
-  isSubmitted.value = true
-  
-  // Сброс формы через секунду после закрытия (если юзер откроет снова)
   setTimeout(() => {
     form.name = ''
     form.phone = ''

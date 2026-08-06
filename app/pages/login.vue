@@ -1,194 +1,255 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex flex-col justify-center items-center py-12 px-4">
-    <div class="w-full max-w-md">
-      <!-- Logo & Title -->
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50/30 flex flex-col justify-center items-center py-12 px-4">
+    <div class="w-full max-w-lg">
+      <!-- Logo & Header -->
       <div class="text-center mb-8">
-        <NuxtLink :to="localePath('/')" class="inline-flex items-center gap-3 mb-6">
-          <div class="h-12 w-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-            <span class="text-white font-bold text-xl">P</span>
+        <NuxtLink :to="localePath('/')" class="inline-flex items-center gap-3 mb-4">
+          <div class="h-12 w-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20 text-white font-extrabold text-xl">
+            P
           </div>
-          <span class="text-2xl font-bold text-slate-900">PAZL</span>
+          <span class="text-2xl font-black text-slate-900 tracking-tight">PAZL MARKET</span>
         </NuxtLink>
-        <h1 class="text-3xl font-extrabold text-slate-900">
-          {{ t('auth.loginTitle') }}
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          {{ isStaffMode ? 'Служебный вход в систему' : 'Кабинет стоматологической клиники' }}
         </h1>
-        <p class="mt-2 text-slate-500">
-          {{ t('auth.loginSubtitle') }}
+        <p class="mt-2 text-sm text-slate-500 font-medium">
+          {{ isStaffMode ? 'Авторизация для операторов и администраторов платформы' : 'Оптовые цены, персональные условия и быстрая история заказов' }}
         </p>
       </div>
 
-      <!-- Login Card -->
-      <div class="bg-white rounded-2xl shadow-xl p-8 border border-slate-100">
-        <form class="space-y-5" @submit.prevent="handleLogin">
-          <!-- Phone -->
-          <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1.5">
-              {{ t('auth.phone') }}
-            </label>
-            <div class="relative">
-              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">📱</span>
-              <input
-                v-model="phone"
-                type="tel"
-                :placeholder="t('auth.phonePlaceholder')"
-                class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-base text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-all"
-                required
-              >
+      <!-- Main Login Card -->
+      <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/60 p-6 sm:p-8 border border-slate-100 relative overflow-hidden">
+        
+        <!-- CLINIC QUICK LOGIN FORM -->
+        <div v-if="!isStaffMode">
+          <form class="space-y-4" @submit.prevent="handleClinicLogin">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                Название клиники или стоматологии <span class="text-red-500">*</span>
+              </label>
+              <div class="relative">
+                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg">🏥</span>
+                <input
+                  v-model="clinicForm.clinicName"
+                  type="text"
+                  placeholder="Например: Стоматология «Dent Smile»"
+                  class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all font-medium"
+                  required
+                />
+              </div>
             </div>
-          </div>
 
-          <!-- Password -->
-          <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1.5">
-              {{ t('auth.password') }}
-            </label>
-            <div class="relative">
-              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">🔒</span>
-              <input
-                v-model="password"
-                :type="showPassword ? 'text' : 'password'"
-                :placeholder="t('auth.passwordPlaceholder')"
-                class="w-full pl-10 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl text-base text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-all"
-                required
-              >
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                Контактный телефон / WhatsApp <span class="text-red-500">*</span>
+              </label>
+              <div class="relative">
+                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg">📱</span>
+                <input
+                  v-model="clinicForm.phone"
+                  type="tel"
+                  placeholder="+7 (___) ___-__-__"
+                  class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all font-medium"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Контактное лицо / Врач
+                </label>
+                <div class="relative">
+                  <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base">👤</span>
+                  <input
+                    v-model="clinicForm.contactPerson"
+                    type="text"
+                    placeholder="Др. Асан"
+                    class="w-full pl-10 pr-3 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all font-medium"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Город / Адрес доставки
+                </label>
+                <div class="relative">
+                  <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base">📍</span>
+                  <input
+                    v-model="clinicForm.address"
+                    type="text"
+                    placeholder="г. Алматы, ул. Абая 42"
+                    class="w-full pl-10 pr-3 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all font-medium"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div v-if="errorMsg" class="p-3 bg-red-50 text-red-700 rounded-xl text-xs font-bold border border-red-100 flex items-center gap-2">
+              <span>⚠️</span>
+              {{ errorMsg }}
+            </div>
+
+            <button
+              type="submit"
+              :disabled="isLoading"
+              class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-98 text-white font-extrabold text-base rounded-2xl shadow-lg shadow-blue-600/30 transition-all cursor-pointer mt-2"
+            >
+              <span v-if="isLoading" class="flex items-center justify-center gap-2">
+                <UIcon name="i-lucide-loader-2" class="w-5 h-5 animate-spin" />
+                Вход в кабинет...
+              </span>
+              <span v-else class="flex items-center justify-center gap-2">
+                Войти в кабинет клиники →
+              </span>
+            </button>
+          </form>
+
+          <!-- Quick 1-click test profiles -->
+          <div class="mt-6 pt-5 border-t border-slate-100">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider text-center mb-3">
+              Быстрый вход для тестирования:
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <button
                 type="button"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                @click="showPassword = !showPassword"
+                @click="fillQuickProfile('ТОО «Dent Smile»', '+7 (777) 123-45-67', 'Алихан Бактыбай', 'г. Алматы, пр. Абая 42')"
+                class="p-2.5 bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 rounded-xl text-left transition-all text-xs cursor-pointer group"
               >
-                {{ showPassword ? '🙈' : '👁' }}
+                <div class="font-bold text-slate-800 group-hover:text-blue-600">ТОО «Dent Smile»</div>
+                <div class="text-[11px] text-slate-400">+7 (777) 123-45-67</div>
+              </button>
+
+              <button
+                type="button"
+                @click="fillQuickProfile('Стоматология «Ару Дент»', '+7 (701) 987-65-43', 'Др. Айгерим', 'г. Астана, ул. Достык 10')"
+                class="p-2.5 bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 rounded-xl text-left transition-all text-xs cursor-pointer group"
+              >
+                <div class="font-bold text-slate-800 group-hover:text-blue-600">«Ару Дент» (Астана)</div>
+                <div class="text-[11px] text-slate-400">+7 (701) 987-65-43</div>
               </button>
             </div>
           </div>
+        </div>
 
-          <!-- Error -->
-          <div v-if="errorMsg" class="p-3 bg-red-50 text-red-700 rounded-xl text-sm border border-red-100 flex items-center gap-2">
-            <span>⚠️</span>
-            {{ errorMsg }}
-          </div>
+        <!-- STAFF (OPERATOR / ADMIN) LOGIN FORM -->
+        <div v-else>
+          <form class="space-y-4" @submit.prevent="handleStaffLogin">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                Логин сотрудника
+              </label>
+              <input
+                v-model="staffUsername"
+                type="text"
+                placeholder="admin или operator"
+                class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
+                required
+              />
+            </div>
 
-          <!-- Submit -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                Пароль
+              </label>
+              <input
+                v-model="staffPassword"
+                type="password"
+                placeholder="••••••••"
+                class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
+                required
+              />
+            </div>
+
+            <div v-if="staffError" class="p-3 bg-red-50 text-red-700 rounded-xl text-xs font-bold border border-red-100">
+              {{ staffError }}
+            </div>
+
+            <button
+              type="submit"
+              :disabled="isLoading"
+              class="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-sm rounded-2xl transition-all shadow-md cursor-pointer"
+            >
+              {{ isLoading ? 'Вход...' : 'Войти в панель управления' }}
+            </button>
+          </form>
+        </div>
+
+        <!-- Mode Toggle Footer -->
+        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
           <button
-            type="submit"
-            :disabled="isLoading"
-            class="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            type="button"
+            class="text-blue-600 hover:text-blue-800 font-bold transition-colors cursor-pointer"
+            @click="isStaffMode = !isStaffMode"
           >
-            <span v-if="isLoading" class="flex items-center justify-center gap-2">
-              <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-              </svg>
-              {{ t('auth.loggingIn') }}
-            </span>
-            <span v-else>{{ t('auth.loginButton') }}</span>
+            {{ isStaffMode ? '← Назад ко входу для клиник' : '🔐 Служебный вход (Оператор / Админ)' }}
           </button>
-        </form>
 
-        <!-- Demo section (only if enableDemoLogin is true) -->
-        <div v-if="config.public.enableDemoLogin" class="mt-8 pt-6 border-t border-slate-100 text-center">
-          <div class="inline-flex items-center justify-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 text-amber-800 text-xs font-black uppercase tracking-widest mb-4">
-            🔥 Демо-доступ без регистрации
-          </div>
-          <p class="text-sm text-slate-500 mb-4 font-medium">Свободный вход для презентации</p>
-          
-          <div class="flex flex-col gap-3 mb-6">
-            <button
-              type="button"
-              class="w-full py-3.5 bg-slate-50 hover:bg-blue-50 text-slate-700 hover:text-blue-700 font-extrabold text-sm rounded-xl border-2 border-slate-200 hover:border-blue-300 transition-all flex items-center justify-center gap-2"
-              @click="quickDemoLogin('buyer')"
-            >
-              <span class="text-xl">🛒</span> Войти как Клиент (Покупатель)
-            </button>
-            <button
-              type="button"
-              class="w-full py-3.5 bg-slate-50 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 font-extrabold text-sm rounded-xl border-2 border-slate-200 hover:border-indigo-300 transition-all flex items-center justify-center gap-2"
-              @click="quickDemoLogin('supplier')"
-            >
-              <span class="text-xl">🏭</span> Войти как Поставщик (Продавец)
-            </button>
-          </div>
-
-          <div class="mb-6">
-            <NuxtLink
-              :to="localePath('/docs')"
-              class="inline-flex items-center justify-center w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm rounded-xl shadow-md transition-all gap-2"
-            >
-              <span>📄</span> Читать полную тех. документацию
-            </NuxtLink>
-          </div>
+          <NuxtLink :to="localePath('/')" class="text-slate-400 hover:text-slate-600 transition-colors">
+            На главную
+          </NuxtLink>
         </div>
-
-        <div class="mt-6 pt-6 border-t border-slate-100 text-center">
-          <p class="text-sm text-slate-500">
-            {{ t('auth.noAccount') }}
-            <NuxtLink
-              :to="localePath('/register')"
-              class="text-blue-600 hover:text-blue-700 font-medium transition-colors"
-            >
-              {{ t('auth.registerLink') }}
-            </NuxtLink>
-          </p>
-        </div>
-      </div>
-
-      <!-- Back to store -->
-      <div class="mt-6 text-center">
-        <NuxtLink
-          :to="localePath('/')"
-          class="text-sm text-slate-400 hover:text-slate-600 transition-colors"
-        >
-          ← {{ t('auth.backToStore') }}
-        </NuxtLink>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, reactive, onMounted } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 
-definePageMeta({ layout: false })
-
-const { t } = useI18n()
 const localePath = useLocalePath()
-const router = useRouter()
-const config = useRuntimeConfig()
 const authStore = useAuthStore()
+const router = useRouter()
 
-const phone = ref('')
-const password = ref('')
-const showPassword = ref(false)
+const isStaffMode = ref(false)
 const isLoading = ref(false)
 const errorMsg = ref('')
+const staffError = ref('')
+
+const clinicForm = reactive({
+  clinicName: '',
+  phone: '',
+  contactPerson: '',
+  address: ''
+})
+
+const staffUsername = ref('')
+const staffPassword = ref('')
 
 onMounted(() => {
-  authStore.initFromCookie()
-  if (authStore.isAuthenticated) {
-    redirectByRole()
+  // Try restoring saved profile from localStorage if any
+  if (import.meta.client) {
+    try {
+      const saved = localStorage.getItem('pazl_clinic_profile')
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (parsed.clinicName) clinicForm.clinicName = parsed.clinicName
+        if (parsed.phone) clinicForm.phone = parsed.phone
+        if (parsed.contactPerson) clinicForm.contactPerson = parsed.contactPerson
+        if (parsed.address) clinicForm.address = parsed.address
+      }
+    } catch {}
   }
 })
 
-async function quickDemoLogin(role: 'buyer' | 'supplier') {
-  phone.value = role === 'supplier' ? '+7 (707) 888-99-00' : '+7 (707) 777-66-55'
-  password.value = '123456'
-  await handleLogin()
+function fillQuickProfile(clinic: string, phone: string, contact: string, address: string) {
+  clinicForm.clinicName = clinic
+  clinicForm.phone = phone
+  clinicForm.contactPerson = contact
+  clinicForm.address = address
+  handleClinicLogin()
 }
 
-function redirectByRole() {
-  if (authStore.isAdmin) {
-    router.push(localePath('/admin'))
-  } else if (authStore.isOperator) {
-    router.push(localePath('/operator'))
-  } else if (authStore.isSupplier) {
-    router.push(localePath('/supplier'))
-  } else {
-    router.push(localePath('/cabinet'))
+async function handleClinicLogin() {
+  if (!clinicForm.clinicName.trim()) {
+    errorMsg.value = 'Пожалуйста, введите название клиники'
+    return
   }
-}
-
-async function handleLogin() {
-  if (!phone.value.trim() || !password.value) {
-    errorMsg.value = t('auth.fillAllFields')
+  if (!clinicForm.phone.trim()) {
+    errorMsg.value = 'Пожалуйста, укажите контактный телефон'
     return
   }
 
@@ -196,18 +257,47 @@ async function handleLogin() {
   errorMsg.value = ''
 
   try {
-    await authStore.loginByPhone(phone.value, password.value)
-    redirectByRole()
+    await authStore.loginClinic({
+      clinicName: clinicForm.clinicName,
+      phone: clinicForm.phone,
+      contactPerson: clinicForm.contactPerson,
+      address: clinicForm.address
+    })
+
+    await router.push(localePath('/cabinet'))
   } catch (err: any) {
-    const detail = err?.data?.detail || err?.message || t('auth.loginError')
-    errorMsg.value = detail
+    errorMsg.value = err.message || 'Ошибка входа в систему'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+async function handleStaffLogin() {
+  if (!staffUsername.value.trim() || !staffPassword.value.trim()) {
+    staffError.value = 'Введите логин и пароль'
+    return
+  }
+
+  isLoading.value = true
+  staffError.value = ''
+
+  try {
+    await authStore.login(staffUsername.value.trim(), staffPassword.value.trim())
+    if (authStore.isAdmin) {
+      await router.push(localePath('/admin'))
+    } else if (authStore.isOperator) {
+      await router.push(localePath('/operator'))
+    } else {
+      await router.push(localePath('/cabinet'))
+    }
+  } catch (err: any) {
+    staffError.value = err.message || 'Неверный логин или пароль'
   } finally {
     isLoading.value = false
   }
 }
 
 useSeoMeta({
-  title: () => t('auth.loginTitle') + ' | PAZL',
-  ogTitle: () => t('auth.loginTitle') + ' | PAZL'
+  title: 'Вход в личный кабинет клиники | PAZL',
 })
 </script>

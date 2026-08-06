@@ -59,6 +59,18 @@
               >
             </div>
 
+            <div>
+              <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-2">
+                Адрес доставки (город, улица, кабинет)
+              </label>
+              <input
+                v-model="form.address"
+                type="text"
+                class="w-full h-13 rounded-2xl bg-slate-100 px-4 text-slate-900 border border-transparent focus:border-blue-500 focus:bg-white focus:outline-none transition-all text-base"
+                placeholder="г. Алматы, пр. Абая 42, каб. 5"
+              >
+            </div>
+
             <p v-if="submitError" class="text-sm font-bold text-red-600 bg-red-50 p-3 rounded-xl border border-red-200">
               {{ submitError }}
             </p>
@@ -69,7 +81,7 @@
               class="w-full py-4 bg-blue-600 hover:bg-blue-500 active:scale-98 text-white font-extrabold text-lg rounded-2xl shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer mt-4"
             >
               <UIcon v-if="isSubmitting" name="i-lucide-loader-2" class="w-5 h-5 animate-spin" />
-              <span>{{ isSubmitting ? 'Отправка заказа...' : 'Подтвердить и отправить оператору' }}</span>
+              <span>{{ isSubmitting ? 'Отправка заказа...' : 'Подтвердить и отправить заказ' }}</span>
             </button>
           </form>
         </div>
@@ -154,11 +166,14 @@ const formatPrice = useFormattedPrice()
 
 onMounted(() => {
   if (authStore?.user) {
-    if (authStore.user.first_name) {
-      form.name = authStore.user.first_name + (authStore.user.last_name ? ` ${authStore.user.last_name}` : '')
+    if (authStore.user.first_name || authStore.user.company_name) {
+      form.name = authStore.user.company_name || (authStore.user.first_name + (authStore.user.last_name ? ` ${authStore.user.last_name}` : ''))
     }
     if (authStore.user.phone) {
       form.phone = authStore.user.phone
+    }
+    if ((authStore.user as any).address) {
+      form.address = (authStore.user as any).address
     }
   }
 })
@@ -168,7 +183,8 @@ const submitError = ref('')
 
 const form = reactive({
   name: '',
-  phone: ''
+  phone: '',
+  address: ''
 })
 
 const totalUnits = computed(() =>
@@ -178,9 +194,10 @@ const totalUnits = computed(() =>
 async function onSubmit() {
   const name = form.name.trim()
   const phone = form.phone.trim()
+  const address = form.address.trim()
 
   if (!name && !phone) {
-    submitError.value = 'Пожалуйста, укажите ваше имя или номер телефона'
+    submitError.value = 'Пожалуйста, укажите название клиники или номер телефона'
     return
   }
   isSubmitting.value = true
@@ -201,6 +218,7 @@ async function onSubmit() {
       body: {
         name: name || 'Стоматологическая клиника',
         phone: phone || '+7 (707) 123-45-67',
+        address: address || 'г. Алматы',
         items: orderItems
       }
     })

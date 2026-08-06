@@ -268,10 +268,13 @@ export default defineEventHandler(async (event) => {
 
     const mockOrders = stored.map((o: any) => ({
       id: o.id,
+      number: String(o.id),
       contractor_number: o.id,
       order_sum: o.total,
+      total_amount: o.total,
       currency: 'KZT',
       date_created: o.date,
+      created_at: o.date,
       date: o.date,
       status: o.status,
       status_name: o.status,
@@ -280,7 +283,9 @@ export default defineEventHandler(async (event) => {
       phone: o.phone,
       contact: o.contact || o.phone,
       total: o.total,
-      address: o.address || 'г. Алматы',
+      supplier: { id: 1, name: 'PAZL Dental' },
+      supplier_name: 'PAZL Dental',
+      delivery_address: o.address || 'г. Алматы',
       items: o.items.map((it: any, i: number) => ({
         id: i + 1,
         name: it.name,
@@ -304,15 +309,19 @@ export default defineEventHandler(async (event) => {
     if (found) {
       return {
         id: found.id,
+        number: String(found.id),
         contractor_number: found.id,
         order_sum: found.total,
+        total_amount: found.total,
         currency: 'KZT',
         date_created: found.date,
+        created_at: found.date,
         status: found.status,
         status_name: found.status,
         status_display: found.status,
-        supplier_name: 'ТОО «Стома-Маркет»',
-        pay_method_name: 'Безналичный расчет',
+        supplier: { id: 1, name: 'PAZL Dental' },
+        supplier_name: 'PAZL Dental',
+        pay_method_name: 'Безналичный расчет / Kaspi QR',
         delivery_address: found.address || 'г. Алматы',
         contact: found.contact || found.phone,
         name: found.name,
@@ -320,6 +329,7 @@ export default defineEventHandler(async (event) => {
         items: found.items.map((it: any, i: number) => ({
           id: i + 1,
           product_name: it.name,
+          name: it.name,
           quantity: it.quantity,
           price: it.price,
           total: it.price * it.quantity

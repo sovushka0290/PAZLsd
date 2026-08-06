@@ -133,9 +133,9 @@ const getStatusBadge = (status: string) => {
                   <p class="text-sm font-medium text-slate-800">{{ profile.document_file || 'Справка_госрегистрация.pdf' }}</p>
                   <p class="text-xs text-slate-500">Документ загружен и передан на модерацию администратору</p>
                 </div>
-                <a href="#" @click.prevent="alert('Просмотр документа')" class="ml-auto text-xs font-semibold text-blue-600 hover:text-blue-800">
-                  Просмотреть
-                </a>
+                <span class="ml-auto text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                  Проверено
+                </span>
               </div>
             </div>
             <div class="md:col-span-2">
