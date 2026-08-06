@@ -295,11 +295,38 @@ export default defineEventHandler(async (event) => {
   }
 
   // 10. GET /api/v2/orders/{id}/
-  const orderDetailRegex = /\/orders\/(\d+)\/?$/
+  const orderDetailRegex = /\/orders\/([^/]+)\/?$/
   const orderMatch = pathname.match(orderDetailRegex)
   if (orderMatch && orderMatch[1]) {
-    const orderId = parseInt(orderMatch[1], 10)
-    if (orderId === 301) {
+    const orderId = orderMatch[1]
+    const stored = getStoredOrders()
+    const found = stored.find((o: any) => String(o.id) === String(orderId))
+    if (found) {
+      return {
+        id: found.id,
+        contractor_number: found.id,
+        order_sum: found.total,
+        currency: 'KZT',
+        date_created: found.date,
+        status: found.status,
+        status_name: found.status,
+        status_display: found.status,
+        supplier_name: 'ТОО «Стома-Маркет»',
+        pay_method_name: 'Безналичный расчет',
+        delivery_address: found.address || 'г. Алматы',
+        contact: found.contact || found.phone,
+        name: found.name,
+        phone: found.phone,
+        items: found.items.map((it: any, i: number) => ({
+          id: i + 1,
+          product_name: it.name,
+          quantity: it.quantity,
+          price: it.price,
+          total: it.price * it.quantity
+        }))
+      }
+    }
+    if (orderId === '301') {
       return {
         id: 301,
         contractor_number: 'ORD-2026-001',
@@ -323,7 +350,7 @@ export default defineEventHandler(async (event) => {
         ]
       }
     }
-    if (orderId === 302) {
+    if (orderId === '302') {
       return {
         id: 302,
         contractor_number: 'ORD-2026-002',
