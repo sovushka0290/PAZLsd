@@ -205,14 +205,7 @@ async function onSubmit() {
       }
     })
     
-    // Save to localStorage for mock operator panel persistence on Vercel
-    try {
-      if (res && res.order) {
-        const existing = JSON.parse(localStorage.getItem('mock_orders') || '[]')
-        existing.unshift(res.order)
-        localStorage.setItem('mock_orders', JSON.stringify(existing))
-      }
-    } catch(e) {}
+    // Order saved on server via /api/web-order POST endpoint
 
     cart.clear()
     await navigateTo('/checkout/success')

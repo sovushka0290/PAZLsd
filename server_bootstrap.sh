@@ -275,6 +275,10 @@ services:
     container_name: pazl-frontend
     restart: unless-stopped
     env_file: .env
+    environment:
+      - DATA_DIR=/data
+    volumes:
+      - /data:/data
     expose:
       - "3000"
     healthcheck:

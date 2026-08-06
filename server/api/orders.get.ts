@@ -1,15 +1,6 @@
-import fs from 'node:fs'
-import path from 'node:path'
+import { defineEventHandler } from 'h3'
+import { getStoredOrders } from '../utils/orderStore'
 
-const dbPath = path.resolve(process.cwd(), 'orders.json')
-
-export default defineEventHandler((event) => {
-  if (!fs.existsSync(dbPath)) return []
-  const raw = fs.readFileSync(dbPath, 'utf-8')
-  try {
-    const list = JSON.parse(raw)
-    return list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-  } catch(e) {
-    return []
-  }
+export default defineEventHandler(() => {
+  return getStoredOrders()
 })

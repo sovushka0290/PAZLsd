@@ -53,16 +53,32 @@ export default defineEventHandler((event) => {
     return source
       .filter((product: any) => {
         const name = typeof product.name === 'string' ? product.name.trim() : ''
-        const description = (product.description ?? '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
-        const hasImage = Array.isArray(product.images) && product.images.some((img: any) => typeof img?.image === 'string' && img.image.trim())
+        if (!name || name.length < 3) return false
+        
+        // Filter out junk: clinics, phone numbers, instagram handles, doctors
+        const nameLower = name.toLowerCase()
+        const junkPatterns = [
+          /^\d{10,}$/,           // Phone numbers
+          /^[\+]?7\d{10}/,       // +7 phone numbers
+          /dental\s*clinic/i,    // "Dental Clinic" names
+          /^doctor[~\s]/i,       // Doctor names
+          /^[\+]?\s*доктор/i,
+          /клиника\s*[«"']/i,    // Clinic names in quotes (but not product descriptions)
+          /^стоматолог\s/i,      // "Стоматолог Name"
+          /дент\s+(караган|алмат|астан|шымк)/i, // "Дент Караганда" etc — city clinics
+          /🦷/,                   // Emoji tooth (social media handles)
+        ]
+        if (junkPatterns.some(p => p.test(name))) return false
+        
+        // Must have a price > 0
         const hasPrice = Array.isArray(product.modifications) && product.modifications.some((mod: any) => {
           return Array.isArray(mod?.prices) && mod.prices.some((pr: any) => {
             const value = pr?.currency_price ?? pr?.original_currency_price
-            return typeof value === 'number' && !Number.isNaN(value)
+            return typeof value === 'number' && !Number.isNaN(value) && value > 0
           })
         })
-
-        return Boolean(name && description && hasImage && hasPrice)
+        
+        return Boolean(name && hasPrice)
       })
       .map((product: any, index: number) => ({
       id: product.id ?? index + 1,

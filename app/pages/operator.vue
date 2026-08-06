@@ -738,41 +738,15 @@ const defaultOperatorOrders = [
 const { data: ordersData, pending: pendingOrders, refresh: refreshOrders } = await useAsyncData('operator-orders', async () => {
   let results: any[] = []
   try {
-    const res = await $fetch('/api/v2/operator/orders/')
-    results = Array.isArray((res as any)?.results) ? (res as any).results : (Array.isArray(res) ? res : [])
+    // Fetch orders from server API (file-based storage)
+    const res = await $fetch<any[]>('/api/orders')
+    results = Array.isArray(res) ? res : []
   } catch (e) {
     console.warn('[Operator] Orders fetch issue:', e)
   }
 
-  if (import.meta.client) {
-    try {
-      const local = JSON.parse(localStorage.getItem('mock_orders') || '[]')
-      if (local.length > 0) {
-        const formattedLocal = local.map((o: any) => ({
-          id: o.id,
-          date: o.date || new Date().toISOString(),
-          name: o.name || 'Стоматологическая клиника',
-          phone: o.phone || '+7 (707) 123-45-67',
-          contact: o.contact || o.phone || '+7 (707) 123-45-67',
-          total: o.total || 0,
-          status: normalizeStatus(o.status),
-          p2pStage: o.p2pStage || 'CREATED',
-          address: o.address || 'г. Алматы',
-          items: o.items || []
-        }))
-        const existingIds = new Set(results.map((r: any) => String(r.id)))
-        const newFromLocal = formattedLocal.filter((l: any) => !existingIds.has(String(l.id)))
-        results = [...newFromLocal, ...results]
-      }
-    } catch(e) {}
-  }
-
   if (!results || results.length === 0) {
     results = defaultOperatorOrders
-  } else {
-    const existingIds = new Set(results.map((r: any) => String(r.id)))
-    const missingDefaults = defaultOperatorOrders.filter((d: any) => !existingIds.has(String(d.id)))
-    results = [...results, ...missingDefaults]
   }
 
   return results.map((o: any) => ({
@@ -819,27 +793,21 @@ function openFeedbackDetails(feedback: any) {
   isFeedbackModalOpen.value = true
 }
 
-function updateOrderStatus(id: string, newStatus: string) {
+async function updateOrderStatus(id: string, newStatus: string) {
   try {
+    // Update on server
+    await $fetch(`/api/orders/${id}`, { method: 'PATCH', body: { status: newStatus } }).catch(() => {})
+    
+    // Update local state immediately
     if (ordersData.value) {
       const list = Array.isArray(ordersData.value) ? ordersData.value : (ordersData.value as any)?.results
       if (list) {
         const item = list.find((o: any) => String(o.id) === String(id))
-        if (item) {
-          item.status = newStatus
-        }
+        if (item) item.status = newStatus
       }
     }
     if (selectedOrder.value && String(selectedOrder.value.id) === String(id)) {
       selectedOrder.value.status = newStatus
-    }
-    if (import.meta.client) {
-      const local = JSON.parse(localStorage.getItem('mock_orders') || '[]')
-      const item = local.find((o: any) => String(o.id) === String(id))
-      if (item) {
-        item.status = newStatus
-        localStorage.setItem('mock_orders', JSON.stringify(local))
-      }
     }
     toast.add({ title: `Статус заказа изменен на "${newStatus}"`, color: 'green', icon: 'i-lucide-check-circle' })
   } catch (e) {
@@ -847,18 +815,15 @@ function updateOrderStatus(id: string, newStatus: string) {
   }
 }
 
-function deleteOrder(id: string) {
+async function deleteOrder(id: string) {
   if (!confirm(`Вы уверены, что хотите безвозвратно удалить заказ #${id}?`)) return
   try {
-    if (import.meta.client) {
-      const local = JSON.parse(localStorage.getItem('mock_orders') || '[]')
-      const updated = local.filter((o: any) => String(o.id) !== String(id))
-      localStorage.setItem('mock_orders', JSON.stringify(updated))
-    }
-    if (ordersData.value) {
-      if (Array.isArray(ordersData.value)) {
-        ordersData.value = ordersData.value.filter((o: any) => String(o.id) !== String(id))
-      }
+    // Delete on server
+    await $fetch(`/api/orders/${id}`, { method: 'DELETE' }).catch(() => {})
+    
+    // Update local state
+    if (ordersData.value && Array.isArray(ordersData.value)) {
+      ordersData.value = ordersData.value.filter((o: any) => String(o.id) !== String(id))
     }
     if (selectedOrder.value && String(selectedOrder.value.id) === String(id)) {
       isOrderModalOpen.value = false
