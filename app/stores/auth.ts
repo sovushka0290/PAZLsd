@@ -27,6 +27,30 @@ export const useAuthStore = defineStore('auth', {
     isSupplier: (state) => state.user?.role === 'supplier'
   },
   actions: {
+    async loginClinic(params: { clinicName: string; phone: string; contactPerson?: string; address?: string }) {
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('pazl_clinic_profile', JSON.stringify(params))
+        } catch {}
+      }
+
+      this.token = 'mock_clinic_token_' + Date.now()
+      this.refreshToken = 'mock_clinic_refresh'
+      this.user = {
+        id: 101,
+        phone: params.phone,
+        first_name: params.contactPerson || params.clinicName,
+        last_name: '',
+        email: '',
+        role: 'buyer',
+        phone_confirmed: true,
+        company_name: params.clinicName,
+        company_bin: '',
+        current_contractor_id: 101
+      }
+      this._saveToCookies()
+    },
+
     async loginByPhone(phone: string, password: string) {
       const config = useRuntimeConfig()
       const baseURL = import.meta.env.SSR
