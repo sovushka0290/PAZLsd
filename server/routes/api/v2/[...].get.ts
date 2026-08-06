@@ -1,5 +1,3 @@
-import { readFile } from 'node:fs/promises'
-import { join } from 'node:path'
 import {
   defineEventHandler,
   getRequestURL,
@@ -7,6 +5,7 @@ import {
   setResponseStatus
 } from 'h3'
 import { getStoredOrders } from '../../../utils/orderStore'
+import { getCatalogCategories, getCatalogProducts } from '../../../utils/catalogStore'
 
 interface Category {
   id: number
@@ -32,21 +31,9 @@ export default defineEventHandler(async (event) => {
   const pathname = u.pathname // e.g., /api/v2/categories/ or /api/v2/products_detailed/
   console.log('[Mock API v2] Request pathname:', pathname)
   
-  // Load mock DB
-  let dataRaw = ""
-  try {
-    const dataPath = join(process.cwd(), 'data', 'scraped_products_500.json')
-    dataRaw = await readFile(dataPath, 'utf-8')
-  } catch (err) {
-    console.error('[Mock API v2] Failed to read scraped_products_500.json:', err)
-    setResponseStatus(event, 500)
-    return { error: 'Mock database not found. Please run prepare_500_mock.py script first.' }
-  }
-
-  const { categories, products } = JSON.parse(dataRaw) as {
-    categories: Category[]
-    products: Product[]
-  }
+  // Statically bundled & cached catalog data (100% reliable on Vercel / serverless)
+  const categories = getCatalogCategories()
+  const products = getCatalogProducts()
   console.log('[Mock API v2] DB loaded. categories:', categories?.length, 'products:', products?.length)
 
   // Helper to paginate array

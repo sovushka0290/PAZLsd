@@ -44,14 +44,11 @@ const fallbackProducts = [
   }
 ]
 
+import { getCatalogProducts } from '../../utils/catalogStore'
+
 export default defineEventHandler(async (event) => {
   try {
-    const dataPath = path.resolve(process.cwd(), 'data/scraped_products.json')
-    const fileContent = await fs.readFile(dataPath, 'utf-8')
-    const data = JSON.parse(fileContent)
-
-    const source = Array.isArray(data) && data.length ? data : fallbackProducts
-
+    const source = getCatalogProducts()
     return source
       .filter((product: any) => {
         const name = typeof product.name === 'string' ? product.name.trim() : ''

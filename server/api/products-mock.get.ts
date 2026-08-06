@@ -44,13 +44,11 @@ const fallbackProducts = [
   }
 ]
 
+import { getCatalogProducts } from '../utils/catalogStore'
+
 export default defineEventHandler((event) => {
   try {
-    const filePath = resolve(process.cwd(), 'data/scraped_products.json')
-    const fileContent = readFileSync(filePath, 'utf-8')
-    const data = JSON.parse(fileContent)
-
-    const source = Array.isArray(data) && data.length ? data : fallbackProducts
+    const source = getCatalogProducts()
 
     return source
       .filter((product: any) => {

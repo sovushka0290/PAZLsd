@@ -127,6 +127,9 @@ export function getProducts(): ProductItem[] {
   return loadCatalog().products
 }
 
+export const getCatalogCategories = getCategories
+export const getCatalogProducts = getProducts
+
 export function getProductById(id: number): ProductItem | undefined {
   return loadCatalog().products.find(p => p.id === id)
 }
