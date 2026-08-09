@@ -52,24 +52,14 @@
                 :key="item.id"
                 class="flex gap-4 rounded-xl border border-gray-100 bg-white p-3 shadow-sm transition-shadow hover:shadow-md dark:border-neutral-800 dark:bg-neutral-950"
               >
-                <!-- Item Image -->
-                <div class="h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-gray-50 dark:bg-neutral-900">
-                  <img
-                    :src="item.image"
-                    :alt="item.name"
-                    class="h-full w-full object-contain p-2 mix-blend-multiply dark:mix-blend-normal"
-                    width="96"
-                    height="96"
-                    loading="lazy"
-                  >
-                </div>
+
 
                 <!-- Item Details -->
                 <div class="flex flex-1 flex-col justify-between min-w-0">
                   <div class="flex items-start justify-between gap-2">
                     <div class="min-w-0">
-                      <span v-if="item.brand" class="mb-0.5 block text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
-                        {{ item.brand }}
+                      <span v-if="item.manufacturer" class="mb-0.5 block text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                        {{ item.manufacturer }}
                       </span>
                       <h4 class="truncate text-sm font-semibold text-gray-900 dark:text-white" :title="item.name">
                         {{ item.name }}

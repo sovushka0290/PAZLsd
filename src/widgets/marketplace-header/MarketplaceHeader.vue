@@ -188,16 +188,16 @@
                 <h4 class="font-bold text-sm text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">
                   {{ cat.name }}
                 </h4>
-                <p class="text-xs text-slate-400 font-medium">{{ cat.count }} товаров</p>
+                <p class="text-xs text-slate-400 font-medium">{{ cat.products_count || 0 }} товаров</p>
               </div>
             </div>
             <ul class="space-y-1.5 pl-2 border-l-2 border-slate-100 group-hover:border-blue-300 transition-colors">
               <li
                 v-for="sub in cat.subcategories"
-                :key="sub"
+                :key="sub.id"
                 class="text-xs text-slate-600 hover:text-blue-600 font-medium transition-colors"
               >
-                • {{ sub }}
+                • {{ sub.name }}
               </li>
             </ul>
           </div>
@@ -228,50 +228,21 @@ const router = useRouter()
 
 const isMegaMenuOpen = ref(false)
 
-const megaMenuCategories = [
-  {
-    slug: 'terapiya',
-    name: 'Терапия',
-    count: 245,
-    icon: 'i-lucide-stethoscope',
-    subcategories: ['Пломбировочные материалы', 'Адгезивы и протравки', 'Слепочные массы', 'Полировочные системы']
-  },
-  {
-    slug: 'endodontiya',
-    name: 'Эндодонтия',
-    count: 180,
-    icon: 'i-lucide-activity',
-    subcategories: ['Эндодонтические файлы', 'Силеры и гуттаперча', 'Апекслокаторы', 'Ирригационные растворы']
-  },
-  {
-    slug: 'ortopediya',
-    name: 'Ортопедия',
-    count: 210,
-    icon: 'i-lucide-smile',
-    subcategories: ['Цементы для фиксации', 'Оттискные ложки', 'Временные коронки', 'Артикуляторы']
-  },
-  {
-    slug: 'oborudovanie',
-    name: 'Оборудование',
-    count: 165,
-    icon: 'i-lucide-zap',
-    subcategories: ['Стоматологические установки', 'Реакторы и автоклавы', 'Скалеры и наконечники', 'Полимеризационные лампы']
-  },
-  {
-    slug: 'khirurgiya',
-    name: 'Хирургия и Имплантология',
-    count: 195,
-    icon: 'i-lucide-scissors',
-    subcategories: ['Имплантационные системы', 'Костные материалы', 'Шовный материал', 'Хирургические инструменты']
-  },
-  {
-    slug: 'rashodniki',
-    name: 'Расходные материалы',
-    count: 458,
-    icon: 'i-lucide-package',
-    subcategories: ['Маски и перчатки', 'Слюноотсосы и валики', 'Дезинфекция и стерилизация', 'Одноразовые лотки']
+const megaMenuCategories = ref<any[]>([])
+const api = useMarketplaceApi()
+
+onMounted(async () => {
+  try {
+    const allCategories = await api.fetchAllCategories()
+    const rootCategories = allCategories.filter(c => c.parent === null)
+    megaMenuCategories.value = rootCategories.map(c => ({
+      ...c,
+      icon: 'i-lucide-folder'
+    }))
+  } catch (err) {
+    console.warn('[MarketplaceHeader] Failed to load categories:', err)
   }
-]
+})
 
 function navigateToCategory(slug: string) {
   isMegaMenuOpen.value = false

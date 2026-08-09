@@ -37,6 +37,33 @@
           <span>{{ pill.name }}</span>
         </button>
       </div>
+      
+      <!-- Subcategory Pills Row -->
+      <div v-if="subcategories.length > 0" class="flex items-center gap-2 min-w-max mt-3">
+        <button
+          @click="selectSubcategory(null)"
+          class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border"
+          :class="selectedSubcategory === null
+            ? 'bg-blue-100 text-blue-700 border-blue-200'
+            : 'bg-white text-slate-600 border-slate-200/80 hover:bg-slate-50'
+          "
+        >
+          <span>Все подкатегории</span>
+        </button>
+        <button
+          v-for="sub in subcategories"
+          :key="sub.id"
+          @click="selectSubcategory(sub.id.toString())"
+          class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border"
+          :class="selectedSubcategory === sub.id.toString()
+            ? 'bg-blue-100 text-blue-700 border-blue-200'
+            : 'bg-white text-slate-600 border-slate-200/80 hover:bg-slate-50'
+          "
+        >
+          <span>{{ sub.name }}</span>
+          <span v-if="sub.product_count" class="opacity-70 text-[10px]">({{ sub.product_count }})</span>
+        </button>
+      </div>
     </div>
 
     <!-- Products Section -->
@@ -77,7 +104,7 @@
 
         <div
           v-else
-          class="grid grid-cols-2 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+          class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3"
         >
           <ProductCard
             v-for="product in filteredProducts"
@@ -125,7 +152,7 @@
             :class="selectedCategory === pill.slug ? 'bg-blue-600 text-white' : 'text-slate-700 hover:bg-slate-100'"
             @click="selectCategory(pill.slug); isMobileDrawerOpen = false"
           >
-            <UIcon :name="pill.icon" class="w-5 h-5" />
+            <UIcon :name="pill.icon || 'i-lucide-folder'" class="w-5 h-5" />
             <span>{{ pill.name }}</span>
           </div>
         </div>
@@ -158,15 +185,11 @@ const categoryTree = ref<CategoryTreeNode[]>([])
 const expandedCategoryIds = ref<Set<number>>(new Set())
 const isMobileDrawerOpen = ref(false)
 
-const categoryPills = [
-  { slug: 'all', name: 'Все товары' },
-  { slug: 'terapiya', name: 'Терапия' },
-  { slug: 'endodontiya', name: 'Эндодонтия' },
-  { slug: 'ortopediya', name: 'Ортопедия' },
-  { slug: 'oborudovanie', name: 'Оборудование' },
-  { slug: 'khirurgiya', name: 'Хирургия' },
-  { slug: 'rashodniki', name: 'Расходники' }
-]
+const categoryPills = computed(() => {
+  const rootCats = allCategories.value.filter(c => c.parent === null)
+  const pills = rootCats.map(c => ({ slug: c.slug, name: c.name, icon: 'i-lucide-folder' }))
+  return [{ slug: 'all', name: 'Все товары', icon: 'i-lucide-layout-grid' }, ...pills]
+})
 
 const isProductModalOpen = ref(false)
 const selectedProductForModal = ref<ProductViewModel | null>(null)
@@ -176,6 +199,18 @@ const loadState = ref<'idle' | 'loading' | 'error'>('idle')
 const loadMoreState = ref<'idle' | 'loading'>('idle')
 
 const selectedCategory = ref<'all' | string>('all')
+const selectedSubcategory = ref<string | null>(null)
+
+const subcategories = computed(() => {
+  if (selectedCategory.value === 'all') return []
+  const cat = allCategories.value.find(c => c.slug === selectedCategory.value)
+  return cat?.subcategories || []
+})
+
+function selectSubcategory(id: string | null) {
+  selectedSubcategory.value = id
+}
+
 const searchDebounced = ref(props.searchQuery)
 const products = ref<ProductViewModel[]>([])
 const page = ref(1)
@@ -233,6 +268,11 @@ const filteredProducts = computed(() => {
         || p.description.toLowerCase().includes(q)
     )
   }
+  
+  if (selectedSubcategory.value) {
+    list = list.filter(p => p.categoryId === selectedSubcategory.value)
+  }
+  
   return list
 })
 
@@ -325,6 +365,7 @@ async function loadMore() {
 
 function selectCategory(slug: string) {
   selectedCategory.value = slug
+  selectedSubcategory.value = null
   isMobileDrawerOpen.value = false
 
   if (slug === 'all') return

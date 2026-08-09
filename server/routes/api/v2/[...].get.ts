@@ -7,31 +7,11 @@ import {
 import { getStoredOrders } from '../../../utils/orderStore'
 import { getCatalogCategories, getCatalogProducts } from '../../../utils/catalogStore'
 
-interface Category {
-  id: number
-  name: string
-  slug: string
-  parent: number | null
-  products_count?: number
-}
-
-interface Product {
-  id: number
-  name: string
-  code?: string
-  category: number
-  category_detail?: { id: number; name: string; slug: string }
-  description: string
-  images?: { id: number; image: string; is_base?: boolean }[]
-  modifications?: any[]
-}
-
 export default defineEventHandler(async (event) => {
   const u = new URL(getRequestURL(event).href)
   const pathname = u.pathname.endsWith('/') ? u.pathname : `${u.pathname}/`
   console.log('[Mock API v2] Request pathname:', pathname)
   
-  // Statically bundled & cached catalog data (100% reliable on Vercel / serverless)
   const categories = getCatalogCategories()
   const products = getCatalogProducts()
   console.log('[Mock API v2] DB loaded. categories:', categories?.length, 'products:', products?.length)
@@ -51,31 +31,19 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  // Calculate products count per category (including all nested subcategories recursively)
-  const getAllSubCatIds = (catId: number): number[] => {
-    const children = categories.filter(c => c.parent === catId).map(c => c.id)
-    let all = [...children]
-    for (const childId of children) {
-      all = all.concat(getAllSubCatIds(childId))
-    }
-    return all
-  }
-
+  // Calculate products count per category
   const getProductCount = (catId: number): number => {
-    const targetCatIds = [catId, ...getAllSubCatIds(catId)]
-    return products.filter(p => targetCatIds.includes(p.category)).length
+    return products.filter(p => p.category === catId).length
   }
 
   setResponseHeader(event, 'content-type', 'application/json; charset=utf-8')
 
   // 1. GET /api/v2/categories/
   if (pathname.endsWith('/categories/')) {
-    console.log('[Mock API v2] Handling /categories/')
     const results = categories.map(c => ({
       ...c,
-      products_count: getProductCount(c.id)
+      products_count: c.products_count || getProductCount(c.id)
     }))
-    console.log('[Mock API v2] Done categories mapping')
     return {
       count: results.length,
       next: null,
@@ -86,14 +54,12 @@ export default defineEventHandler(async (event) => {
 
   // 2. GET /api/v2/categories/root/
   if (pathname.endsWith('/categories/root/')) {
-    console.log('[Mock API v2] Handling /categories/root/')
     const results = categories
       .filter(c => c.parent === null)
       .map(c => ({
         ...c,
-        products_count: getProductCount(c.id)
+        products_count: c.products_count || getProductCount(c.id)
       }))
-    console.log('[Mock API v2] Done categories root mapping')
     return {
       count: results.length,
       next: null,
@@ -108,11 +74,41 @@ export default defineEventHandler(async (event) => {
     if (!q || q.length < 2) {
       return { categories: [], products: [] }
     }
-    const matchedCategories = categories.filter(c => c.name.toLowerCase().includes(q)).slice(0, 5)
+    // Search in categories and subcategories
+    const matchedCategories = categories.filter(c => 
+      c.name.toLowerCase().includes(q) ||
+      (c.subcategories || []).some(sub => sub.name.toLowerCase().includes(q))
+    ).slice(0, 5)
+    
+    // Search in products by name, sku, manufacturer, description
     const matchedProducts = products.filter(p => 
       p.name.toLowerCase().includes(q) || 
-      (p.code && p.code.toLowerCase().includes(q))
-    ).slice(0, 8)
+      (p.sku && p.sku.toLowerCase().includes(q)) ||
+      (p.code && p.code.toLowerCase().includes(q)) ||
+      (p.manufacturer && p.manufacturer.toLowerCase().includes(q)) ||
+      (p.subcategory && p.subcategory.toLowerCase().includes(q))
+    ).slice(0, 10)
+    return {
+      categories: matchedCategories,
+      products: matchedProducts
+    }
+  }
+
+  // 2.6 GET /api/v2/search_fast/
+  if (pathname.endsWith('/search_fast/')) {
+    const q = (u.searchParams.get('query') || '').trim().toLowerCase()
+    if (!q || q.length < 2) {
+      return { categories: [], products: [] }
+    }
+    const matchedCategories = categories.filter(c => 
+      c.name.toLowerCase().includes(q) ||
+      (c.subcategories || []).some(sub => sub.name.toLowerCase().includes(q))
+    ).slice(0, 5)
+    const matchedProducts = products.filter(p => 
+      p.name.toLowerCase().includes(q) || 
+      (p.sku && p.sku.toLowerCase().includes(q)) ||
+      (p.manufacturer && p.manufacturer.toLowerCase().includes(q))
+    ).slice(0, 10)
     return {
       categories: matchedCategories,
       products: matchedProducts
@@ -125,32 +121,31 @@ export default defineEventHandler(async (event) => {
   if (catMatch && catMatch[1]) {
     const catSlugOrId = decodeURIComponent(catMatch[1])
     const search = (u.searchParams.get('search') || '').trim().toLowerCase()
+    const subcategoryFilter = (u.searchParams.get('subcategory') || '').trim()
     const page = parseInt(u.searchParams.get('page') || '1', 10)
-    const pageSize = parseInt(u.searchParams.get('page_size') || '20', 10)
+    const pageSize = parseInt(u.searchParams.get('page_size') || '50', 10)
 
-    // Find category
+    // Find category by slug or id
     const cat = categories.find(c => c.slug === catSlugOrId || String(c.id) === catSlugOrId)
     if (!cat) {
       return { count: 0, next: null, previous: null, results: [] }
     }
 
-    // Recursively collect all descendant category IDs
-    const getAllSubCategoryIds = (parentId: number): number[] => {
-      const children = categories.filter(c => c.parent === parentId).map(c => c.id)
-      let all = [...children]
-      for (const childId of children) {
-        all = all.concat(getAllSubCategoryIds(childId))
-      }
-      return all
+    let filtered = products.filter(p => p.category === cat.id)
+    
+    // Filter by subcategory if specified
+    if (subcategoryFilter) {
+      filtered = filtered.filter(p => p.subcategory === subcategoryFilter)
     }
-
-    const targetCatIds = [cat.id, ...getAllSubCategoryIds(cat.id)]
-
-    let filtered = products.filter(p => targetCatIds.includes(p.category))
+    
+    // Search across multiple fields
     if (search) {
       filtered = filtered.filter(p => 
         p.name.toLowerCase().includes(search) || 
-        p.description.toLowerCase().includes(search)
+        p.description.toLowerCase().includes(search) ||
+        (p.sku && p.sku.toLowerCase().includes(search)) ||
+        (p.manufacturer && p.manufacturer.toLowerCase().includes(search)) ||
+        (p.subcategory && p.subcategory.toLowerCase().includes(search))
       )
     }
 
@@ -160,15 +155,36 @@ export default defineEventHandler(async (event) => {
   // 4. GET /api/v2/products_detailed/ or /api/v2/my_products/
   if (pathname.endsWith('/products_detailed/') || pathname.endsWith('/my_products/')) {
     const search = (u.searchParams.get('search') || '').trim().toLowerCase()
+    const categoryFilter = (u.searchParams.get('category') || '').trim()
+    const subcategoryFilter = (u.searchParams.get('subcategory') || '').trim()
     const page = parseInt(u.searchParams.get('page') || '1', 10)
-    const pageSize = parseInt(u.searchParams.get('page_size') || '20', 10)
+    const pageSize = parseInt(u.searchParams.get('page_size') || '50', 10)
 
     let filtered = products
+    
+    // Category filter
+    if (categoryFilter) {
+      const cat = categories.find(c => c.slug === categoryFilter || String(c.id) === categoryFilter)
+      if (cat) {
+        filtered = filtered.filter(p => p.category === cat.id)
+      }
+    }
+    
+    // Subcategory filter
+    if (subcategoryFilter) {
+      filtered = filtered.filter(p => p.subcategory === subcategoryFilter)
+    }
+    
+    // Full-text search across multiple fields
     if (search) {
-      filtered = products.filter(p => 
+      filtered = filtered.filter(p => 
         p.name.toLowerCase().includes(search) || 
         p.description.toLowerCase().includes(search) ||
-        (p.code && p.code.toLowerCase().includes(search))
+        (p.sku && p.sku.toLowerCase().includes(search)) ||
+        (p.code && p.code.toLowerCase().includes(search)) ||
+        (p.manufacturer && p.manufacturer.toLowerCase().includes(search)) ||
+        (p.subcategory && p.subcategory.toLowerCase().includes(search)) ||
+        (p.category_name && p.category_name.toLowerCase().includes(search))
       )
     }
 
@@ -279,52 +295,19 @@ export default defineEventHandler(async (event) => {
   const orderMatch = pathname.match(orderDetailRegex)
   if (orderMatch && orderMatch[1]) {
     const orderId = parseInt(orderMatch[1], 10)
-    if (orderId === 301) {
+    const stored = getStoredOrders()
+    const order = stored.find((o: any) => o.id === orderId)
+    if (order) {
       return {
-        id: 301,
-        contractor_number: 'ORD-2026-001',
-        order_sum: 250000,
+        id: order.id,
+        contractor_number: `ORD-${order.id}`,
+        order_sum: order.total,
         currency: 'KZT',
-        date_created: '2026-07-15T12:00:00Z',
-        status: 4,
-        status_name: 'Отгружен',
-        status_display: 'Отгружен',
-        supplier_name: 'ТОО «Альянс-Дент»',
-        pay_method_name: 'Безналичный расчет',
-        delivery_address: 'г. Алматы, ул. Абая 42',
-        items: [
-          {
-            id: 1,
-            product_name: products[0]?.name || 'Тестовый товар 1',
-            quantity: 2,
-            price: products[0]?.modifications?.[0]?.prices?.[0]?.currency_price || 125000,
-            total: (products[0]?.modifications?.[0]?.prices?.[0]?.currency_price || 125000) * 2
-          }
-        ]
-      }
-    }
-    if (orderId === 302) {
-      return {
-        id: 302,
-        contractor_number: 'ORD-2026-002',
-        order_sum: 47500,
-        currency: 'KZT',
-        date_created: '2026-07-20T10:30:00Z',
-        status: 1,
-        status_name: 'Обработка',
-        status_display: 'Обработка',
-        supplier_name: 'ТОО «Стома-Маркет»',
-        pay_method_name: 'Оплата картой',
-        delivery_address: 'г. Алматы, ул. Абая 42',
-        items: [
-          {
-            id: 2,
-            product_name: products[1]?.name || 'Тестовый товар 2',
-            quantity: 10,
-            price: products[1]?.modifications?.[0]?.prices?.[0]?.currency_price || 4750,
-            total: (products[1]?.modifications?.[0]?.prices?.[0]?.currency_price || 4750) * 10
-          }
-        ]
+        date_created: order.date,
+        status: order.status,
+        status_name: order.status,
+        status_display: order.status,
+        items: order.items
       }
     }
     setResponseStatus(event, 404)

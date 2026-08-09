@@ -6,15 +6,32 @@ export interface ProductViewModel {
   categoryId: string
   /** Resolved label for UI (from API). */
   categoryName: string
+  /** Subcategory name */
+  subcategory?: string
   /** `null` when the backend has no price in modifications / measure_prices. */
   price: number | null
+  /** Max price if range exists */
+  maxPrice?: number | null
   /** ISO 4217 from the winning price row (e.g. `KZT`). */
   currencyCode: string | null
-  image: string
   name: string
   description: string
+  /** SKU / Article number */
+  sku?: string
   /** Brand or Manufacturer name */
-  brand?: string
+  manufacturer?: string
+  /** Country of origin */
+  country?: string
+  /** Unit of measurement */
+  unit?: string
+  /** Shelf life / warranty */
+  shelfLife?: string
+  /** Registration number */
+  regNumber?: string
+  /** Number of suppliers */
+  supplierCount?: number
+  /** Stock quantity */
+  stock?: number
   /** Marketing badges like New, Hit, Sale */
   stickers?: string[]
 }

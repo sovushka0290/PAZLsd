@@ -13,6 +13,7 @@ export interface ApiCategory {
   parent: number | null
   products_count?: number
   hidden?: boolean
+  subcategories?: { id: string; name: string; product_count: number }[]
 }
 
 export interface ApiCompactCategoryResponse {
@@ -44,9 +45,20 @@ export interface ApiProductDetailed {
   id: number
   name: string
   code?: string
+  sku?: string
   description?: string
   category?: number
   category_detail?: { id: number, name: string }
+  subcategory?: string
+  manufacturer?: string
+  country?: string
+  unit?: string
+  min_price?: number | null
+  max_price?: number | null
+  stock?: number
+  supplier_count?: number
+  shelf_life?: string | null
+  reg_number?: string | null
   images?: ApiProductImage[]
   modifications?: ApiProductModification[]
   measure_prices?: unknown[]

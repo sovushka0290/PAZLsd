@@ -1,9 +1,5 @@
 import type { ApiProductDetailed } from '@fsd/shared/api/types'
 import type { ProductViewModel } from '@fsd/entities/product/model/types'
-import { resolveMediaUrl } from '@fsd/shared/lib/resolveMediaUrl'
-
-const PLACEHOLDER_IMAGE
-  = 'https://placehold.co/400x400/e5e7eb/6b7280?text=PAZL'
 
 function stripHtml(text: string | undefined): string {
   return (text ?? '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
@@ -11,16 +7,24 @@ function stripHtml(text: string | undefined): string {
 
 export function shouldShowInCatalog(product: Partial<ApiProductDetailed>): boolean {
   const name = product.name?.trim()
-  
-  // Temporarily return true if name exists, regardless of image or price or description
-  // This will show all products while backend image/price issues are being debugged.
   return Boolean(name)
 }
 
 export function extractPriceFromDetailed(product: ApiProductDetailed): {
   price: number | null
+  maxPrice: number | null
   currencyCode: string | null
 } {
+  // New format: min_price / max_price directly on product
+  if (product.min_price != null) {
+    return {
+      price: product.min_price,
+      maxPrice: product.max_price ?? product.min_price,
+      currencyCode: 'KZT'
+    }
+  }
+
+  // Fallback: old format with modifications
   let min: number | null = null
   let currencyAtMin: string | null = null
   for (const m of product.modifications ?? []) {
@@ -35,7 +39,7 @@ export function extractPriceFromDetailed(product: ApiProductDetailed): {
       }
     }
   }
-  return { price: min, currencyCode: currencyAtMin }
+  return { price: min, maxPrice: null, currencyCode: currencyAtMin ?? 'KZT' }
 }
 
 function pickDescription(product: ApiProductDetailed): string {
@@ -43,16 +47,7 @@ function pickDescription(product: ApiProductDetailed): string {
   if (cleaned) {
     return cleaned
   }
-  const firstMod = product.modifications?.[0]
-  if (firstMod?.name && firstMod.name !== product.name) {
-    return firstMod.name
-  }
   return product.category_detail?.name ?? ''
-}
-
-function pickImage(product: ApiProductDetailed): string {
-  const raw = product.images?.find(i => i.image)?.image
-  return resolveMediaUrl(raw) ?? PLACEHOLDER_IMAGE
 }
 
 export function apiProductToViewModel(
@@ -60,37 +55,26 @@ export function apiProductToViewModel(
   categorySlug: string,
   categoryName: string
 ): ProductViewModel {
-  if (!shouldShowInCatalog(product)) {
-    return {
-      id: product.id,
-      categoryId: categorySlug,
-      categoryName,
-      price: null,
-      currencyCode: null,
-      image: PLACEHOLDER_IMAGE,
-      name: product.name ?? 'Товар',
-      description: stripHtml(product.description),
-      brand: '',
-      stickers: undefined
-    }
-  }
-  const { price, currencyCode } = extractPriceFromDetailed(product)
-  
-  // TODO: Replace with real data from backend when available
-  const mockStickers = []
-  if (product.id % 5 === 0) mockStickers.push('Хит')
-  if (product.id % 7 === 0) mockStickers.push('Новинка')
+  const { price, maxPrice, currencyCode } = extractPriceFromDetailed(product)
 
   return {
     id: product.id,
     categoryId: categorySlug,
     categoryName,
+    subcategory: product.subcategory ?? undefined,
     price,
+    maxPrice,
     currencyCode,
-    image: pickImage(product),
     name: product.name,
     description: pickDescription(product),
-    brand: product.name.split(' ')[0], // Dummy brand based on first word
-    stickers: mockStickers.length ? mockStickers : undefined
+    sku: product.sku ?? product.code ?? undefined,
+    manufacturer: product.manufacturer ?? undefined,
+    country: product.country ?? undefined,
+    unit: product.unit ?? 'шт',
+    shelfLife: product.shelf_life ?? undefined,
+    regNumber: product.reg_number ?? undefined,
+    supplierCount: product.supplier_count ?? undefined,
+    stock: product.stock ?? undefined,
+    stickers: undefined
   }
 }

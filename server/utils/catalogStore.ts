@@ -1,7 +1,8 @@
 // server/utils/catalogStore.ts
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs'
 import { join, dirname } from 'path'
-import dbData from '../../data/scraped_products_500.json'
+import catalogProducts from '../../data/catalog-products.json'
+import catalogCategories from '../../data/categories.json'
 
 export interface CategoryItem {
   id: number
@@ -10,18 +11,30 @@ export interface CategoryItem {
   parent: number | null
   icon?: string
   products_count?: number
+  subcategories?: { id: string; name: string; product_count: number }[]
 }
 
 export interface ProductItem {
   id: number
   name: string
   code?: string
+  sku?: string
   category: number
+  category_name?: string
+  subcategory?: string
   category_detail?: { id: number; name: string; slug: string }
   description: string
+  manufacturer?: string
+  country?: string
+  unit?: string
+  min_price?: number | null
+  max_price?: number | null
+  stock?: number
+  supplier_count?: number
+  shelf_life?: string | null
+  reg_number?: string | null
   images?: { id: number; image: string; is_base?: boolean }[]
   modifications?: any[]
-  stock?: number
   brand?: string
   supplier_name?: string
   is_custom?: boolean
@@ -37,36 +50,99 @@ interface CatalogData {
 
 let catalogCache: CatalogData | null = null
 
+function slugify(text: string): string {
+  const map: Record<string, string> = {
+    'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo',
+    'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm',
+    'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
+    'ф': 'f', 'х': 'kh', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'shch',
+    'ы': 'y', 'э': 'e', 'ю': 'yu', 'я': 'ya', 'ь': '', 'ъ': '',
+    ' ': '-', ',': '', '.': '', '(': '', ')': '', '/': '-', '«': '', '»': ''
+  }
+  return text
+    .toLowerCase()
+    .split('')
+    .map(ch => map[ch] ?? ch)
+    .join('')
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
+function getAutoIcon(name: string): string {
+  const n = (name || '').toLowerCase()
+  if (n.includes('анестез') || n.includes('гемостат')) return '💉'
+  if (n.includes('дезинфек') || n.includes('стерилиз')) return '🧼'
+  if (n.includes('имплант') || n.includes('хирург')) return '🔪'
+  if (n.includes('инструмент') || n.includes('бор') || n.includes('фрез')) return '🪛'
+  if (n.includes('красител') || n.includes('вспомогат')) return '🎨'
+  if (n.includes('оборудов')) return '⚙️'
+  if (n.includes('ортодонт')) return '😁'
+  if (n.includes('ортопед') || n.includes('зуботехн')) return '👑'
+  if (n.includes('полиров') || n.includes('шлифов')) return '✨'
+  if (n.includes('профилакт') || n.includes('гигиен')) return '🪥'
+  if (n.includes('реставрац') || n.includes('пломб')) return '🦷'
+  if (n.includes('сиз') || n.includes('расходн')) return '📦'
+  if (n.includes('эндодонт')) return '📍'
+  if (n.includes('прочее')) return '📋'
+  return '🦷'
+}
+
 function loadCatalog(): CatalogData {
   if (catalogCache) return catalogCache
 
-  // Start with base data from scraped_products_500.json
-  const baseCategories: CategoryItem[] = (dbData.categories || []).map((c: any) => ({
-    id: c.id,
-    name: c.name,
-    slug: c.slug || `cat-${c.id}`,
-    parent: c.parent ?? null,
-    icon: c.icon || getAutoIcon(c.name)
+  // Build categories from categories.json
+  const baseCategories: CategoryItem[] = (catalogCategories as any[]).map((cat: any) => ({
+    id: parseInt(cat.id, 10),
+    name: cat.name,
+    slug: slugify(cat.name),
+    parent: null,
+    icon: getAutoIcon(cat.name),
+    products_count: cat.product_count || 0,
+    subcategories: (cat.subcategories || []).map((sub: any) => ({
+      id: sub.id,
+      name: sub.name,
+      product_count: sub.product_count || 0
+    }))
   }))
 
-  const baseProducts: ProductItem[] = (dbData.products || []).map((p: any) => ({
-    id: p.id,
-    name: p.name,
-    code: p.code || `SKU-${p.id}`,
-    category: p.category,
-    category_detail: p.category_detail,
-    description: p.description || '',
-    images: p.images || [],
-    modifications: p.modifications || [
-      {
-        id: p.id * 10,
-        name: p.name,
-        prices: [{ currency_price: 15000, price_type: 1 }]
-      }
-    ],
-    stock: p.stock ?? 25,
-    brand: p.brand || 'PAZL Dental'
-  }))
+  // Build products from catalog-products.json
+  const baseProducts: ProductItem[] = (catalogProducts as any[]).map((p: any) => {
+    // Find the category for this product
+    const cat = baseCategories.find(c => c.name === p.category)
+    const catId = cat ? cat.id : 0
+
+    return {
+      id: p.id,
+      name: p.name,
+      code: p.sku || `SKU-${p.id}`,
+      sku: p.sku || '',
+      category: catId,
+      category_name: p.category || '',
+      subcategory: p.subcategory || '',
+      category_detail: cat ? { id: cat.id, name: cat.name, slug: cat.slug } : undefined,
+      description: p.description || '',
+      manufacturer: p.manufacturer || '',
+      country: p.country || '',
+      unit: p.unit || 'шт',
+      min_price: p.min_price ?? null,
+      max_price: p.max_price ?? null,
+      stock: p.stock ?? 0,
+      supplier_count: p.supplier_count ?? 1,
+      shelf_life: p.shelf_life || null,
+      reg_number: p.reg_number || null,
+      images: [],
+      modifications: p.min_price != null ? [
+        {
+          id: p.id * 10,
+          name: p.modification || p.name,
+          prices: [{ currency_price: p.min_price, currency: 'KZT', price_type: 1 }]
+        }
+      ] : [],
+      brand: p.manufacturer || '',
+      supplier_name: ''
+    }
+  })
 
   catalogCache = {
     categories: baseCategories,
@@ -102,23 +178,6 @@ function saveCatalog(): void {
   }
 }
 
-function getAutoIcon(name: string): string {
-  const n = (name || '').toLowerCase()
-  if (n.includes('зуб') || n.includes('пломб') || n.includes('дент')) return '🦷'
-  if (n.includes('инструмент') || n.includes('бор') || n.includes('фрез')) return '🪛'
-  if (n.includes('наконечник') || n.includes('лампа') || n.includes('скалер')) return '🔦'
-  if (n.includes('стерил') || n.includes('автоклав') || n.includes('дезинф')) return '🧼'
-  if (n.includes('перчатк') || n.includes('маск') || n.includes('защит')) return '🧤'
-  if (n.includes('оттиск') || n.includes('слепоч') || n.includes('слепок')) return '🥣'
-  if (n.includes('ортопед') || n.includes('коронк') || n.includes('мост')) return '👑'
-  if (n.includes('хирург') || n.includes('имплант') || n.includes('шовн')) return '💉'
-  if (n.includes('эндодонт') || n.includes('канал') || n.includes('файл')) return '📍'
-  if (n.includes('гигиен') || n.includes('щетк') || n.includes('паст')) return '🪥'
-  if (n.includes('оборудован') || n.includes('установк') || n.includes('компрессор')) return '⚙️'
-  if (n.includes('расход') || n.includes('ват') || n.includes('валик')) return '📦'
-  return '🦷'
-}
-
 export function getCategories(): CategoryItem[] {
   return loadCatalog().categories
 }
@@ -140,7 +199,7 @@ export function addCategory(category: { name: string; parent?: number | null; ic
   const newCategory: CategoryItem = {
     id: newId,
     name: category.name,
-    slug: `cat-${newId}`,
+    slug: slugify(category.name),
     parent: category.parent ?? null,
     icon: category.icon || '🦷'
   }
@@ -184,19 +243,20 @@ export function addProduct(product: {
   supplier_name?: string
 }): ProductItem {
   const data = loadCatalog()
-  const newId = Math.max(...data.products.map(p => p.id), 2000) + 1
+  const newId = Math.max(...data.products.map(p => p.id), 20000) + 1
   const cat = data.categories.find(c => c.id === product.category)
 
   const newProduct: ProductItem = {
     id: newId,
     name: product.name,
     code: product.code || `SKU-${newId}`,
+    sku: product.code || `SKU-${newId}`,
     category: product.category,
     category_detail: cat ? { id: cat.id, name: cat.name, slug: cat.slug } : undefined,
     description: product.description || '',
-    images: product.image
-      ? [{ id: newId * 10, image: product.image, is_base: true }]
-      : [{ id: newId * 10, image: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=400&q=80', is_base: true }],
+    min_price: product.price,
+    max_price: product.price,
+    images: [],
     modifications: [
       {
         id: newId * 10,
@@ -205,8 +265,8 @@ export function addProduct(product: {
       }
     ],
     stock: product.stock ?? 50,
-    brand: product.brand || 'PAZL Dental',
-    supplier_name: product.supplier_name || 'PAZL Partner',
+    brand: product.brand || '',
+    supplier_name: product.supplier_name || '',
     is_custom: true
   }
 
@@ -233,6 +293,8 @@ export function updateProduct(id: number, fields: {
       if (prod.modifications?.[0]) prod.modifications[0].name = fields.name
     }
     if (fields.price !== undefined) {
+      prod.min_price = fields.price
+      prod.max_price = fields.price
       if (prod.modifications?.[0]?.prices?.[0]) {
         prod.modifications[0].prices[0].currency_price = fields.price
       } else {
@@ -245,9 +307,6 @@ export function updateProduct(id: number, fields: {
       if (cat) prod.category_detail = { id: cat.id, name: cat.name, slug: cat.slug }
     }
     if (fields.description !== undefined) prod.description = fields.description
-    if (fields.image !== undefined) {
-      prod.images = [{ id: id * 10, image: fields.image, is_base: true }]
-    }
     if (fields.code !== undefined) prod.code = fields.code
     if (fields.brand !== undefined) prod.brand = fields.brand
     if (fields.stock !== undefined) prod.stock = fields.stock

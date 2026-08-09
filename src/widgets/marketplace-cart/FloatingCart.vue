@@ -57,18 +57,12 @@
               :key="item.id"
               class="flex gap-4 border-b border-gray-200 pb-4 dark:border-neutral-800"
             >
-              <img
-                :src="item.image"
-                :alt="item.name"
-                class="h-20 w-20 rounded object-cover"
-                width="80"
-                height="80"
-                loading="lazy"
-              >
+
               <div class="min-w-0 flex-1">
                 <div class="flex items-start justify-between gap-2">
                   <div>
                     <h4 class="text-sm font-medium line-clamp-2">
+                      <span v-if="item.manufacturer" class="block text-[10px] text-blue-600 uppercase">{{ item.manufacturer }}</span>
                       {{ item.name }}
                     </h4>
                     <p class="text-sm text-gray-500 dark:text-neutral-400">

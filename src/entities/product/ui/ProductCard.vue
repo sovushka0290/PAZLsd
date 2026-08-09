@@ -3,44 +3,24 @@
     class="product-card group relative flex flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl bg-white border border-slate-200/80 rounded-2xl p-4 cursor-pointer"
     @click="emit('open-details', product)"
   >
-    <!-- Badges overlay -->
-    <div v-if="product.stickers && product.stickers.length" class="absolute left-3 top-3 z-10 flex flex-wrap gap-1">
-      <span
-        v-for="sticker in product.stickers"
-        :key="sticker"
-        :class="[
-          'px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider rounded-md shadow-xs',
-          sticker === 'Хит' ? 'bg-orange-500 text-white' : 
-          sticker === 'Новинка' ? 'bg-emerald-500 text-white' : 
-          'bg-blue-600 text-white'
-        ]"
-      >
-        {{ sticker }}
-      </span>
-    </div>
-
-    <!-- Image -->
-    <div class="relative aspect-square w-full overflow-hidden rounded-xl bg-slate-50 flex items-center justify-center p-3 mb-3">
-      <img
-        :src="product.image || '/images/nophoto.png'"
-        :alt="product.name"
-        class="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
-        loading="lazy"
-      >
-    </div>
-
-    <!-- Category / Brand Tag -->
+    <!-- Category / Manufacturer Tag -->
     <div class="flex items-center justify-between gap-1 mb-1.5 text-xs text-slate-400">
-      <span class="font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md text-[10px] uppercase tracking-wider" :title="product.brand || 'Стоматология'">
-        {{ product.brand || 'Стоматология' }}
+      <span class="font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md text-[10px] uppercase tracking-wider" :title="product.manufacturer || 'Стоматология'">
+        {{ product.manufacturer || 'Стоматология' }}
       </span>
       <span class="truncate text-[11px] text-slate-400" :title="categoryLabel">{{ categoryLabel }}</span>
     </div>
 
     <!-- Title -->
-    <h3 class="line-clamp-2 min-h-[2.5rem] text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors mb-3" :title="product.name">
+    <h3 class="line-clamp-2 min-h-[2.5rem] text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors mb-2" :title="product.name">
       {{ product.name }}
     </h3>
+    
+    <!-- Meta info -->
+    <div class="flex flex-col gap-0.5 mb-3 text-[11px] text-slate-500">
+      <span v-if="product.sku">Арт: <span class="font-medium text-slate-700">{{ product.sku }}</span></span>
+      <span v-if="product.unit">Ед. изм: <span class="font-medium text-slate-700">{{ product.unit }}</span></span>
+    </div>
 
     <!-- Price and Add to Cart Section -->
     <div class="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
