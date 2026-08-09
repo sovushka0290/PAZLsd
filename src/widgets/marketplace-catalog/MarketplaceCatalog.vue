@@ -34,7 +34,6 @@
             : 'bg-white text-slate-700 border-slate-200/80 hover:bg-slate-50 hover:border-slate-300'
           "
         >
-          <UIcon :name="pill.icon" class="w-4 h-4" />
           <span>{{ pill.name }}</span>
         </button>
       </div>
@@ -160,13 +159,13 @@ const expandedCategoryIds = ref<Set<number>>(new Set())
 const isMobileDrawerOpen = ref(false)
 
 const categoryPills = [
-  { slug: 'all', name: 'Все товары', icon: 'i-lucide-grid' },
-  { slug: 'terapiya', name: 'Терапия', icon: 'i-lucide-stethoscope' },
-  { slug: 'endodontiya', name: 'Эндодонтия', icon: 'i-lucide-activity' },
-  { slug: 'ortopediya', name: 'Ортопедия', icon: 'i-lucide-smile' },
-  { slug: 'oborudovanie', name: 'Оборудование', icon: 'i-lucide-zap' },
-  { slug: 'khirurgiya', name: 'Хирургия', icon: 'i-lucide-scissors' },
-  { slug: 'rashodniki', name: 'Расходники', icon: 'i-lucide-package' }
+  { slug: 'all', name: 'Все товары' },
+  { slug: 'terapiya', name: 'Терапия' },
+  { slug: 'endodontiya', name: 'Эндодонтия' },
+  { slug: 'ortopediya', name: 'Ортопедия' },
+  { slug: 'oborudovanie', name: 'Оборудование' },
+  { slug: 'khirurgiya', name: 'Хирургия' },
+  { slug: 'rashodniki', name: 'Расходники' }
 ]
 
 const isProductModalOpen = ref(false)

@@ -28,7 +28,7 @@ interface Product {
 
 export default defineEventHandler(async (event) => {
   const u = new URL(getRequestURL(event).href)
-  const pathname = u.pathname // e.g., /api/v2/categories/ or /api/v2/products_detailed/
+  const pathname = u.pathname.endsWith('/') ? u.pathname : `${u.pathname}/`
   console.log('[Mock API v2] Request pathname:', pathname)
   
   // Statically bundled & cached catalog data (100% reliable on Vercel / serverless)

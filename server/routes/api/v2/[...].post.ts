@@ -2,7 +2,7 @@ import { defineEventHandler, readBody, getRequestURL } from 'h3'
 
 export default defineEventHandler(async (event) => {
   const u = new URL(getRequestURL(event).href)
-  const pathname = u.pathname
+  const pathname = u.pathname.endsWith('/') ? u.pathname : `${u.pathname}/`
   const body = await readBody(event).catch(() => ({}))
 
   // 1. POST /api/v2/auth/register/
