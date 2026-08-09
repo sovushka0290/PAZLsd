@@ -20,14 +20,14 @@
           </h1>
         </div>
 
-        <!-- Mega Menu Catalog Button -->
+        <!-- Left Drawer Catalog Button -->
         <button
           type="button"
-          @click="isMegaMenuOpen = !isMegaMenuOpen"
+          @click="isCategoryDrawerOpen = true"
           class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-blue-500/20 transition-all cursor-pointer shrink-0"
         >
-          <UIcon :name="isMegaMenuOpen ? 'i-lucide-x' : 'i-lucide-layout-grid'" class="w-4 h-4 sm:w-5 sm:h-5" />
-          <span class="hidden sm:inline">{{ t('catalog.categoriesTitle', 'Каталог') }}</span>
+          <UIcon name="i-lucide-layout-grid" class="w-4 h-4 sm:w-5 sm:h-5" />
+          <span>{{ t('catalog.categoriesTitle', 'Каталог') }}</span>
         </button>
       </div>
 
@@ -55,61 +55,6 @@
               {{ isStaffLoggingIn ? 'Вход...' : 'Войти в панель' }}
             </button>
           </form>
-        </div>
-      </div>
-
-      <!-- Search Bar -->
-      <div class="flex-1 max-w-xl relative hidden md:block">
-        <div class="relative flex items-center bg-slate-100/70 border border-slate-200/80 rounded-2xl px-3 py-1.5 focus-within:ring-2 focus-within:ring-blue-500/30 focus-within:border-blue-500 focus-within:bg-white transition-all">
-          <UIcon name="i-lucide-search" class="w-5 h-5 text-gray-400 shrink-0" />
-          <input
-            v-model="searchQuery"
-            type="text"
-            :placeholder="t('hero.searchPlaceholder', 'Поиск по каталогу...')"
-            class="w-full bg-transparent border-0 px-3 py-1 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-0 focus:outline-none"
-            @focus="isFocused = true"
-            @blur="handleBlur"
-          />
-        </div>
-        
-        <!-- Autocomplete Dropdown -->
-        <div
-          v-if="isFocused && searchQuery.length >= 2"
-          class="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-neutral-900 rounded-xl shadow-xl border border-gray-100 dark:border-neutral-800 overflow-hidden z-[60] flex flex-col max-h-96"
-        >
-          <div v-if="isLoading" class="p-4 text-center text-sm text-gray-500">Поиск...</div>
-          <div v-else-if="suggestions.categories.length === 0 && suggestions.products.length === 0" class="p-4 text-center text-sm text-gray-500">Ничего не найдено</div>
-          <ul v-else class="overflow-y-auto">
-            <li v-if="suggestions.categories.length > 0" class="px-4 py-2 bg-slate-50 dark:bg-neutral-800/50 text-xs font-semibold text-slate-500 uppercase tracking-wider">Категории</li>
-            <li
-              v-for="c in suggestions.categories"
-              :key="'cat-'+c.id"
-              @mousedown="selectSuggestion(c.name)"
-              class="px-4 py-2 hover:bg-blue-50 dark:hover:bg-neutral-800 cursor-pointer flex items-center gap-3 border-b border-gray-50 dark:border-neutral-800 transition-colors"
-            >
-              <div class="w-7 h-7 rounded bg-blue-100/50 dark:bg-blue-900/30 text-blue-500 flex items-center justify-center shrink-0">
-                <UIcon name="i-lucide-folder" class="w-3.5 h-3.5" />
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-slate-800 dark:text-neutral-200 truncate">{{ c.name }}</p>
-              </div>
-            </li>
-            
-            <li v-if="suggestions.products.length > 0" class="px-4 py-2 bg-slate-50 dark:bg-neutral-800/50 text-xs font-semibold text-slate-500 uppercase tracking-wider">Товары</li>
-            <li
-              v-for="p in suggestions.products"
-              :key="'prod-'+p.id"
-              @mousedown="selectSuggestion(p.name)"
-              class="px-4 py-2 hover:bg-blue-50 dark:hover:bg-neutral-800 cursor-pointer flex items-center gap-3 border-b border-gray-50 dark:border-neutral-800 last:border-0 transition-colors"
-            >
-              <div class="w-7 h-7 rounded bg-gray-100 dark:bg-neutral-800 text-gray-400 flex items-center justify-center shrink-0">
-                <UIcon name="i-lucide-search" class="w-3.5 h-3.5" />
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-slate-800 dark:text-neutral-200 truncate">{{ p.name }}</p>
-              </div>
-            </li>
-          </ul>
         </div>
       </div>
 
@@ -143,110 +88,134 @@
       </div>
     </div>
 
-    <!-- Mega Menu Backdrop & Dropdown Container -->
-    <div
-      v-if="isMegaMenuOpen"
-      class="fixed inset-0 top-16 bg-slate-900/30 backdrop-blur-xs z-40"
-      @click="isMegaMenuOpen = false"
-    />
-
-    <div
-      v-if="isMegaMenuOpen"
-      class="absolute top-16 left-0 right-0 z-50 bg-white border-b border-slate-200/90 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200"
+    <!-- Left Category Drawer (USlideover side="left") -->
+    <USlideover
+      v-model:open="isCategoryDrawerOpen"
+      side="left"
+      :ui="{ content: 'w-full max-w-sm sm:max-w-md bg-white flex flex-col h-full' }"
     >
-      <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-100">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-              <UIcon name="i-lucide-layout-grid" class="w-5 h-5" />
-            </div>
-            <div>
-              <h3 class="text-lg font-bold text-slate-900">Каталог медицинских категорий</h3>
-              <p class="text-xs text-slate-500">Быстрый переход к разделам стоматологического оборудования и материалов</p>
-            </div>
-          </div>
-          <button
-            class="text-xs font-semibold text-slate-500 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition-colors"
-            @click="isMegaMenuOpen = false"
-          >
-            Закрыть ✕
-          </button>
+      <template #title>
+        <div class="flex items-center justify-between w-full border-b border-slate-100 pb-3">
+          <span class="inline-flex items-center gap-2 text-lg font-extrabold text-slate-900">
+            <UIcon name="i-lucide-layout-grid" class="w-5 h-5 text-blue-600" />
+            Каталог категорий
+          </span>
         </div>
+      </template>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          <div
-            v-for="cat in megaMenuCategories"
-            :key="cat.slug"
-            class="group p-4 rounded-2xl border border-slate-100 hover:border-blue-200 hover:bg-blue-50/50 transition-all cursor-pointer"
-            @click="navigateToCategory(cat.slug)"
+      <template #body>
+        <div class="py-2 overflow-y-auto space-y-1 pr-1">
+          <!-- All Categories Option -->
+          <button
+            type="button"
+            class="w-full text-left px-3 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-between cursor-pointer hover:bg-blue-50 text-slate-800"
+            @click="selectCategory('')"
           >
-            <div class="flex items-center gap-3 mb-3">
-              <div class="w-10 h-10 rounded-xl bg-blue-100/60 text-blue-600 flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-xs">
-                <UIcon :name="cat.icon" class="w-5 h-5" />
+            <span class="flex items-center gap-2">
+              <span class="text-base">📦</span>
+              <span>Все товары</span>
+            </span>
+            <span class="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full font-semibold">7 150</span>
+          </button>
+
+          <!-- Dynamic Categories & Subcategories -->
+          <div
+            v-for="cat in categoriesList"
+            :key="cat.slug"
+            class="rounded-xl border border-slate-100 overflow-hidden bg-slate-50/50"
+          >
+            <div
+              class="w-full text-left px-3 py-2.5 font-bold text-sm flex items-center justify-between cursor-pointer hover:bg-blue-50/80 transition-colors text-slate-900"
+              @click="toggleCategoryExpand(cat.slug)"
+            >
+              <div class="flex items-center gap-2 min-w-0 pr-2" @click.stop="selectCategory(cat.slug)">
+                <span class="text-base shrink-0">{{ cat.icon || '📁' }}</span>
+                <span class="truncate hover:text-blue-600 transition-colors">{{ cat.name }}</span>
               </div>
-              <div>
-                <h4 class="font-bold text-sm text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">
-                  {{ cat.name }}
-                </h4>
-                <p class="text-xs text-slate-400 font-medium">{{ cat.products_count || 0 }} товаров</p>
+              <div class="flex items-center gap-2 shrink-0">
+                <span class="text-[11px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
+                  {{ cat.products_count || 0 }}
+                </span>
+                <UIcon
+                  :name="expandedSlugs.has(cat.slug) ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
+                  class="w-4 h-4 text-slate-400"
+                />
               </div>
             </div>
-            <ul class="space-y-1.5 pl-2 border-l-2 border-slate-100 group-hover:border-blue-300 transition-colors">
-              <li
+
+            <!-- Subcategories List -->
+            <div v-if="expandedSlugs.has(cat.slug) && cat.subcategories && cat.subcategories.length" class="bg-white border-t border-slate-100 py-1 px-2 space-y-0.5">
+              <button
                 v-for="sub in cat.subcategories"
                 :key="sub.id"
-                class="text-xs text-slate-600 hover:text-blue-600 font-medium transition-colors"
+                type="button"
+                class="w-full text-left px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-blue-600 hover:bg-slate-50 transition-colors flex items-center justify-between cursor-pointer"
+                @click="selectSubcategory(cat.slug, sub.name)"
               >
-                • {{ sub.name }}
-              </li>
-            </ul>
+                <span class="truncate">• {{ sub.name }}</span>
+                <span class="text-[10px] text-slate-400 font-medium shrink-0 ml-2">{{ sub.product_count }}</span>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+      </template>
+    </USlideover>
   </header>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 
 const localePath = useLocalePath()
 const authStore = useAuthStore()
-const searchQuery = defineModel<string>({ default: '' })
 const { t } = useI18n()
+const router = useRouter()
+const api = useMarketplaceApi()
 
 const phoneHref = '+77077120190'
-const emailHref = 'info@pazl-ai.com'
 
 const showStaffModal = ref(false)
 const staffUsername = ref('')
 const staffPassword = ref('')
 const staffError = ref('')
 const isStaffLoggingIn = ref(false)
-const router = useRouter()
 
-const isMegaMenuOpen = ref(false)
-
-const megaMenuCategories = ref<any[]>([])
-const api = useMarketplaceApi()
+const isCategoryDrawerOpen = ref(false)
+const categoriesList = ref<any[]>([])
+const expandedSlugs = ref<Set<string>>(new Set())
 
 onMounted(async () => {
   try {
-    const allCategories = await api.fetchAllCategories()
-    const rootCategories = allCategories.filter(c => c.parent === null)
-    megaMenuCategories.value = rootCategories.map(c => ({
-      ...c,
-      icon: 'i-lucide-folder'
-    }))
+    const all = await api.fetchAllCategories()
+    categoriesList.value = all
   } catch (err) {
     console.warn('[MarketplaceHeader] Failed to load categories:', err)
   }
 })
 
-function navigateToCategory(slug: string) {
-  isMegaMenuOpen.value = false
-  router.push(localePath(`/?category=${slug}`))
+function toggleCategoryExpand(slug: string) {
+  const next = new Set(expandedSlugs.value)
+  if (next.has(slug)) {
+    next.delete(slug)
+  } else {
+    next.add(slug)
+  }
+  expandedSlugs.value = next
+}
+
+function selectCategory(slug: string) {
+  isCategoryDrawerOpen.value = false
+  if (slug) {
+    router.push(localePath(`/?category=${slug}`))
+  } else {
+    router.push(localePath('/'))
+  }
+}
+
+function selectSubcategory(catSlug: string, subName: string) {
+  isCategoryDrawerOpen.value = false
+  router.push(localePath(`/?category=${catSlug}&subcategory=${encodeURIComponent(subName)}`))
 }
 
 async function handleStaffLogin() {
@@ -266,53 +235,6 @@ async function handleStaffLogin() {
     isStaffLoggingIn.value = false
   }
 }
-
-const isFocused = ref(false)
-const isLoading = ref(false)
-const suggestions = ref<{ categories: any[], products: any[] }>({ categories: [], products: [] })
-let searchTimer: ReturnType<typeof setTimeout> | undefined
-
-function handleBlur() {
-  setTimeout(() => {
-    isFocused.value = false
-  }, 200)
-}
-
-function selectSuggestion(name: string) {
-  searchQuery.value = name
-  isFocused.value = false
-}
-
-watch(searchQuery, (q) => {
-  clearTimeout(searchTimer)
-  if (!q || q.length < 2) {
-    suggestions.value = { categories: [], products: [] }
-    return
-  }
-  
-  isLoading.value = true
-  searchTimer = setTimeout(async () => {
-    try {
-      const config = useRuntimeConfig()
-      const versionPath = `/api/${config.public.apiVersion}`
-      const baseURL = import.meta.env.SSR
-        ? `${String(config.apiBackendUrl ?? 'http://backend:8000').replace(/\/$/, '')}${versionPath}`
-        : versionPath
-      
-      const res = await $fetch<{ categories: any[], products: any[] }>('catalog/product-autocomplete/', {
-        baseURL,
-        query: { query: q },
-        retry: 0
-      })
-      suggestions.value = res || { categories: [], products: [] }
-    } catch (e) {
-      console.warn('Autocomplete fetch failed', e)
-      suggestions.value = { categories: [], products: [] }
-    } finally {
-      isLoading.value = false
-    }
-  }, 300)
-})
 </script>
 
 <style scoped lang="scss">
