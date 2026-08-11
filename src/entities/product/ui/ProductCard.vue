@@ -1,6 +1,10 @@
 <template>
   <tr
-    class="group transition-colors hover:bg-blue-50/60 border-b border-slate-200 last:border-0 cursor-pointer"
+    class="group transition-colors border-b border-slate-200 last:border-0 cursor-pointer"
+    :class="[
+      isFocused ? 'bg-blue-100/80 ring-2 ring-inset ring-blue-500 shadow-md z-10 relative' : 'hover:bg-blue-50/60'
+    ]"
+    :id="`product-row-${product.id}`"
     @click="emit('open-details', product)"
   >
     <!-- 1. Название товара -->
@@ -56,7 +60,7 @@
     </td>
 
     <!-- 6. Итоговая сумма -->
-    <td class="p-2 align-middle text-right whitespace-nowrap bg-slate-50/30 font-bold group-hover:bg-blue-50/60 transition-colors">
+    <td class="p-2 align-middle text-right whitespace-nowrap font-bold transition-colors" :class="isFocused ? 'bg-blue-200/50' : 'bg-slate-50/30 group-hover:bg-blue-50/60'">
       <template v-if="product.price !== null">
         <span class="text-sm font-extrabold text-slate-900">{{ formatPrice(totalSum) }}</span>
         <span class="text-[10px] text-slate-500 ml-0.5">{{ currencySymbol(product.currencyCode) }}</span>
@@ -76,6 +80,7 @@ import { useFormattedPrice } from '~/composables/useFormattedPrice'
 
 const props = defineProps<{
   product: ProductViewModel
+  isFocused?: boolean
 }>()
 
 const emit = defineEmits<{

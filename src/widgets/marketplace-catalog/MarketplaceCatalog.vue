@@ -135,9 +135,10 @@
               </thead>
               <tbody>
                 <ProductCard
-                  v-for="product in filteredProducts"
+                  v-for="(product, index) in filteredProducts"
                   :key="product.id"
                   :product="product"
+                  :is-focused="focusedIndex === index"
                   @open-details="openProductDetails"
                 />
               </tbody>
@@ -167,6 +168,7 @@ import type { ApiCategory } from '@fsd/shared/api/types'
 import type { ProductViewModel } from '@fsd/entities/product/model/types'
 import { apiProductToViewModel } from '@fsd/shared/lib/mapApiProduct'
 import { buildCategoryTree, type CategoryTreeNode } from '@fsd/shared/lib/buildCategoryTree'
+import { useCartStore } from '~/stores/cart'
 
 const props = defineProps<{
   searchQuery: string
@@ -176,6 +178,7 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const api = useMarketplaceApi()
+const cart = useCartStore()
 
 const allCategories = ref<ApiCategory[]>([])
 const categoryTree = ref<CategoryTreeNode[]>([])
@@ -241,6 +244,66 @@ const nextPageUrl = ref<string | null>(null)
 function openProductDetails(product: ProductViewModel) {
   selectedProductForModal.value = product
   isProductModalOpen.value = true
+}
+
+const focusedIndex = ref(-1)
+
+function handleKeydown(e: KeyboardEvent) {
+  if (document.activeElement instanceof HTMLInputElement || document.activeElement instanceof HTMLTextAreaElement) {
+    return
+  }
+  
+  if (filteredProducts.value.length === 0) return
+
+  switch (e.key) {
+    case 'ArrowDown':
+      e.preventDefault()
+      focusedIndex.value = Math.min(filteredProducts.value.length - 1, focusedIndex.value + 1)
+      scrollToFocused()
+      break
+    case 'ArrowUp':
+      e.preventDefault()
+      focusedIndex.value = Math.max(0, focusedIndex.value - 1)
+      scrollToFocused()
+      break
+    case 'ArrowRight':
+      if (focusedIndex.value >= 0) {
+        e.preventDefault()
+        const p = filteredProducts.value[focusedIndex.value]
+        cart.addProduct(p)
+      }
+      break
+    case 'ArrowLeft':
+      if (focusedIndex.value >= 0) {
+        e.preventDefault()
+        const p = filteredProducts.value[focusedIndex.value]
+        const cartItem = cart.items.find(i => i.id === p.id)
+        if (cartItem && cartItem.quantity > 1) {
+          cart.applyQuantityDelta(p.id, -1)
+        } else if (cartItem && cartItem.quantity === 1) {
+          cart.removeItem(p.id)
+        }
+      }
+      break
+    case 'Enter':
+      if (focusedIndex.value >= 0) {
+        e.preventDefault()
+        const p = filteredProducts.value[focusedIndex.value]
+        cart.addProduct(p)
+      }
+      break
+  }
+}
+
+function scrollToFocused() {
+  if (focusedIndex.value < 0) return
+  nextTick(() => {
+    const p = filteredProducts.value[focusedIndex.value]
+    const row = document.getElementById(`product-row-${p.id}`)
+    if (row) {
+      row.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  })
 }
 
 let searchTimer: ReturnType<typeof setTimeout> | undefined
@@ -354,14 +417,15 @@ async function loadMore() {
   }
 }
 
-watch(searchDebounced, () => { page.value = 1 })
-watch(selectedCategory, () => { page.value = 1 })
+watch(searchDebounced, () => { page.value = 1; focusedIndex.value = -1 })
+watch(selectedCategory, () => { page.value = 1; focusedIndex.value = -1 })
 watch([selectedCategory, searchDebounced], () => {
   if (!catalogReady.value) return
   void loadProducts()
 })
 
 onMounted(async () => {
+  window.addEventListener('keydown', handleKeydown)
   loadState.value = 'loading'
   try {
     await loadCategories().catch(e => console.warn('[MarketplaceCatalog] Categories load issue:', e))
@@ -369,6 +433,10 @@ onMounted(async () => {
   } finally {
     await loadProducts()
   }
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown)
 })
 
 // EXPOSE toggle method for parent component (index.vue bubbles) to use

@@ -14,11 +14,15 @@
         :class="y > 300 ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-12 scale-95 pointer-events-none'"
       >
         <div 
-          class="flex items-center gap-3 bg-white/70 backdrop-blur-2xl px-4 py-2.5 rounded-2xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] border border-white/60 w-[280px] sm:w-[400px] cursor-text hover:bg-white/90 transition-colors"
-          @click="scrollToTop"
+          class="flex items-center gap-3 bg-white/70 backdrop-blur-2xl px-4 py-2.5 rounded-2xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] border border-white/60 w-[280px] sm:w-[400px] transition-colors focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500"
         >
-          <UIcon name="i-lucide-search" class="w-5 h-5 text-slate-400" />
-          <span class="text-sm font-semibold text-slate-500 truncate">Поиск товаров...</span>
+          <UIcon name="i-lucide-search" class="w-5 h-5 text-slate-400 shrink-0" />
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Поиск товаров..."
+            class="w-full bg-transparent border-0 p-0 text-sm font-semibold text-slate-700 placeholder-slate-400 focus:ring-0 outline-none"
+          />
         </div>
       </div>
 
@@ -131,20 +135,20 @@
 
               <div class="mt-1 flex items-center justify-between">
                 <!-- Quantity Control -->
-                <div class="flex items-center gap-0.5 rounded-md border border-slate-200 bg-slate-50 p-0.5 shrink-0">
+                <div class="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1 shrink-0 shadow-sm">
                   <button
-                    class="h-5 w-5 flex items-center justify-center text-slate-600 hover:bg-white rounded transition-colors disabled:opacity-50"
+                    class="h-6 w-6 sm:h-7 sm:w-7 flex items-center justify-center bg-white text-slate-700 shadow-sm hover:text-blue-600 hover:border-blue-200 border border-transparent rounded transition-all disabled:opacity-50"
                     :disabled="item.quantity <= 1"
                     @click="cart.applyQuantityDelta(item.id, -1)"
                   >
-                    <UIcon name="i-lucide-minus" class="w-3 h-3" />
+                    <UIcon name="i-lucide-minus" class="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </button>
-                  <span class="w-5 text-center text-[11px] font-bold text-slate-700">{{ item.quantity }}</span>
+                  <span class="w-6 sm:w-8 text-center text-xs sm:text-sm font-extrabold text-slate-800">{{ item.quantity }}</span>
                   <button
-                    class="h-5 w-5 flex items-center justify-center text-slate-600 hover:bg-white rounded transition-colors"
+                    class="h-6 w-6 sm:h-7 sm:w-7 flex items-center justify-center bg-white text-slate-700 shadow-sm hover:text-blue-600 hover:border-blue-200 border border-transparent rounded transition-all"
                     @click="cart.applyQuantityDelta(item.id, 1)"
                   >
-                    <UIcon name="i-lucide-plus" class="w-3 h-3" />
+                    <UIcon name="i-lucide-plus" class="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </button>
                 </div>
 
