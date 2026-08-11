@@ -1,15 +1,16 @@
 <template>
   <section class="marketplace-catalog w-full bg-slate-50 min-h-screen relative flex">
     
-    <!-- Unified Sidebar (Fixed on all screens) -->
-    <div 
-      class="flex flex-col transition-all duration-300 ease-in-out border-r border-slate-200 bg-white z-[70]"
-      :class="[
-        isCatalogSidebarOpen ? 'w-[320px] opacity-100 translate-x-0' : 'w-0 opacity-0 -translate-x-full overflow-hidden border-none',
-        'fixed top-0 left-0 h-screen shadow-2xl'
-      ]"
-    >
-       <div class="p-4 w-[320px] h-full overflow-y-auto">
+    <!-- Unified Sidebar (Teleports to root on Desktop, Fixed Overlay on Mobile) -->
+    <Teleport to="#desktop-sidebar-slot" :disabled="!isDesktopView">
+      <div 
+        class="flex flex-col transition-all duration-300 ease-in-out border-slate-200 bg-white"
+        :class="[
+          isDesktopView ? 'h-full' : 'fixed top-0 left-0 h-screen z-[70] border-r shadow-2xl',
+          !isDesktopView && !isCatalogSidebarOpen ? 'w-0 opacity-0 -translate-x-full overflow-hidden border-none' : 'w-[320px] opacity-100 translate-x-0'
+        ]"
+      >
+         <div class="p-4 w-[320px] h-full overflow-y-auto">
          <div class="font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100 flex items-center justify-between">
             Каталог
             <UButton icon="i-lucide-x" color="gray" variant="ghost" size="xs" @click="isCatalogSidebarOpen = false" />
@@ -69,13 +70,13 @@
               <span>{{ sub.name }}</span>
               <span v-if="sub.product_count" class="opacity-70 text-[10px] ml-auto">({{ sub.product_count }})</span>
             </div>
-         </div>
        </div>
-    </div>
+      </div>
+    </Teleport>
 
-    <!-- Backdrop -->
+    <!-- Backdrop (Mobile Only) -->
     <div 
-      v-if="isCatalogSidebarOpen" 
+      v-if="isCatalogSidebarOpen && !isDesktopView" 
       class="fixed inset-0 bg-slate-900/50 z-[60] backdrop-blur-sm transition-opacity"
       @click="isCatalogSidebarOpen = false"
     ></div>
@@ -181,8 +182,18 @@ const allCategories = ref<ApiCategory[]>([])
 const categoryTree = ref<CategoryTreeNode[]>([])
 const isMobileDrawerOpen = ref(false)
 
-// Controls the fixed full-screen catalog drawer
+// Controls the fixed full-screen catalog drawer (Mobile)
 const isCatalogSidebarOpen = ref(false)
+const isDesktopView = ref(false)
+
+onMounted(() => {
+  if (typeof window !== 'undefined') {
+    isDesktopView.value = window.innerWidth >= 1024
+    window.addEventListener('resize', () => {
+      isDesktopView.value = window.innerWidth >= 1024
+    })
+  }
+})
 
 // Used for level 1 / level 2 drilling in the sidebar
 const selectedCategoryForSidebar = ref<ApiCategory & { icon?: string } | null>(null)
@@ -373,8 +384,12 @@ onMounted(async () => {
 
 // EXPOSE toggle method for parent component (index.vue bubbles) to use
 defineExpose({
-  toggleSidebar: () => {
-    isCatalogSidebarOpen.value = !isCatalogSidebarOpen.value
+  toggleSidebar: (forceState?: boolean) => {
+    if (forceState !== undefined) {
+      isCatalogSidebarOpen.value = forceState
+    } else {
+      isCatalogSidebarOpen.value = !isCatalogSidebarOpen.value
+    }
   }
 })
 </script>

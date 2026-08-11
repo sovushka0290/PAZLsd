@@ -1,10 +1,21 @@
 <template>
-  <div class="min-h-screen bg-slate-50 relative pb-24">
-    <!-- Main page flow -->
-    <MarketplaceHeader v-model="searchQuery" @toggle-catalog="toggleCatalog" />
-    <MarketplaceHero v-model="searchQuery" />
-    <MarketplaceCatalog ref="catalogRef" :search-query="searchQuery" />
-    <MarketplaceFooter />
+  <div class="flex min-h-screen bg-slate-50 relative pb-24">
+    
+    <!-- Sidebar Slot (Controlled by index.vue state, populated by Teleport from Catalog) -->
+    <aside 
+      class="hidden lg:block shrink-0 border-r border-slate-200 bg-white sticky top-0 h-screen z-[60] transition-all duration-300"
+      :class="isDesktopSidebarOpen ? 'w-[320px]' : 'w-0 overflow-hidden border-none'"
+    >
+      <div id="desktop-sidebar-slot" class="w-[320px] h-full"></div>
+    </aside>
+
+    <!-- Main Content Flow -->
+    <main class="flex-1 flex flex-col min-w-0">
+      <MarketplaceHeader v-model="searchQuery" @toggle-catalog="toggleCatalog" />
+      <MarketplaceHero v-model="searchQuery" />
+      <MarketplaceCatalog ref="catalogRef" :search-query="searchQuery" />
+      <MarketplaceFooter />
+    </main>
     
     <!-- Floating Cart Slideover (Desktop/Mobile overlay) -->
     <FloatingCart />
@@ -78,10 +89,17 @@ const { y } = useWindowScroll()
 const cart = useCartStore()
 
 const catalogRef = ref<any>(null)
+const isDesktopSidebarOpen = ref(true)
 
 function toggleCatalog() {
-  if (catalogRef.value) {
-    catalogRef.value.toggleSidebar()
+  if (window.innerWidth >= 1024) {
+    isDesktopSidebarOpen.value = !isDesktopSidebarOpen.value
+    // Also tell catalog to sync its internal state if needed
+    if (catalogRef.value) catalogRef.value.toggleSidebar(isDesktopSidebarOpen.value)
+  } else {
+    if (catalogRef.value) {
+      catalogRef.value.toggleSidebar()
+    }
   }
 }
 
