@@ -102,9 +102,19 @@
           </p>
         </div>
 
+        <!-- Table Header (Visible on md+) -->
+        <div class="hidden md:grid md:grid-cols-[3fr_1.5fr_1.5fr_120px_1fr_1fr] gap-4 px-4 py-2.5 bg-slate-100 rounded-t-xl text-xs font-extrabold text-slate-500 border border-slate-200 border-b-0 uppercase tracking-wider">
+          <div>Название</div>
+          <div>Производитель</div>
+          <div>Артикул</div>
+          <div class="text-center">Кол-во</div>
+          <div class="text-right">Цена</div>
+          <div class="text-right">Сумма</div>
+        </div>
+
         <div
           v-else
-          class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"
+          class="flex flex-col gap-0 border border-slate-200 rounded-xl md:rounded-t-none overflow-hidden bg-white divide-y divide-slate-100"
         >
           <ProductCard
             v-for="product in filteredProducts"
