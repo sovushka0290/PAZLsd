@@ -6,18 +6,7 @@
 
     <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="max-w-4xl mx-auto text-center relative z-10">
-        <!-- Badge -->
-        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/20 border border-blue-400/30 backdrop-blur-md mb-6 shadow-sm">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span class="text-xs font-extrabold uppercase tracking-widest text-blue-200">PAZL Marketplace</span>
-        </div>
-
-        <h1 class="mb-4 text-4xl font-extrabold tracking-tight text-white md:text-5xl lg:text-6xl drop-shadow-md">
-          PAZL — Маркетплейс Стоматологии
-        </h1>
-        <p class="mb-8 text-base text-blue-200 md:text-lg lg:text-xl font-medium max-w-2xl mx-auto">
-          Единый умный поиск по 1 450+ медицинским товарам, инструментам и оборудованию с доставкой по всему Казахстану
-        </p>
+        <!-- Text removed by request -->
         
         <!-- Search Bar (Light theme) -->
         <div class="w-full relative group max-w-3xl mx-auto text-left z-20">
