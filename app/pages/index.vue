@@ -1,8 +1,11 @@
 <template>
-  <div class="flex bg-slate-50 relative overflow-hidden w-full h-screen">
+  <div 
+    class="min-h-screen bg-slate-50 relative transition-all duration-300"
+    :class="cart.isFloatingCartOpen ? 'lg:pr-[380px]' : ''"
+  >
     
-    <!-- Main Content (Left) -->
-    <div class="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto relative" id="main-scroll-container">
+    <!-- Main Content -->
+    <div class="w-full flex flex-col min-w-0" id="main-scroll-container">
       <MarketplaceHeader v-model="searchQuery" @toggle-catalog="toggleCatalog" />
       <MarketplaceHero v-model="searchQuery" />
       <MarketplaceCatalog ref="catalogRef" :search-query="searchQuery" />
@@ -10,7 +13,7 @@
       
       <!-- Top Floating Search -->
       <div
-        class="fixed top-4 sm:top-6 left-1/2 -translate-x-1/2 z-[60] transition-all duration-500 ease-out flex"
+        class="fixed top-4 sm:top-6 left-1/2 -translate-x-1/2 z-[80] transition-all duration-500 ease-out flex"
         :class="y > 300 ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-12 scale-95 pointer-events-none'"
       >
         <div 
@@ -78,13 +81,10 @@
 
     <!-- Right Sidebar (Embedded Cart) -->
     <div 
-      class="flex flex-col transition-all duration-300 ease-in-out border-l border-slate-200 bg-white z-[70] lg:z-auto"
-      :class="[
-        cart.isFloatingCartOpen ? 'w-[320px] lg:w-[380px] opacity-100 translate-x-0' : 'w-0 opacity-0 translate-x-full lg:translate-x-0 overflow-hidden border-none',
-        'fixed lg:relative top-0 right-0 h-screen lg:h-auto shadow-2xl lg:shadow-none'
-      ]"
+      class="fixed top-0 right-0 h-screen transition-transform duration-300 ease-in-out border-l border-slate-200 bg-white shadow-2xl z-[80]"
+      :class="cart.isFloatingCartOpen ? 'translate-x-0 w-[320px] lg:w-[380px]' : 'translate-x-full w-[320px] lg:w-[380px]'"
     >
-      <div class="w-[320px] lg:w-[380px] h-full flex flex-col bg-slate-50/50">
+      <div class="w-full h-full flex flex-col bg-slate-50/50">
         <!-- Cart Header -->
         <div class="p-3 lg:p-4 border-b border-slate-200 bg-white flex items-center justify-between shrink-0 shadow-xs z-10">
           <span class="font-extrabold text-slate-900 flex items-center gap-2 text-sm lg:text-base">
@@ -190,7 +190,7 @@
 </template>
 
 <script setup lang="ts">
-import { useScroll } from '@vueuse/core'
+import { useWindowScroll } from '@vueuse/core'
 import { useCartStore } from '~/stores/cart'
 import { currencySymbol } from '@fsd/shared/lib/currencySymbol'
 import { useFormattedPrice } from '~/composables/useFormattedPrice'
@@ -201,13 +201,8 @@ const localePath = useLocalePath()
 const cart = useCartStore()
 const formatPrice = useFormattedPrice()
 
-// Scroll tracking for the main container now (since h-screen and overflow-y-auto is used)
-const mainContainer = ref<HTMLElement | null>(null)
-const { y } = useScroll(mainContainer)
-
-onMounted(() => {
-  mainContainer.value = document.getElementById('main-scroll-container')
-})
+// Scroll tracking for the window
+const { y } = useWindowScroll()
 
 const catalogRef = ref<any>(null)
 
@@ -218,11 +213,7 @@ function toggleCatalog() {
 }
 
 function scrollToTop() {
-  if (mainContainer.value) {
-    mainContainer.value.scrollTo({ top: 0, behavior: 'smooth' })
-  } else {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
+  window.scrollTo({ top: 0, behavior: 'smooth' })
   setTimeout(() => {
     const input = document.querySelector('header input[type="text"]') as HTMLInputElement
     if (input) input.focus()

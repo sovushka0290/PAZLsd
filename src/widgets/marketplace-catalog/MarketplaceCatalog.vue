@@ -1,5 +1,5 @@
 <template>
-  <section class="marketplace-catalog w-full bg-slate-50 min-h-screen relative flex items-start">
+  <section class="marketplace-catalog w-full bg-slate-50 min-h-screen relative flex">
     
     <!-- Unified Sidebar (Fixed on mobile, embedded on desktop) -->
     <div 
