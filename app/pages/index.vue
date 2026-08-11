@@ -84,7 +84,11 @@ function toggleCatalog() {
     if (window.innerWidth < 1024) {
       catalogRef.value.openMobileDrawer()
     } else {
-      catalogRef.value.toggleSidebar()
+      // Catalog is permanently visible on desktop, just scroll up to it
+      const catalogEl = document.querySelector('.marketplace-catalog')
+      if (catalogEl) {
+        catalogEl.scrollIntoView({ behavior: 'smooth' })
+      }
     }
   }
 }

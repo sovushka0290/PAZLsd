@@ -2,14 +2,10 @@
   <section class="marketplace-catalog w-full bg-slate-50 min-h-screen relative flex">
     
     <!-- Embedded Left Sidebar (Desktop/Tablet) -->
-    <div 
-      class="hidden lg:flex flex-col transition-all duration-300 ease-in-out border-r border-slate-200 bg-white"
-      :class="isCatalogSidebarOpen ? 'w-[320px] opacity-100' : 'w-0 opacity-0 overflow-hidden border-none'"
-    >
+    <div class="hidden lg:flex flex-col border-r border-slate-200 bg-white w-[320px] shrink-0">
        <div class="p-4 w-[320px] h-[calc(100vh-80px)] sticky top-[80px] overflow-y-auto">
          <div class="font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100 flex items-center justify-between">
             Каталог
-            <UButton icon="i-lucide-x" color="gray" variant="ghost" size="xs" @click="isCatalogSidebarOpen = false" />
          </div>
 
          <!-- Level 1: Root Categories -->
@@ -73,7 +69,7 @@
     </div>
     
     <!-- Main Content Area -->
-    <div class="flex-1 transition-all duration-300 w-full min-w-0" :class="isCatalogSidebarOpen ? 'lg:pl-6' : 'lg:px-8 mx-auto max-w-7xl'">
+    <div class="flex-1 w-full min-w-0 lg:pl-6">
       <div class="px-4 py-6 sm:px-6 w-full">
         <!-- Mobile Categories Button -->
         <div class="lg:hidden mb-4 flex items-center justify-between gap-4 rounded-xl bg-white p-3 border border-slate-200 shadow-2xs">
@@ -228,9 +224,6 @@ const api = useMarketplaceApi()
 const allCategories = ref<ApiCategory[]>([])
 const categoryTree = ref<CategoryTreeNode[]>([])
 const isMobileDrawerOpen = ref(false)
-
-// Controls the embedded side-by-side catalog drawer (Desktop)
-const isCatalogSidebarOpen = ref(true)
 
 // Used for level 1 / level 2 drilling in the sidebar
 const selectedCategoryForSidebar = ref<ApiCategory & { icon?: string } | null>(null)
@@ -421,9 +414,6 @@ onMounted(async () => {
 
 // EXPOSE toggle method for parent component (index.vue bubbles) to use
 defineExpose({
-  toggleSidebar: () => {
-    isCatalogSidebarOpen.value = !isCatalogSidebarOpen.value
-  },
   openMobileDrawer: () => {
     isMobileDrawerOpen.value = true
   }
