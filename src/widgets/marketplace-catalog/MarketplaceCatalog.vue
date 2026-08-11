@@ -102,26 +102,30 @@
           </p>
         </div>
 
-        <!-- Table Header (Visible on md+) -->
-        <div class="hidden md:grid md:grid-cols-[3fr_1.5fr_1.5fr_120px_1fr_1fr] gap-4 px-4 py-2.5 bg-slate-100 rounded-t-xl text-xs font-extrabold text-slate-500 border border-slate-200 border-b-0 uppercase tracking-wider">
-          <div>Название</div>
-          <div>Производитель</div>
-          <div>Артикул</div>
-          <div class="text-center">Кол-во</div>
-          <div class="text-right">Цена</div>
-          <div class="text-right">Сумма</div>
-        </div>
-
         <div
           v-else
-          class="flex flex-col gap-0 border border-slate-200 rounded-xl md:rounded-t-none overflow-hidden bg-white divide-y divide-slate-100"
+          class="w-full overflow-x-auto bg-white border border-slate-200 rounded-xl shadow-2xs"
         >
-          <ProductCard
-            v-for="product in filteredProducts"
-            :key="product.id"
-            :product="product"
-            @open-details="openProductDetails"
-          />
+          <table class="w-full text-left border-collapse min-w-[700px]">
+            <thead class="bg-slate-100 border-b border-slate-200 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">
+              <tr>
+                <th class="p-2 w-[40%]">Название</th>
+                <th class="p-2 w-[15%]">Производитель</th>
+                <th class="p-2 w-[15%]">Артикул</th>
+                <th class="p-2 w-[10%] text-center">Кол-во</th>
+                <th class="p-2 w-[10%] text-right">Цена</th>
+                <th class="p-2 w-[10%] text-right">Сумма</th>
+              </tr>
+            </thead>
+            <tbody>
+              <ProductCard
+                v-for="product in filteredProducts"
+                :key="product.id"
+                :product="product"
+                @open-details="openProductDetails"
+              />
+            </tbody>
+          </table>
         </div>
 
         <!-- Load More Button -->
