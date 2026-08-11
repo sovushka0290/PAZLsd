@@ -1,16 +1,22 @@
 <template>
   <section class="marketplace-catalog w-full bg-slate-50 min-h-screen relative flex">
     
-    <!-- Embedded Left Sidebar (Desktop/Tablet) -->
-    <div class="hidden lg:flex flex-col border-r border-slate-200 bg-white w-[320px] shrink-0">
-       <div class="p-4 w-[320px] h-[calc(100vh-80px)] sticky top-[80px] overflow-y-auto">
+    <!-- Unified Sidebar (Fixed on mobile, embedded on desktop) -->
+    <div 
+      class="flex flex-col transition-all duration-300 ease-in-out border-r border-slate-200 bg-white z-[70] lg:z-auto"
+      :class="[
+        isCatalogSidebarOpen ? 'w-[320px] opacity-100 translate-x-0' : 'w-0 opacity-0 -translate-x-full lg:translate-x-0 overflow-hidden border-none',
+        'fixed lg:relative top-0 left-0 h-screen lg:h-auto shadow-2xl lg:shadow-none'
+      ]"
+    >
+       <div class="p-4 w-[320px] h-full lg:h-[calc(100vh-80px)] lg:sticky top-[80px] overflow-y-auto">
          <div class="font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100 flex items-center justify-between">
             Каталог
+            <UButton icon="i-lucide-x" color="gray" variant="ghost" size="xs" @click="isCatalogSidebarOpen = false" />
          </div>
 
          <!-- Level 1: Root Categories -->
          <div v-if="!selectedCategoryForSidebar" class="space-y-1">
-           <!-- "All products" -->
            <div
             class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer"
             :class="selectedCategory === 'all' ? 'bg-blue-600 text-white' : 'text-slate-700 hover:bg-slate-100'"
@@ -44,7 +50,6 @@
                {{ selectedCategoryForSidebar.name }}
             </div>
 
-            <!-- "All in this category" -->
             <div
               class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors cursor-pointer"
               :class="selectedCategory === selectedCategoryForSidebar.slug && !selectedSubcategory ? 'bg-blue-600 text-white font-bold shadow-xs' : 'text-slate-700 font-semibold hover:bg-slate-100'"
@@ -67,9 +72,16 @@
          </div>
        </div>
     </div>
+
+    <!-- Mobile Backdrop -->
+    <div 
+      v-if="isCatalogSidebarOpen" 
+      class="fixed inset-0 bg-slate-900/50 z-[60] lg:hidden backdrop-blur-sm transition-opacity"
+      @click="isCatalogSidebarOpen = false"
+    ></div>
     
     <!-- Main Content Area -->
-    <div class="flex-1 w-full min-w-0 lg:pl-6">
+    <div class="flex-1 transition-all duration-300 w-full min-w-0" :class="isCatalogSidebarOpen ? 'lg:pl-6' : 'lg:px-8 mx-auto max-w-7xl'">
       <div class="px-4 py-6 sm:px-6 w-full">
         <!-- Mobile Categories Button -->
         <div class="lg:hidden mb-4 flex items-center justify-between gap-4 rounded-xl bg-white p-3 border border-slate-200 shadow-2xs">
@@ -77,7 +89,7 @@
             <p class="text-[11px] text-slate-500">Категория:</p>
             <p class="text-xs font-bold truncate text-slate-900">{{ selectedCategoryName }}</p>
           </div>
-          <UButton color="primary" variant="outline" size="xs" @click="isMobileDrawerOpen = true">
+          <UButton color="primary" variant="outline" size="xs" @click="isCatalogSidebarOpen = true">
             Категории ☰
           </UButton>
         </div>
@@ -142,62 +154,6 @@
       </div>
     </div>
 
-    <!-- Mobile Slideover for Category Tree -->
-    <USlideover v-model:open="isMobileDrawerOpen" side="left" :ui="{ content: 'w-full sm:max-w-xs' }">
-      <template #title>
-        <span class="font-bold text-slate-900">{{ t('catalog.categoriesTitle') }}</span>
-      </template>
-      <template #body>
-        <div class="space-y-1 pr-1 py-2 overflow-y-auto max-h-[80vh]">
-          <!-- Similar to desktop logic, but simplified for mobile overlay -->
-          <div v-if="!selectedCategoryForSidebar" class="space-y-1">
-             <div
-              class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
-              :class="selectedCategory === 'all' ? 'bg-blue-600 text-white' : 'text-slate-700 hover:bg-slate-100'"
-              @click="selectCategory('all')"
-             >
-              <UIcon name="i-lucide-layout-grid" class="w-4 h-4" />
-              <span>Все товары</span>
-             </div>
-             <div
-              v-for="cat in rootCategories"
-              :key="cat.slug"
-              class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer text-slate-700 hover:bg-slate-100"
-              @click="openCategoryInSidebar(cat)"
-             >
-              <div class="flex items-center gap-3">
-                <UIcon :name="cat.icon || 'i-lucide-folder'" class="w-4 h-4" />
-                <span>{{ cat.name }}</span>
-              </div>
-              <UIcon name="i-lucide-chevron-right" class="w-4 h-4 text-slate-400" v-if="cat.subcategories?.length" />
-             </div>
-          </div>
-          <div v-else class="space-y-1">
-            <button @click="selectedCategoryForSidebar = null" class="flex items-center gap-2 text-[11px] font-bold text-slate-500 hover:text-blue-600 mb-2 px-2">
-              <UIcon name="i-lucide-arrow-left" class="w-3 h-3" /> Назад
-            </button>
-            <div class="px-3 pb-2 text-xs font-extrabold text-slate-900">{{ selectedCategoryForSidebar.name }}</div>
-            <div
-              class="flex items-center gap-3 px-3 py-2 rounded-xl text-xs transition-colors cursor-pointer"
-              :class="selectedCategory === selectedCategoryForSidebar.slug && !selectedSubcategory ? 'bg-blue-600 text-white font-bold' : 'text-slate-700 hover:bg-slate-100'"
-              @click="selectCategory(selectedCategoryForSidebar.slug)"
-            >
-              Все товары
-            </div>
-            <div
-              v-for="sub in selectedCategoryForSidebar.subcategories"
-              :key="sub.name"
-              class="flex items-center gap-3 px-3 py-2 rounded-xl text-xs transition-colors cursor-pointer"
-              :class="selectedSubcategory === sub.name ? 'bg-blue-600 text-white font-bold' : 'text-slate-600 hover:bg-slate-100'"
-              @click="selectSubcategoryWithCategory(selectedCategoryForSidebar.slug, sub.name)"
-            >
-              <span>{{ sub.name }}</span>
-            </div>
-          </div>
-        </div>
-      </template>
-    </USlideover>
-
     <!-- Product Details Modal -->
     <ProductDetailsModal
       v-model="isProductModalOpen"
@@ -224,6 +180,9 @@ const api = useMarketplaceApi()
 const allCategories = ref<ApiCategory[]>([])
 const categoryTree = ref<CategoryTreeNode[]>([])
 const isMobileDrawerOpen = ref(false)
+
+// Controls the embedded side-by-side catalog drawer (Desktop)
+const isCatalogSidebarOpen = ref(true)
 
 // Used for level 1 / level 2 drilling in the sidebar
 const selectedCategoryForSidebar = ref<ApiCategory & { icon?: string } | null>(null)
@@ -414,8 +373,8 @@ onMounted(async () => {
 
 // EXPOSE toggle method for parent component (index.vue bubbles) to use
 defineExpose({
-  openMobileDrawer: () => {
-    isMobileDrawerOpen.value = true
+  toggleSidebar: () => {
+    isCatalogSidebarOpen.value = !isCatalogSidebarOpen.value
   }
 })
 </script>
