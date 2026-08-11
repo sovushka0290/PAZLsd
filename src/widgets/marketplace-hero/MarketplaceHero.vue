@@ -79,13 +79,7 @@
           </div>
         </div>
         
-        <!-- Quick Tags -->
-        <div class="mt-8 flex flex-wrap justify-center gap-3 relative z-10">
-          <span class="text-sm text-gray-500 mr-2 mt-2 hidden sm:block">Популярное:</span>
-          <button v-for="tag in ['Оборудование', 'Инструменты', 'Материалы', 'Диагностика']" :key="tag" @click="searchQuery = tag" class="px-4 py-1.5 rounded-full border border-blue-200 bg-blue-50 text-sm text-blue-600 hover:bg-blue-100 hover:border-blue-300 transition-all cursor-pointer">
-            {{ tag }}
-          </button>
-        </div>
+        <!-- Quick tags removed by request -->
       </div>
     </div>
   </section>
