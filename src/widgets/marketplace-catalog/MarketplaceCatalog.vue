@@ -1,15 +1,15 @@
 <template>
   <section class="marketplace-catalog w-full bg-slate-50 min-h-screen relative flex">
     
-    <!-- Unified Sidebar (Fixed on mobile, embedded on desktop) -->
+    <!-- Unified Sidebar (Fixed on all screens) -->
     <div 
-      class="flex flex-col transition-all duration-300 ease-in-out border-r border-slate-200 bg-white z-[70] lg:z-auto"
+      class="flex flex-col transition-all duration-300 ease-in-out border-r border-slate-200 bg-white z-[70]"
       :class="[
-        isCatalogSidebarOpen ? 'w-[320px] opacity-100 translate-x-0' : 'w-0 opacity-0 -translate-x-full lg:translate-x-0 overflow-hidden border-none',
-        'fixed lg:relative top-0 left-0 h-screen lg:h-auto shadow-2xl lg:shadow-none'
+        isCatalogSidebarOpen ? 'w-[320px] opacity-100 translate-x-0' : 'w-0 opacity-0 -translate-x-full overflow-hidden border-none',
+        'fixed top-0 left-0 h-screen shadow-2xl'
       ]"
     >
-       <div class="p-4 w-[320px] h-full lg:h-[calc(100vh-72px)] lg:sticky top-[72px] overflow-y-auto">
+       <div class="p-4 w-[320px] h-full overflow-y-auto">
          <div class="font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100 flex items-center justify-between">
             Каталог
             <UButton icon="i-lucide-x" color="gray" variant="ghost" size="xs" @click="isCatalogSidebarOpen = false" />
@@ -73,18 +73,18 @@
        </div>
     </div>
 
-    <!-- Mobile Backdrop -->
+    <!-- Backdrop -->
     <div 
       v-if="isCatalogSidebarOpen" 
-      class="fixed inset-0 bg-slate-900/50 z-[60] lg:hidden backdrop-blur-sm transition-opacity"
+      class="fixed inset-0 bg-slate-900/50 z-[60] backdrop-blur-sm transition-opacity"
       @click="isCatalogSidebarOpen = false"
     ></div>
     
     <!-- Main Content Area -->
-    <div class="flex-1 transition-all duration-300 w-full min-w-0" :class="isCatalogSidebarOpen ? 'lg:pl-6' : 'lg:px-8 mx-auto max-w-7xl'">
+    <div class="flex-1 transition-all duration-300 w-full min-w-0 lg:px-8 mx-auto max-w-7xl">
       <div class="px-4 py-6 sm:px-6 w-full">
-        <!-- Mobile Categories Button -->
-        <div class="lg:hidden mb-4 flex items-center justify-between gap-4 rounded-xl bg-white p-3 border border-slate-200 shadow-2xs">
+        <!-- Categories Button (Shows on all screens now since sidebar is hidden by default) -->
+        <div class="mb-4 flex items-center justify-between gap-4 rounded-xl bg-white p-3 border border-slate-200 shadow-2xs">
           <div class="min-w-0">
             <p class="text-[11px] text-slate-500">Категория:</p>
             <p class="text-xs font-bold truncate text-slate-900">{{ selectedCategoryName }}</p>
@@ -181,8 +181,8 @@ const allCategories = ref<ApiCategory[]>([])
 const categoryTree = ref<CategoryTreeNode[]>([])
 const isMobileDrawerOpen = ref(false)
 
-// Controls the embedded side-by-side catalog drawer (Desktop)
-const isCatalogSidebarOpen = ref(true)
+// Controls the fixed full-screen catalog drawer
+const isCatalogSidebarOpen = ref(false)
 
 // Used for level 1 / level 2 drilling in the sidebar
 const selectedCategoryForSidebar = ref<ApiCategory & { icon?: string } | null>(null)
