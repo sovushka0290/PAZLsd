@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-slate-50 relative pb-24">
     <!-- Main page flow -->
-    <MarketplaceHeader v-model="searchQuery" />
+    <MarketplaceHeader v-model="searchQuery" @toggle-catalog="toggleCatalog" />
     <MarketplaceHero v-model="searchQuery" />
     <MarketplaceCatalog ref="catalogRef" :search-query="searchQuery" />
     <MarketplaceFooter />

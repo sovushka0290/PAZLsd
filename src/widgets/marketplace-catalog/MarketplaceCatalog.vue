@@ -6,7 +6,7 @@
       class="hidden lg:flex flex-col transition-all duration-300 ease-in-out border-r border-slate-200 bg-white"
       :class="isCatalogSidebarOpen ? 'w-[320px] opacity-100' : 'w-0 opacity-0 overflow-hidden border-none'"
     >
-       <div class="p-4 w-[320px] h-[calc(100vh-100px)] sticky top-4 overflow-y-auto space-y-1 scrollbar-thin">
+       <div class="p-4 w-[320px] h-[calc(100vh-80px)] sticky top-[80px] overflow-y-auto">
          <div class="font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100 flex items-center justify-between">
             Каталог
             <UButton icon="i-lucide-x" color="gray" variant="ghost" size="xs" @click="isCatalogSidebarOpen = false" />
@@ -431,14 +431,4 @@ defineExpose({
 </script>
 
 <style scoped lang="scss">
-.scrollbar-thin::-webkit-scrollbar {
-  width: 4px;
-}
-.scrollbar-thin::-webkit-scrollbar-track {
-  background: transparent;
-}
-.scrollbar-thin::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
 </style>

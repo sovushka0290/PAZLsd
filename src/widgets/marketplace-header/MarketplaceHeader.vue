@@ -23,7 +23,7 @@
         <!-- Left Drawer Catalog Button -->
         <button
           type="button"
-          @click="isCategoryDrawerOpen = true"
+          @click="emit('toggle-catalog')"
           class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-blue-500/20 transition-all cursor-pointer shrink-0"
         >
           <UIcon name="i-lucide-layout-grid" class="w-4 h-4 sm:w-5 sm:h-5" />
@@ -88,84 +88,17 @@
       </div>
     </div>
 
-    <!-- Left Category Drawer (USlideover side="left") -->
-    <USlideover
-      v-model:open="isCategoryDrawerOpen"
-      side="left"
-      :ui="{ content: 'w-full max-w-sm sm:max-w-md bg-white flex flex-col h-full' }"
-    >
-      <template #title>
-        <div class="flex items-center justify-between w-full border-b border-slate-100 pb-3">
-          <span class="inline-flex items-center gap-2 text-lg font-extrabold text-slate-900">
-            <UIcon name="i-lucide-layout-grid" class="w-5 h-5 text-blue-600" />
-            Каталог категорий
-          </span>
-        </div>
-      </template>
-
-      <template #body>
-        <div class="py-2 overflow-y-auto space-y-1 pr-1">
-          <!-- All Categories Option -->
-          <button
-            type="button"
-            class="w-full text-left px-3 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-between cursor-pointer hover:bg-blue-50 text-slate-800"
-            @click="selectCategory('')"
-          >
-            <span class="flex items-center gap-2">
-              <span class="text-base">📦</span>
-              <span>Все товары</span>
-            </span>
-            <span class="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full font-semibold">7 150</span>
-          </button>
-
-          <!-- Dynamic Categories & Subcategories -->
-          <div
-            v-for="cat in categoriesList"
-            :key="cat.slug"
-            class="rounded-xl border border-slate-100 overflow-hidden bg-slate-50/50"
-          >
-            <div
-              class="w-full text-left px-3 py-2.5 font-bold text-sm flex items-center justify-between cursor-pointer hover:bg-blue-50/80 transition-colors text-slate-900"
-              @click="toggleCategoryExpand(cat.slug)"
-            >
-              <div class="flex items-center gap-2 min-w-0 pr-2" @click.stop="selectCategory(cat.slug)">
-                <span class="text-base shrink-0">{{ cat.icon || '📁' }}</span>
-                <span class="truncate hover:text-blue-600 transition-colors">{{ cat.name }}</span>
-              </div>
-              <div class="flex items-center gap-2 shrink-0">
-                <span class="text-[11px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
-                  {{ cat.products_count || 0 }}
-                </span>
-                <UIcon
-                  :name="expandedSlugs.has(cat.slug) ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
-                  class="w-4 h-4 text-slate-400"
-                />
-              </div>
-            </div>
-
-            <!-- Subcategories List -->
-            <div v-if="expandedSlugs.has(cat.slug) && cat.subcategories && cat.subcategories.length" class="bg-white border-t border-slate-100 py-1 px-2 space-y-0.5">
-              <button
-                v-for="sub in cat.subcategories"
-                :key="sub.id"
-                type="button"
-                class="w-full text-left px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-blue-600 hover:bg-slate-50 transition-colors flex items-center justify-between cursor-pointer"
-                @click="selectSubcategory(cat.slug, sub.name)"
-              >
-                <span class="truncate">• {{ sub.name }}</span>
-                <span class="text-[10px] text-slate-400 font-medium shrink-0 ml-2">{{ sub.product_count }}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </template>
-    </USlideover>
+    <!-- Left Category Drawer (USlideover) REMOVED - Using Embedded Drawer in Index -->
   </header>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useAuthStore } from '~/stores/auth'
+
+const emit = defineEmits<{
+  (e: 'toggle-catalog'): void
+}>()
 
 const localePath = useLocalePath()
 const authStore = useAuthStore()
