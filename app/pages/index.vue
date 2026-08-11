@@ -15,7 +15,7 @@
       class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] transition-all duration-500 ease-out flex"
       :class="y > 400 ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-12 scale-95 pointer-events-none'"
     >
-      <div class="flex items-center gap-2 sm:gap-4 bg-white/95 backdrop-blur-xl px-4 py-3 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-200/80">
+      <div class="flex items-center gap-2 sm:gap-4 bg-white/40 backdrop-blur-3xl px-4 py-3 rounded-full shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] border border-white/60">
         
         <!-- Category Bubble -->
         <button 

@@ -9,7 +9,7 @@
         'fixed lg:relative top-0 left-0 h-screen lg:h-auto shadow-2xl lg:shadow-none'
       ]"
     >
-       <div class="p-4 w-[320px] h-full lg:h-[calc(100vh-80px)] lg:sticky top-[80px] overflow-y-auto">
+       <div class="p-4 w-[320px] h-full lg:h-auto overflow-y-auto lg:overflow-y-visible">
          <div class="font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100 flex items-center justify-between">
             Каталог
             <UButton icon="i-lucide-x" color="gray" variant="ghost" size="xs" @click="isCatalogSidebarOpen = false" />
