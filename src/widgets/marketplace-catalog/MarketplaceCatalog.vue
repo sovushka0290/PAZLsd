@@ -70,6 +70,7 @@
               <span v-if="sub.product_count" class="opacity-70 text-[10px] ml-auto">({{ sub.product_count }})</span>
             </div>
        </div>
+      </div>
     </div>
 
     <!-- Mobile Backdrop -->
