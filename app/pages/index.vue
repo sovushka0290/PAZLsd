@@ -11,61 +11,128 @@
       <MarketplaceCatalog ref="catalogRef" :search-query="searchQuery" />
       <MarketplaceFooter />
       
-      <!-- Top Floating Search -->
+      <!-- ═══════ TOP FLOATING SEARCH BAR ═══════ -->
       <div
-        class="fixed top-4 sm:top-6 left-1/2 -translate-x-1/2 z-[80] transition-all duration-500 ease-out flex"
-        :class="y > 300 ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-12 scale-95 pointer-events-none'"
+        class="fixed top-3 left-1/2 -translate-x-1/2 z-[90] transition-all duration-500 ease-out"
+        :class="y > 300 ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-10 scale-95 pointer-events-none'"
+        :style="{ maxWidth: cart.isFloatingCartOpen ? 'calc(100vw - 420px)' : '720px' }"
       >
-        <div 
-          class="flex items-center gap-3 bg-white/70 backdrop-blur-2xl px-4 py-2.5 rounded-2xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] border border-white/60 w-[280px] sm:w-[400px] transition-colors focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500"
-        >
-          <UIcon name="i-lucide-search" class="w-5 h-5 text-slate-400 shrink-0" />
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="Поиск товаров..."
-            class="w-full bg-transparent border-0 p-0 text-sm font-semibold text-slate-700 placeholder-slate-400 focus:ring-0 outline-none"
-          />
+        <div class="relative w-[92vw] max-w-[720px] mx-auto">
+          <!-- Glow -->
+          <div class="absolute -inset-1 rounded-2xl bg-gradient-to-r from-blue-500/20 via-sky-400/20 to-blue-600/20 blur-lg opacity-60"></div>
+          
+          <!-- Search Container -->
+          <div 
+            class="relative flex items-center gap-2 bg-white/80 backdrop-blur-2xl rounded-2xl shadow-[0_8px_40px_rgba(31,38,135,0.18)] border border-white/70 px-4 py-2 transition-all focus-within:bg-white focus-within:shadow-[0_12px_48px_rgba(31,38,135,0.25)] focus-within:border-blue-300/60"
+          >
+            <UIcon name="i-lucide-search" class="w-5 h-5 text-blue-500 shrink-0" />
+            <input
+              ref="floatingSearchInput"
+              v-model="searchQuery"
+              type="text"
+              placeholder="Поиск товаров, категорий..."
+              class="flex-1 bg-transparent border-0 p-0 py-1.5 text-sm font-semibold text-slate-800 placeholder-slate-400 focus:ring-0 outline-none"
+              @focus="floatingSearchFocused = true"
+              @blur="handleFloatingSearchBlur"
+            />
+            <!-- Clear button -->
+            <button
+              v-if="searchQuery.length > 0"
+              class="shrink-0 w-6 h-6 flex items-center justify-center text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors"
+              @click="searchQuery = ''"
+            >
+              <UIcon name="i-lucide-x" class="w-3.5 h-3.5" />
+            </button>
+            <!-- Shortcut hint -->
+            <kbd v-if="!searchQuery" class="hidden sm:inline-flex shrink-0 items-center px-2 py-0.5 text-[10px] font-bold text-slate-400 bg-slate-100 rounded border border-slate-200">
+              /
+            </kbd>
+          </div>
+
+          <!-- Autocomplete Dropdown -->
+          <div
+            v-if="floatingSearchFocused && searchQuery.length >= 2"
+            class="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl rounded-xl shadow-2xl border border-slate-200/80 overflow-hidden z-50 max-h-80"
+          >
+            <div v-if="floatingSearchLoading" class="p-4 text-center text-sm text-slate-500 flex items-center justify-center gap-2">
+              <div class="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+              Поиск...
+            </div>
+            <div v-else-if="floatingSearchResults.categories.length === 0 && floatingSearchResults.products.length === 0" class="p-4 text-center text-sm text-slate-400">
+              Ничего не найдено
+            </div>
+            <ul v-else class="overflow-y-auto max-h-72">
+              <!-- Categories -->
+              <li v-if="floatingSearchResults.categories.length > 0" class="px-3 py-1.5 bg-slate-50 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                Категории
+              </li>
+              <li
+                v-for="c in floatingSearchResults.categories"
+                :key="'fcat-'+c.id"
+                @mousedown.prevent="selectFloatingResult(c.name)"
+                class="px-3 py-2 hover:bg-blue-50 cursor-pointer flex items-center gap-2.5 transition-colors"
+              >
+                <div class="w-7 h-7 rounded-lg bg-blue-100/60 text-blue-500 flex items-center justify-center shrink-0">
+                  <UIcon name="i-lucide-folder" class="w-3.5 h-3.5" />
+                </div>
+                <span class="text-sm font-medium text-slate-700 truncate">{{ c.name }}</span>
+              </li>
+              <!-- Products -->
+              <li v-if="floatingSearchResults.products.length > 0" class="px-3 py-1.5 bg-slate-50 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                Товары
+              </li>
+              <li
+                v-for="p in floatingSearchResults.products"
+                :key="'fprod-'+p.id"
+                @mousedown.prevent="selectFloatingResult(p.name)"
+                class="px-3 py-2 hover:bg-blue-50 cursor-pointer flex items-center gap-2.5 transition-colors last:rounded-b-xl"
+              >
+                <div class="w-7 h-7 rounded-lg bg-slate-100 text-slate-400 flex items-center justify-center shrink-0">
+                  <UIcon name="i-lucide-package" class="w-3.5 h-3.5" />
+                </div>
+                <span class="text-sm font-medium text-slate-700 truncate">{{ p.name }}</span>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
 
-      <!-- FLOATING BUBBLES BAR (Categories, Cart) -->
+      <!-- ═══════ FLOATING BUBBLES BAR (Categories, Cart) ═══════ -->
       <div
-        class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] transition-all duration-500 ease-out flex"
+        class="fixed bottom-5 left-1/2 -translate-x-1/2 z-[60] transition-all duration-500 ease-out flex"
         :class="y > 400 ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-12 scale-95 pointer-events-none'"
       >
-        <div class="flex items-center gap-2 sm:gap-4 bg-white/40 backdrop-blur-3xl px-4 py-3 rounded-full shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] border border-white/60">
+        <div class="flex items-center gap-3 bg-white/50 backdrop-blur-3xl px-5 py-3 rounded-full shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] border border-white/60 hover:bg-white/70 transition-colors">
           
           <!-- Category Bubble -->
           <button 
-            class="flex flex-col items-center gap-1.5 text-slate-700 hover:text-blue-600 transition-colors w-16 cursor-pointer" 
+            class="flex flex-col items-center gap-1 text-slate-600 hover:text-blue-600 transition-colors w-14 cursor-pointer group" 
             @click="toggleCatalog"
           >
-            <div class="w-11 h-11 rounded-full bg-blue-50 flex items-center justify-center shadow-sm">
-              <UIcon name="i-lucide-layout-grid" class="w-5 h-5 text-blue-600" />
+            <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center shadow-sm group-hover:bg-blue-100 group-hover:shadow-md transition-all">
+              <UIcon name="i-lucide-layout-grid" class="w-4.5 h-4.5 text-blue-600" />
             </div>
-            <span class="text-[10px] font-extrabold uppercase tracking-wide">Каталог</span>
+            <span class="text-[9px] font-extrabold uppercase tracking-wider">Каталог</span>
           </button>
           
           <!-- Divider -->
-          <div class="w-px h-8 bg-slate-200"></div>
+          <div class="w-px h-7 bg-slate-200/80"></div>
 
           <!-- Cart Bubble -->
           <button 
-            class="flex flex-col items-center gap-1.5 text-slate-700 hover:text-blue-600 transition-colors w-16 relative cursor-pointer" 
+            class="flex flex-col items-center gap-1 text-slate-600 hover:text-blue-600 transition-colors w-14 relative cursor-pointer group" 
             @click="openCart"
           >
-            <div class="w-11 h-11 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center shadow-sm hover:bg-white hover:border-slate-200 transition-all">
-              <UIcon name="i-lucide-shopping-cart" class="w-5 h-5" />
-              <!-- Notification Badge -->
+            <div class="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center shadow-sm group-hover:bg-white group-hover:border-blue-200 group-hover:shadow-md transition-all">
+              <UIcon name="i-lucide-shopping-cart" class="w-4.5 h-4.5" />
               <span 
                 v-if="cart.itemsCount > 0"
-                class="absolute top-0 right-1 w-5 h-5 bg-red-500 text-white rounded-full text-[10px] font-bold flex items-center justify-center border-2 border-white"
+                class="absolute -top-0.5 right-0 w-5 h-5 bg-red-500 text-white rounded-full text-[10px] font-bold flex items-center justify-center border-2 border-white shadow-sm animate-[bounce_0.6s_ease-in-out]"
               >
-                {{ cart.itemsCount }}
+                {{ cart.itemsCount > 9 ? '9+' : cart.itemsCount }}
               </span>
             </div>
-            <span class="text-[10px] font-extrabold uppercase tracking-wide">Корзина</span>
+            <span class="text-[9px] font-extrabold uppercase tracking-wider">Корзина</span>
           </button>
 
         </div>
@@ -74,7 +141,7 @@
       <!-- Mobile Backdrop for Cart -->
       <div 
         v-if="cart.isFloatingCartOpen" 
-        class="fixed inset-0 bg-slate-900/50 z-[60] lg:hidden backdrop-blur-sm transition-opacity"
+        class="fixed inset-0 bg-slate-900/50 z-[70] lg:hidden backdrop-blur-sm transition-opacity"
         @click="cart.isFloatingCartOpen = false"
       ></div>
     </div>
@@ -201,9 +268,76 @@ const localePath = useLocalePath()
 const cart = useCartStore()
 const formatPrice = useFormattedPrice()
 
-// Scroll tracking for the window
+// Scroll tracking
 const { y } = useWindowScroll()
 
+// ─── Floating search autocomplete ───
+const floatingSearchInput = ref<HTMLInputElement | null>(null)
+const floatingSearchFocused = ref(false)
+const floatingSearchLoading = ref(false)
+const floatingSearchResults = ref<{ categories: any[], products: any[] }>({ categories: [], products: [] })
+let floatingSearchTimer: ReturnType<typeof setTimeout> | undefined
+
+function handleFloatingSearchBlur() {
+  setTimeout(() => {
+    floatingSearchFocused.value = false
+  }, 200)
+}
+
+function selectFloatingResult(name: string) {
+  searchQuery.value = name
+  floatingSearchFocused.value = false
+}
+
+// Watch searchQuery for autocomplete in the floating bar
+watch(searchQuery, (q) => {
+  clearTimeout(floatingSearchTimer)
+  if (!q || q.length < 2) {
+    floatingSearchResults.value = { categories: [], products: [] }
+    return
+  }
+  floatingSearchLoading.value = true
+  floatingSearchTimer = setTimeout(async () => {
+    try {
+      const config = useRuntimeConfig()
+      const versionPath = `/api/${config.public.apiVersion}`
+      const baseURL = import.meta.env.SSR
+        ? `${String(config.apiBackendUrl ?? 'http://backend:8000').replace(/\/$/, '')}${versionPath}`
+        : versionPath
+      
+      const res = await $fetch<{ categories: any[], products: any[] }>('search_fast/', {
+        baseURL,
+        query: { query: q },
+        retry: 0
+      })
+      floatingSearchResults.value = res || { categories: [], products: [] }
+    } catch (e) {
+      floatingSearchResults.value = { categories: [], products: [] }
+    } finally {
+      floatingSearchLoading.value = false
+    }
+  }, 300)
+})
+
+// ─── Keyboard shortcut: press "/" to focus floating search ───
+function handleGlobalKeydown(e: KeyboardEvent) {
+  if (e.key === '/' && !(document.activeElement instanceof HTMLInputElement) && !(document.activeElement instanceof HTMLTextAreaElement)) {
+    e.preventDefault()
+    if (y.value > 300 && floatingSearchInput.value) {
+      floatingSearchInput.value.focus()
+    }
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', handleGlobalKeydown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleGlobalKeydown)
+})
+
+// ─── Catalog & Cart ───
 const catalogRef = ref<any>(null)
 
 function toggleCatalog() {
