@@ -7,10 +7,14 @@
     <!-- Main Content -->
     <div class="w-full flex flex-col min-w-0" id="main-scroll-container">
       <MarketplaceHeader v-model="searchQuery" @toggle-catalog="toggleCatalog" />
-      <MarketplaceHero v-model="searchQuery" />
-      <MarketplaceCatalog ref="catalogRef" :search-query="searchQuery" />
-      <TrustedManufacturers />
-      <MarketplaceFooter />
+      
+      <!-- Content shifted to make room for fixed sidebar on desktop -->
+      <div class="lg:pl-[320px] w-full flex flex-col min-w-0">
+        <MarketplaceHero v-model="searchQuery" />
+        <MarketplaceCatalog ref="catalogRef" :search-query="searchQuery" />
+        <TrustedManufacturers />
+        <MarketplaceFooter />
+      </div>
       
       <!-- ═══════ TOP FLOATING SEARCH BAR ═══════ -->
       <div

@@ -11,11 +11,11 @@
           @click="showStaffModal = true"
         />
 
-        <div class="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center">
+        <div class="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 shadow-md shadow-blue-500/20">
           <IconLogoMark />
         </div>
-        <div class="hidden md:block ml-1">
-          <h1 class="text-2xl font-black leading-tight text-slate-900 tracking-tight">
+        <div class="hidden md:block">
+          <h1 class="text-2xl font-extrabold leading-tight text-slate-900 tracking-tight">
             {{ t('brand.name') }}
           </h1>
         </div>
