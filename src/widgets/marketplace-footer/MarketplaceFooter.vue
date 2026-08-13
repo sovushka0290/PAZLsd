@@ -3,11 +3,12 @@
     <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
         <div>
-          <h4 class="mb-4 font-bold text-slate-900">
-            {{ t('footer.aboutTitle') }}
+          <h4 class="mb-4 font-bold text-slate-900 flex items-center gap-2">
+            <IconLogoMark class="w-6 h-6" />
+            <span>PAZL</span>
           </h4>
           <p class="text-sm leading-relaxed text-slate-500">
-            {{ t('footer.aboutText') }}
+            Платформа автоматизации закупок и логистики для стоматологических клиник. Мы объединяем более 100 ведущих производителей на одной удобной площадке, делая процесс снабжения быстрым, прозрачным и надежным.
           </p>
         </div>
         <div>

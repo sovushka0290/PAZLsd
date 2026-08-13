@@ -1,6 +1,6 @@
 <template>
   <div 
-    class="min-h-screen bg-slate-50 relative transition-all duration-300"
+    class="min-h-[100dvh] bg-slate-50 relative transition-all duration-300"
     :class="cart.isFloatingCartOpen ? 'lg:pr-[380px]' : ''"
   >
     
@@ -9,6 +9,7 @@
       <MarketplaceHeader v-model="searchQuery" @toggle-catalog="toggleCatalog" />
       <MarketplaceHero v-model="searchQuery" />
       <MarketplaceCatalog ref="catalogRef" :search-query="searchQuery" />
+      <TrustedManufacturers />
       <MarketplaceFooter />
       
       <!-- ═══════ TOP FLOATING SEARCH BAR ═══════ -->
@@ -148,7 +149,7 @@
 
     <!-- Right Sidebar (Embedded Cart) -->
     <div 
-      class="fixed top-0 right-0 h-screen transition-transform duration-300 ease-in-out border-l border-slate-200 bg-white shadow-2xl z-[80]"
+      class="fixed top-0 right-0 h-[100dvh] transition-transform duration-300 ease-in-out border-l border-slate-200 bg-white shadow-2xl z-[80]"
       :class="cart.isFloatingCartOpen ? 'translate-x-0 w-[320px] lg:w-[380px]' : 'translate-x-full w-[320px] lg:w-[380px]'"
     >
       <div class="w-full h-full flex flex-col bg-slate-50/50">

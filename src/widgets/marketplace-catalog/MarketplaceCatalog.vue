@@ -1,15 +1,15 @@
 <template>
-  <section class="marketplace-catalog w-full bg-slate-50 min-h-screen relative flex">
+  <section class="marketplace-catalog w-full bg-slate-50 min-h-[100dvh] relative flex">
     
     <!-- Unified Sidebar (Fixed on mobile, embedded on desktop) -->
     <div 
       class="flex flex-col transition-all duration-300 ease-in-out border-r border-slate-200 bg-white z-[70] lg:z-auto"
       :class="[
         isCatalogSidebarOpen ? 'w-[320px] opacity-100 translate-x-0' : 'w-0 opacity-0 -translate-x-full lg:translate-x-0 overflow-hidden border-none',
-        'fixed lg:relative top-0 left-0 h-screen lg:h-auto shadow-2xl lg:shadow-none'
+        'fixed lg:relative top-0 left-0 h-[100dvh] lg:h-auto shadow-2xl lg:shadow-none'
       ]"
     >
-       <div class="p-4 w-[320px] h-full lg:h-[calc(100vh-72px)] lg:sticky top-[72px] overflow-y-auto">
+       <div class="p-4 w-[320px] h-full lg:h-[calc(100dvh-72px)] lg:sticky top-[72px] overflow-y-auto">
          <div class="font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100 flex items-center justify-between">
             Каталог
             <UButton icon="i-lucide-x" color="gray" variant="ghost" size="xs" @click="isCatalogSidebarOpen = false" />
