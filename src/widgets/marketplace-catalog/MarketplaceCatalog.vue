@@ -16,27 +16,44 @@
          </div>
 
          <!-- Level 1: Root Categories -->
-         <div v-if="!selectedCategoryForSidebar" class="space-y-1">
+         <div v-if="!selectedCategoryForSidebar" class="space-y-0.5">
            <div
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer"
-            :class="selectedCategory === 'all' ? 'bg-blue-600 text-white' : 'text-slate-700 hover:bg-slate-100'"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer"
+            :class="selectedCategory === 'all' ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' : 'text-slate-700 hover:bg-slate-100'"
             @click="selectCategory('all')"
            >
-            <UIcon name="i-lucide-layout-grid" class="w-5 h-5" />
-            <span>Все товары</span>
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" :class="selectedCategory === 'all' ? 'bg-blue-500' : 'bg-blue-50'">
+              <UIcon name="i-lucide-layout-grid" class="w-4 h-4" />
+            </div>
+            <span class="flex-1">Все товары</span>
            </div>
            
            <div
             v-for="cat in rootCategories"
             :key="cat.slug"
-            class="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer text-slate-700 hover:bg-slate-100"
+            class="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-all cursor-pointer group"
+            :class="[
+              selectedCategory === cat.slug ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20 font-bold' : 'text-slate-700 hover:bg-slate-50 font-semibold',
+              (cat.products_count ?? 0) >= 800 ? 'border-l-3 border-blue-500/60' : ''
+            ]"
             @click="openCategoryInSidebar(cat)"
            >
-            <div class="flex items-center gap-3">
-              <UIcon :name="cat.icon || 'i-lucide-folder'" class="w-5 h-5 text-blue-600/70" />
-              <span>{{ cat.name }}</span>
+            <div class="flex items-center gap-3 min-w-0 flex-1">
+              <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors"
+                :class="selectedCategory === cat.slug ? 'bg-blue-500' : 'bg-slate-100 group-hover:bg-blue-50'"
+              >
+                <UIcon :name="cat.icon || 'i-lucide-folder'" class="w-4 h-4" :class="selectedCategory === cat.slug ? 'text-white' : 'text-blue-600/70'" />
+              </div>
+              <span class="truncate">{{ cat.name }}</span>
             </div>
-            <UIcon name="i-lucide-chevron-right" class="w-4 h-4 text-slate-400" v-if="cat.subcategories?.length" />
+            <div class="flex items-center gap-1.5 shrink-0 ml-2">
+              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-md tabular-nums"
+                :class="selectedCategory === cat.slug ? 'bg-blue-500 text-blue-100' : 'bg-slate-100 text-slate-500'"
+              >
+                {{ cat.products_count ?? 0 }}
+              </span>
+              <UIcon name="i-lucide-chevron-right" class="w-3.5 h-3.5 opacity-40" v-if="cat.subcategories?.length" />
+            </div>
            </div>
          </div>
          
@@ -190,10 +207,33 @@ const isCatalogSidebarOpen = ref(true)
 // Used for level 1 / level 2 drilling in the sidebar
 const selectedCategoryForSidebar = ref<ApiCategory & { icon?: string } | null>(null)
 
+// Icon mapping for dental categories
+const categoryIconMap: Record<string, string> = {
+  'Анестезия': 'i-lucide-syringe',
+  'Дезинфекция и стерилизация': 'i-lucide-spray-can',
+  'Имплантология и хирургия': 'i-lucide-bone',
+  'Инструменты стоматологические': 'i-lucide-wrench',
+  'Красители и вспомогательные материалы': 'i-lucide-palette',
+  'Оборудование': 'i-lucide-settings',
+  'Ортодонтия': 'i-lucide-smile',
+  'Ортопедия и зуботехническая лаборатория': 'i-lucide-hard-hat',
+  'Полировка и шлифование': 'i-lucide-sparkles',
+  'Профилактика и гигиена': 'i-lucide-heart-pulse',
+  'Прочее': 'i-lucide-package',
+  'Реставрационные и пломбировочные материалы': 'i-lucide-flask-conical',
+  'СИЗ и расходные материалы': 'i-lucide-shield',
+  'Эндодонтия': 'i-lucide-ruler',
+}
+
+function getCategoryIcon(name: string): string {
+  return categoryIconMap[name] || 'i-lucide-folder'
+}
+
 const rootCategories = computed(() => {
   return allCategories.value
     .filter(c => c.parent === null)
-    .map(c => ({ ...c, icon: 'i-lucide-folder' }))
+    .map(c => ({ ...c, icon: getCategoryIcon(c.name) }))
+    .sort((a, b) => (b.products_count ?? 0) - (a.products_count ?? 0))
 })
 
 const isProductModalOpen = ref(false)
